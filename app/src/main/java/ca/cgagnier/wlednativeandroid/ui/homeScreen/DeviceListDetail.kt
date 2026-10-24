@@ -33,6 +33,7 @@ import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.NavigationEvent
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.detail.DeviceDetail
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceAdd.DeviceAdd
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.provision.ProvisionDevice
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceEdit.DeviceEdit
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceList
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceWebsocketListViewModel
@@ -74,6 +75,7 @@ fun DeviceListDetail(
     val showHiddenDevices by viewModel.showHiddenDevices.collectAsStateWithLifecycle()
     val isWLEDCaptivePortal by viewModel.isWLEDCaptivePortal.collectAsStateWithLifecycle()
     val isAddDeviceDialogVisible by viewModel.isAddDeviceDialogVisible.collectAsStateWithLifecycle()
+    val isProvisionDialogVisible by viewModel.isProvisionDialogVisible.collectAsStateWithLifecycle()
 
     val navigateToDetail: (DeviceWithState) -> Unit = { device ->
         coroutineScope.launch {
@@ -154,6 +156,9 @@ fun DeviceListDetail(
     if (isAddDeviceDialogVisible) {
         DeviceAdd(onDismissRequest = { viewModel.hideAddDeviceDialog() })
     }
+    if (isProvisionDialogVisible) {
+        ProvisionDevice(onDismissRequest = { viewModel.hideProvisionDialog() })
+    }
 }
 
 @Composable
@@ -182,6 +187,12 @@ private fun DrawerSheetContent(
         addDevice = {
             coroutineScope.launch {
                 viewModel.showAddDeviceDialog()
+                drawerState.close()
+            }
+        },
+        provisionDevice = {
+            coroutineScope.launch {
+                viewModel.showProvisionDialog()
                 drawerState.close()
             }
         },

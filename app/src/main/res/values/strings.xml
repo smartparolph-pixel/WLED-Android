@@ -134,4 +134,25 @@
     <string name="control_off">Off</string>
     <string name="no_release_notes_provided">No release notes provided</string>
 
+
+    <!-- Device setup over its own WiFi (provisioning) -->
+    <string name="provision_menu_item">Set up a new device</string>
+    <string name="provision_title">Set up new device</string>
+    <string name="provision_instructions">Power on your device, then enter the WiFi network it should join. Your phone will ask permission to connect to the device\'s setup network.</string>
+    <string name="provision_home_wifi_name">Home WiFi name</string>
+    <string name="provision_home_wifi_password">Home WiFi password</string>
+    <string name="provision_show_password">Show password</string>
+    <string name="provision_hide_password">Hide password</string>
+    <string name="provision_start">Start</string>
+    <string name="provision_step_joining">Connecting to the device…</string>
+    <string name="provision_step_sending">Sending WiFi details…</string>
+    <string name="provision_step_rebooting">Restarting the device…</string>
+    <string name="provision_step_waiting">Looking for the device on your WiFi…</string>
+    <string name="provision_error_ssid_required">Enter your WiFi name</string>
+    <string name="provision_error_manual_join">This Android version cannot join the device automatically. Connect to the device\'s WiFi in Settings, then open the app again.</string>
+    <string name="provision_error_ap_unavailable">Could not connect to the device\'s setup network. Make sure it is powered on and close to your phone.</string>
+    <string name="provision_error_not_wled">The setup network did not respond like a WLED device.</string>
+    <string name="provision_error_rejected">The device did not accept the WiFi details.</string>
+    <string name="provision_error_not_found">The device did not show up on your WiFi. Check the name and password, then try again.</string>
+    <string name="provision_error_generic">Something went wrong. Please try again.</string>
 </resources>

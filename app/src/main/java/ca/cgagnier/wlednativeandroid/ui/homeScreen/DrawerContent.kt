@@ -35,6 +35,7 @@ import ca.cgagnier.wlednativeandroid.util.openUriSafely
 internal fun DrawerContent(
     showHiddenDevices: Boolean,
     addDevice: () -> Unit,
+    provisionDevice: () -> Unit,
     toggleShowHiddenDevices: () -> Unit,
     openSettings: () -> Unit,
 ) {
@@ -45,7 +46,7 @@ internal fun DrawerContent(
         modifier = Modifier.verticalScroll(scrollState),
     ) {
         DrawerHeader()
-        DrawerMainActions(addDevice, showHiddenDevices, toggleShowHiddenDevices, openSettings)
+        DrawerMainActions(addDevice, provisionDevice, showHiddenDevices, toggleShowHiddenDevices, openSettings)
         HorizontalDivider(modifier = Modifier.padding(12.dp))
         DrawerExternalLinks(uriHandler)
         Spacer(Modifier.height(24.dp))
@@ -71,6 +72,7 @@ private fun DrawerHeader() {
 @Composable
 private fun DrawerMainActions(
     addDevice: () -> Unit,
+    provisionDevice: () -> Unit,
     showHiddenDevices: Boolean,
     toggleShowHiddenDevices: () -> Unit,
     openSettings: () -> Unit,
@@ -85,6 +87,18 @@ private fun DrawerMainActions(
         },
         selected = false,
         onClick = addDevice,
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+    )
+    NavigationDrawerItem(
+        label = { Text(text = stringResource(R.string.provision_menu_item)) },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_router_24),
+                contentDescription = stringResource(R.string.provision_menu_item),
+            )
+        },
+        selected = false,
+        onClick = provisionDevice,
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
     )
     ToggleHiddenDeviceButton(showHiddenDevices, toggleShowHiddenDevices)
