@@ -133,4 +133,24 @@
     <string name="control_off">Aus</string>
     <string name="no_release_notes_provided">Keine Versionshinweise vorhanden</string>
 
+    <!-- Device setup over its own WiFi (provisioning) -->
+    <string name="provision_menu_item">Neues Gerät einrichten</string>
+    <string name="provision_title">Neues Gerät einrichten</string>
+    <string name="provision_instructions">Schalte dein Gerät ein und gib dann das WLAN ein, mit dem es sich verbinden soll. Dein Telefon fragt nach der Erlaubnis, sich mit dem Einrichtungsnetzwerk des Geräts zu verbinden.</string>
+    <string name="provision_home_wifi_name">Name des Heim-WLANs</string>
+    <string name="provision_home_wifi_password">Passwort des Heim-WLANs</string>
+    <string name="provision_show_password">Passwort anzeigen</string>
+    <string name="provision_hide_password">Passwort verbergen</string>
+    <string name="provision_start">Starten</string>
+    <string name="provision_step_joining">Verbinde mit dem Gerät…</string>
+    <string name="provision_step_sending">Sende WLAN-Daten…</string>
+    <string name="provision_step_rebooting">Starte das Gerät neu…</string>
+    <string name="provision_step_waiting">Suche das Gerät in deinem WLAN…</string>
+    <string name="provision_error_ssid_required">Gib den Namen deines WLANs ein</string>
+    <string name="provision_error_manual_join">Diese Android-Version kann sich nicht automatisch mit dem Gerät verbinden. Verbinde dich in den Einstellungen mit dem WLAN des Geräts und öffne dann die App erneut.</string>
+    <string name="provision_error_ap_unavailable">Konnte keine Verbindung zum Einrichtungsnetzwerk des Geräts herstellen. Stelle sicher, dass es eingeschaltet ist und sich in der Nähe deines Telefons befindet.</string>
+    <string name="provision_error_not_wled">Das Einrichtungsnetzwerk hat nicht wie ein WLED-Gerät geantwortet.</string>
+    <string name="provision_error_rejected">Das Gerät hat die WLAN-Daten nicht akzeptiert.</string>
+    <string name="provision_error_not_found">Das Gerät ist nicht in deinem WLAN aufgetaucht. Überprüfe Name und Passwort und versuche es erneut.</string>
+    <string name="provision_error_generic">Etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
 </resources>

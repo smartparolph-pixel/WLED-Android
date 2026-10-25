@@ -9,6 +9,7 @@ import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.os.PatternMatcher
 import android.util.Log
+import androidx.annotation.RequiresApi
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.model.wledapi.Info
 import ca.cgagnier.wlednativeandroid.service.DeviceDiscovery
@@ -90,6 +91,7 @@ class WledProvisioningService @Inject constructor(
 
     private class ApConnection(val network: Network, val release: () -> Unit)
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private suspend fun joinSetupNetwork(request: ProvisioningRequest): ApConnection =
         suspendCancellableCoroutine { cont ->
             val specifier = WifiNetworkSpecifier.Builder()

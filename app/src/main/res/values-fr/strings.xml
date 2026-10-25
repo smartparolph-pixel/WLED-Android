@@ -132,4 +132,24 @@
     <string name="control_off">Éteint</string>
     <string name="no_release_notes_provided">Aucune note de version fournie</string>
 
+    <!-- Device setup over its own WiFi (provisioning) -->
+    <string name="provision_menu_item">Configurer un nouvel appareil</string>
+    <string name="provision_title">Configurer un nouvel appareil</string>
+    <string name="provision_instructions">Allumez votre appareil, puis entrez le réseau WiFi auquel il doit se connecter. Votre téléphone vous demandera l\'autorisation de se connecter au réseau de configuration de l\'appareil.</string>
+    <string name="provision_home_wifi_name">Nom du WiFi domestique</string>
+    <string name="provision_home_wifi_password">Mot de passe du WiFi domestique</string>
+    <string name="provision_show_password">Afficher le mot de passe</string>
+    <string name="provision_hide_password">Masquer le mot de passe</string>
+    <string name="provision_start">Démarrer</string>
+    <string name="provision_step_joining">Connexion à l\'appareil…</string>
+    <string name="provision_step_sending">Envoi des informations WiFi…</string>
+    <string name="provision_step_rebooting">Redémarrage de l\'appareil…</string>
+    <string name="provision_step_waiting">Recherche de l\'appareil sur votre WiFi…</string>
+    <string name="provision_error_ssid_required">Entrez le nom de votre WiFi</string>
+    <string name="provision_error_manual_join">Cette version d\'Android ne peut pas se connecter automatiquement à l\'appareil. Connectez-vous au WiFi de l\'appareil dans les Paramètres, puis rouvrez l\'application.</string>
+    <string name="provision_error_ap_unavailable">Impossible de se connecter au réseau de configuration de l\'appareil. Assurez-vous qu\'il est allumé et proche de votre téléphone.</string>
+    <string name="provision_error_not_wled">Le réseau de configuration n\'a pas répondu comme un appareil WLED.</string>
+    <string name="provision_error_rejected">L\'appareil n\'a pas accepté les informations WiFi.</string>
+    <string name="provision_error_not_found">L\'appareil n\'est pas apparu sur votre WiFi. Vérifiez le nom et le mot de passe, puis réessayez.</string>
+    <string name="provision_error_generic">Une erreur s\'est produite. Veuillez réessayer.</string>
 </resources>
