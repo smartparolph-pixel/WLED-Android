@@ -33,10 +33,10 @@ import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.NavigationEvent
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.detail.DeviceDetail
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceAdd.DeviceAdd
-import ca.cgagnier.wlednativeandroid.ui.homeScreen.provision.ProvisionDevice
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceEdit.DeviceEdit
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceList
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceWebsocketListViewModel
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.provision.ProvisionDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
