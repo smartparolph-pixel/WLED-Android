@@ -153,4 +153,22 @@
     <string name="provision_error_rejected">Das Gerät hat die WLAN-Daten nicht akzeptiert.</string>
     <string name="provision_error_not_found">Das Gerät ist nicht in deinem WLAN aufgetaucht. Überprüfe Name und Passwort und versuche es erneut.</string>
     <string name="provision_error_generic">Etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
+    <string name="provision_setup_network_options">Optionen für das Einrichtungsnetzwerk</string>
+    <string name="provision_setup_network_hint">Ändere diese nur, wenn das Einrichtungsnetzwerk deines Geräts nicht WLED-AP heißt, z. B. bei Produkten mit eigenem Namen.</string>
+    <string name="provision_setup_network_name">Name des Einrichtungsnetzwerks beginnt mit</string>
+    <string name="provision_setup_network_password">Passwort des Einrichtungsnetzwerks (leer, wenn offen)</string>
+    <string name="provision_error_ap_name_required">Gib den Anfang des Namens des Einrichtungsnetzwerks ein</string>
+    <string name="provision_error_ap_password_length">WLAN-Passwörter haben 8 bis 63 Zeichen</string>
+    <string name="provision_secure_tip">Tipp: Schütze dein Gerät, indem du unter Config → Security &amp; Updates eine Einstellungs-PIN festlegst und die OTA-Sperre aktivierst.</string>
+    <string name="timezone_button">Zeitzone des Geräts festlegen</string>
+    <string name="timezone_title">Zeitzone des Geräts</string>
+    <string name="timezone_selected">Ausgewählt: %1$s</string>
+    <string name="timezone_search">Stadt, Land oder UTC-Versatz suchen</string>
+    <string name="timezone_pin">Einstellungs-PIN des Geräts</string>
+    <string name="timezone_apply">Übernehmen</string>
+    <string name="timezone_applied">Gespeichert. Das Gerät verwendet jetzt %1$s und bezieht die Uhrzeit aus dem Internet.</string>
+    <string name="timezone_not_exact">Die Firmware dieses Geräts kennt die Sommerzeitregeln dieser Zone nicht. Die Uhrzeit stimmt jetzt, wird aber nicht automatisch auf Sommer- oder Winterzeit umgestellt.</string>
+    <string name="timezone_error_pin">Dieses Gerät ist durch eine Einstellungs-PIN geschützt. Gib sie ein und versuche es erneut.</string>
+    <string name="timezone_error_unreachable">Das Gerät ist nicht erreichbar. Stelle sicher, dass es eingeschaltet und verbunden ist.</string>
+    <string name="timezone_error_generic">Das Gerät hat die Zeitzone nicht akzeptiert.</string>
 </resources>

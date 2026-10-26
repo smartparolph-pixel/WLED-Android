@@ -150,4 +150,22 @@
     <string name="provision_error_rejected">设备未接受 WiFi 信息。</string>
     <string name="provision_error_not_found">设备未出现在你的 WiFi 中。请检查名称和密码，然后重试。</string>
     <string name="provision_error_generic">出现问题，请重试。</string>
+    <string name="provision_setup_network_options">设置网络选项</string>
+    <string name="provision_setup_network_hint">仅当设备的设置网络名称不是 WLED-AP 时才需要修改，例如带有自有名称的产品。</string>
+    <string name="provision_setup_network_name">设置网络名称开头为</string>
+    <string name="provision_setup_network_password">设置网络密码（开放网络留空）</string>
+    <string name="provision_error_ap_name_required">请输入设置网络名称的开头</string>
+    <string name="provision_error_ap_password_length">WiFi 密码长度为 8 到 63 个字符</string>
+    <string name="provision_secure_tip">提示：在 Config → Security &amp; Updates 中设置设置 PIN 并启用 OTA 锁，以保护你的设备。</string>
+    <string name="timezone_button">设置设备时区</string>
+    <string name="timezone_title">设备时区</string>
+    <string name="timezone_selected">已选择：%1$s</string>
+    <string name="timezone_search">搜索城市、国家或 UTC 偏移</string>
+    <string name="timezone_pin">设备设置 PIN</string>
+    <string name="timezone_apply">应用</string>
+    <string name="timezone_applied">已保存。设备现在使用 %1$s，并从互联网获取时间。</string>
+    <string name="timezone_not_exact">此设备的固件不支持该时区的夏令时规则。当前时间正确，但不会自动切换夏令时。</string>
+    <string name="timezone_error_pin">此设备受设置 PIN 保护。请输入 PIN 后重试。</string>
+    <string name="timezone_error_unreachable">无法连接到设备。请确保设备已开机并已联网。</string>
+    <string name="timezone_error_generic">设备未接受该时区。</string>
 </resources>

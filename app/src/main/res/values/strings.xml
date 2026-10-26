@@ -155,4 +155,22 @@
     <string name="provision_error_rejected">The device did not accept the WiFi details.</string>
     <string name="provision_error_not_found">The device did not show up on your WiFi. Check the name and password, then try again.</string>
     <string name="provision_error_generic">Something went wrong. Please try again.</string>
+    <string name="provision_setup_network_options">Setup network options</string>
+    <string name="provision_setup_network_hint">Only change these if your device\'s setup network is not called WLED-AP, for example on products with their own name.</string>
+    <string name="provision_setup_network_name">Setup network name starts with</string>
+    <string name="provision_setup_network_password">Setup network password (empty if open)</string>
+    <string name="provision_error_ap_name_required">Enter the start of the setup network name</string>
+    <string name="provision_error_ap_password_length">WiFi passwords are 8 to 63 characters</string>
+    <string name="provision_secure_tip">Tip: protect your device by setting a settings PIN and enabling the OTA lock under Config → Security &amp; Updates.</string>
+    <string name="timezone_button">Set device time zone</string>
+    <string name="timezone_title">Device time zone</string>
+    <string name="timezone_selected">Selected: %1$s</string>
+    <string name="timezone_search">Search city, country or UTC offset</string>
+    <string name="timezone_pin">Device settings PIN</string>
+    <string name="timezone_apply">Apply</string>
+    <string name="timezone_applied">Saved. The device now uses %1$s and gets its time from the internet.</string>
+    <string name="timezone_not_exact">This device\'s firmware does not know the daylight saving rules of this zone. The time is correct now, but will not change automatically for daylight saving.</string>
+    <string name="timezone_error_pin">This device is protected by a settings PIN. Enter it and try again.</string>
+    <string name="timezone_error_unreachable">Could not reach the device. Make sure it is on and connected.</string>
+    <string name="timezone_error_generic">The device did not accept the time zone.</string>
 </resources>

@@ -152,4 +152,22 @@
     <string name="provision_error_rejected">L\'appareil n\'a pas accepté les informations WiFi.</string>
     <string name="provision_error_not_found">L\'appareil n\'est pas apparu sur votre WiFi. Vérifiez le nom et le mot de passe, puis réessayez.</string>
     <string name="provision_error_generic">Une erreur s\'est produite. Veuillez réessayer.</string>
+    <string name="provision_setup_network_options">Options du réseau de configuration</string>
+    <string name="provision_setup_network_hint">Ne modifiez ces champs que si le réseau de configuration de votre appareil ne s\'appelle pas WLED-AP, par exemple pour les produits portant leur propre nom.</string>
+    <string name="provision_setup_network_name">Le nom du réseau de configuration commence par</string>
+    <string name="provision_setup_network_password">Mot de passe du réseau de configuration (vide s\'il est ouvert)</string>
+    <string name="provision_error_ap_name_required">Entrez le début du nom du réseau de configuration</string>
+    <string name="provision_error_ap_password_length">Les mots de passe WiFi comportent 8 à 63 caractères</string>
+    <string name="provision_secure_tip">Conseil : protégez votre appareil en définissant un code PIN des paramètres et en activant le verrouillage OTA dans Config → Security &amp; Updates.</string>
+    <string name="timezone_button">Définir le fuseau horaire de l\'appareil</string>
+    <string name="timezone_title">Fuseau horaire de l\'appareil</string>
+    <string name="timezone_selected">Sélectionné : %1$s</string>
+    <string name="timezone_search">Rechercher une ville, un pays ou un décalage UTC</string>
+    <string name="timezone_pin">Code PIN des paramètres de l\'appareil</string>
+    <string name="timezone_apply">Appliquer</string>
+    <string name="timezone_applied">Enregistré. L\'appareil utilise maintenant %1$s et obtient l\'heure depuis Internet.</string>
+    <string name="timezone_not_exact">Le micrologiciel de cet appareil ne connaît pas les règles d\'heure d\'été de ce fuseau. L\'heure est correcte maintenant, mais ne changera pas automatiquement à l\'heure d\'été.</string>
+    <string name="timezone_error_pin">Cet appareil est protégé par un code PIN des paramètres. Saisissez-le et réessayez.</string>
+    <string name="timezone_error_unreachable">Impossible de joindre l\'appareil. Assurez-vous qu\'il est allumé et connecté.</string>
+    <string name="timezone_error_generic">L\'appareil n\'a pas accepté le fuseau horaire.</string>
 </resources>

@@ -1,6 +1,8 @@
 package ca.cgagnier.wlednativeandroid.service.provisioning
 
 import ca.cgagnier.wlednativeandroid.model.Device
+import ca.cgagnier.wlednativeandroid.service.timezone.TimezonePayloads
+import ca.cgagnier.wlednativeandroid.service.timezone.WledTimezoneSetting
 import com.squareup.moshi.Moshi
 
 /**
@@ -35,6 +37,8 @@ data class ProvisioningRequest(
     val apSsidPrefix: String = ProvisioningDefaults.AP_SSID_PREFIX,
     /** Null means the setup AP is open (no passphrase). */
     val apPassword: String? = ProvisioningDefaults.AP_PASSWORD,
+    /** Sent along with the credentials so the device shows local time right away. Null leaves it unchanged. */
+    val timezone: WledTimezoneSetting? = null,
 )
 
 /** Steps surfaced to the UI. */
@@ -65,16 +69,17 @@ object ProvisioningPayloads {
      *
      * Only `nw.ins[0]` is sent. WLED's deserializeConfig leaves every field that is absent from
      * the JSON untouched, so unlike posting the whole /settings/wifi HTML form this cannot reset
-     * AP behaviour, static IP, mDNS name, etc.
+     * AP behaviour, static IP, mDNS name, etc. [timezone] adds `if.ntp`, which is equally partial.
      */
-    fun wifiConfigJson(ssid: String, password: String): String {
-        val payload = mapOf(
+    fun wifiConfigJson(ssid: String, password: String, timezone: WledTimezoneSetting? = null): String {
+        val payload = mutableMapOf<String, Any>(
             "nw" to mapOf(
                 "ins" to listOf(
                     mapOf("ssid" to ssid, "psk" to password),
                 ),
             ),
         )
+        if (timezone != null) payload["if"] = mapOf("ntp" to TimezonePayloads.ntpConfig(timezone))
         return moshi.adapter(Any::class.java).toJson(payload)
     }
 

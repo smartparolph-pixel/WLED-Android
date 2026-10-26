@@ -112,6 +112,7 @@ private fun FormStep(
     TextButton(onClick = { showPassword = !showPassword }) {
         Text(stringResource(if (showPassword) R.string.provision_hide_password else R.string.provision_show_password))
     }
+    SetupNetworkFields(state, step, viewModel, showPassword)
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         horizontalArrangement = Arrangement.End,
@@ -119,6 +120,49 @@ private fun FormStep(
         TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         Button(onClick = viewModel::start) { Text(stringResource(R.string.provision_start)) }
     }
+}
+
+/**
+ * Name and password of the device's own setup network. Hidden by default; only needed for devices
+ * flashed with a custom access point (e.g. a product name instead of WLED-AP).
+ */
+@Composable
+private fun SetupNetworkFields(
+    state: ProvisionState,
+    step: ProvisionStep.Form,
+    viewModel: ProvisionViewModel,
+    showPassword: Boolean,
+) {
+    var expanded by remember { mutableStateOf(step.apSsidError != null || step.apPasswordError != null) }
+    TextButton(onClick = { expanded = !expanded }) {
+        Text(stringResource(R.string.provision_setup_network_options))
+    }
+    if (!expanded) return
+    Text(
+        text = stringResource(R.string.provision_setup_network_hint),
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(bottom = 4.dp),
+    )
+    OutlinedTextField(
+        value = state.apSsidPrefix,
+        onValueChange = viewModel::setApSsidPrefix,
+        label = { Text(stringResource(R.string.provision_setup_network_name)) },
+        isError = step.apSsidError != null,
+        supportingText = { step.apSsidError?.let { Text(stringResource(it)) } },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    OutlinedTextField(
+        value = state.apPassword,
+        onValueChange = viewModel::setApPassword,
+        label = { Text(stringResource(R.string.provision_setup_network_password)) },
+        isError = step.apPasswordError != null,
+        supportingText = { step.apPasswordError?.let { Text(stringResource(it)) } },
+        singleLine = true,
+        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -138,6 +182,11 @@ private fun SuccessStep(step: ProvisionStep.Success, onDismiss: () -> Unit) {
     Text(
         text = stringResource(R.string.add_device_added, deviceName(step.device)),
         style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(bottom = 12.dp),
+    )
+    Text(
+        text = stringResource(R.string.provision_secure_tip),
+        style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.padding(bottom = 16.dp),
     )
     Button(onClick = onDismiss) { Text(stringResource(R.string.done)) }
