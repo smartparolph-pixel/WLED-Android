@@ -1,6 +1,7 @@
 package ca.cgagnier.wlednativeandroid.ui.homeScreen.timezone
 
 import android.icu.text.TimeZoneNames
+import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,7 +105,12 @@ class TimezoneViewModel @Inject constructor(private val deviceApiFactory: Device
     private fun loadOptions(): List<TimezoneOption> {
         val locale = Locale.getDefault()
         val names = TimeZoneNames.getInstance(locale)
-        val ids = IcuTimeZone.getAvailableIDs(IcuTimeZone.SystemTimeZoneType.CANONICAL_LOCATION, null, null)
+        // Canonical locations skip legacy aliases (Asia/Calcutta etc.); the filter needs Android 9.
+        val ids: Collection<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            IcuTimeZone.getAvailableIDs(IcuTimeZone.SystemTimeZoneType.CANONICAL_LOCATION, null, null)
+        } else {
+            TimeZone.getAvailableIDs().toList()
+        }
         return TimezoneCatalog.options(ids, System.currentTimeMillis(), locale) { names.getExemplarLocationName(it) }
     }
 }
