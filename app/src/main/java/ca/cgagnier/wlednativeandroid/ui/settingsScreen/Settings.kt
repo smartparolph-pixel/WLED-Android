@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,7 +36,12 @@ import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.repository.ThemeSettings
 
 @Composable
-fun Settings(navigateUp: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun Settings(
+    navigateUp: () -> Unit,
+    openAbout: () -> Unit = {},
+    onSignedOut: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
     val settingsState by viewModel.settingsState.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
@@ -79,7 +86,31 @@ fun Settings(navigateUp: () -> Unit, viewModel: SettingsViewModel = hiltViewMode
                     )
                 },
             )
-            // }
+            AccountOptions(
+                openAbout = openAbout,
+                signOut = { viewModel.signOut(onSignedOut) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccountOptions(openAbout: () -> Unit, signOut: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .padding(12.dp)
+            .widthIn(0.dp, 1100.dp)
+            .fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.sinag_about)) },
+                modifier = Modifier.clickable(role = Role.Button, onClick = openAbout),
+            )
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.sinag_sign_out)) },
+                modifier = Modifier.clickable(role = Role.Button, onClick = signOut),
+            )
         }
     }
 }

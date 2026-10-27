@@ -1,5 +1,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">WLED</string>
+    <string name="app_name" translatable="false">Sinag</string>
     <string name="app_logo">WLED Logo</string>
     <string name="add_a_device">Add a New Device</string>
     <string name="add">Add</string>
@@ -134,4 +134,41 @@
     <string name="control_off">Off</string>
     <string name="no_release_notes_provided">No release notes provided</string>
 
+
+    <!-- Sinag account screens -->
+    <string name="sinag_logo_description">Sinag by SinagTech Labs Inc.</string>
+    <string name="sinag_tagline">Every celebration, connected.</string>
+    <string name="sinag_name">Name</string>
+    <string name="sinag_email">Email</string>
+    <string name="sinag_password">Password</string>
+    <string name="sinag_confirm_password">Confirm password</string>
+    <string name="sinag_show_password">Show</string>
+    <string name="sinag_hide_password">Hide</string>
+    <string name="sinag_log_in">Log in</string>
+    <string name="sinag_forgot_password">Forgot password?</string>
+    <string name="sinag_new_to_sinag">New to Sinag?</string>
+    <string name="sinag_sign_up_with_email">Sign up with email</string>
+    <string name="sinag_privacy_policy">Privacy Policy</string>
+    <string name="sinag_create_account_title">Create your account</string>
+    <string name="sinag_create_account_subtitle">Set up your parol in a minute.</string>
+    <string name="sinag_create_account">Create account</string>
+    <string name="sinag_signup_agreement">By creating an account, you agree to our %1$s. We use your details only to set up your account and run your parols.</string>
+    <string name="sinag_have_account">Already have an account?</string>
+    <string name="sinag_error_required">This field is required</string>
+    <string name="sinag_error_email">Enter a valid email address</string>
+    <string name="sinag_error_password_short">Use at least 8 characters</string>
+    <string name="sinag_error_password_mismatch">Passwords don\'t match</string>
+    <string name="sinag_error_invalid_credentials">Email or password is incorrect.</string>
+    <string name="sinag_error_email_in_use">An account with this email already exists.</string>
+    <string name="sinag_error_network">Can\'t connect. Check your internet connection and try again.</string>
+    <string name="sinag_error_unknown">Something went wrong. Please try again.</string>
+    <string name="sinag_reset_needs_email">Enter your email above, then tap Forgot password? again.</string>
+    <string name="sinag_reset_sent">If an account exists for that email, we\'ve sent a link to reset your password.</string>
+    <string name="sinag_about">About</string>
+    <string name="sinag_version">Version</string>
+    <string name="sinag_terms">Terms of Use</string>
+    <string name="sinag_sign_out">Sign out</string>
+    <string name="sinag_footer_company">Sinag by SinagTech Labs Inc.</string>
+    <string name="sinag_powered_by">Powered by WLED</string>
+    <string name="sinag_license_notice">Based on WLED Native. Free software under GPL-3.0, with no warranty. View source code</string>
 </resources>
