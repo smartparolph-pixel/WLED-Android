@@ -6,6 +6,7 @@ import ca.cgagnier.wlednativeandroid.model.wledapi.JsonPost
 import ca.cgagnier.wlednativeandroid.model.wledapi.State
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -23,6 +24,21 @@ interface DeviceApi {
 
     @POST("json/state")
     suspend fun postJson(@Body state: JsonPost): Response<State>
+
+    /** Full device configuration (cfg.json). */
+    @GET("json/cfg")
+    suspend fun getConfig(): Response<ResponseBody>
+
+    @GET("presets.json")
+    suspend fun getPresets(): Response<ResponseBody>
+
+    /** Raw state call, e.g. to save a preset. */
+    @POST("json/state")
+    suspend fun postState(@Body state: RequestBody): Response<ResponseBody>
+
+    /** Partial config update. Fields absent from the body are left untouched by the device. */
+    @POST("json/cfg")
+    suspend fun postConfig(@Body config: RequestBody): Response<ResponseBody>
 
     @Multipart
     @POST("update")

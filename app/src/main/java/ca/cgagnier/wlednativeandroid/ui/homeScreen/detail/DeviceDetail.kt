@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,6 +23,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +40,7 @@ import ca.cgagnier.wlednativeandroid.ui.components.LoadingState
 import ca.cgagnier.wlednativeandroid.ui.components.WebViewState
 import ca.cgagnier.wlednativeandroid.ui.components.rememberSaveableWebViewState
 import ca.cgagnier.wlednativeandroid.ui.components.rememberWebViewNavigator
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.schedule.ScheduleDialog
 
 private const val TAG = "ui.DeviceDetail"
 
@@ -48,6 +54,7 @@ fun DeviceDetail(
 ) {
     val webViewState = rememberSaveableWebViewState()
     val navigator = rememberWebViewNavigator()
+    var showSchedule by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             DeviceDetailAppBar(
@@ -61,6 +68,7 @@ fun DeviceDetail(
                 refreshPage = {
                     navigator.reload()
                 },
+                openSchedule = { showSchedule = true },
             )
         },
     ) { innerPadding ->
@@ -88,9 +96,13 @@ fun DeviceDetail(
             )
         }
     }
+    if (showSchedule) {
+        ScheduleDialog(device = device, onDismiss = { showSchedule = false })
+    }
 }
 
 @Composable
+@Suppress("LongParameterList") // One callback per toolbar action.
 fun DeviceDetailAppBar(
     device: DeviceWithState,
     canNavigateBack: Boolean,
@@ -99,6 +111,7 @@ fun DeviceDetailAppBar(
     refreshPage: () -> Unit,
     editItem: () -> Unit,
     modifier: Modifier = Modifier,
+    openSchedule: () -> Unit = {},
 ) {
     TopAppBar(
         title = {
@@ -129,6 +142,14 @@ fun DeviceDetailAppBar(
             }
         },
         actions = {
+            if (!device.isAPMode) {
+                IconButton(onClick = openSchedule) {
+                    Icon(
+                        imageVector = Icons.Filled.DateRange,
+                        contentDescription = stringResource(R.string.schedule_title),
+                    )
+                }
+            }
             IconButton(onClick = refreshPage) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,

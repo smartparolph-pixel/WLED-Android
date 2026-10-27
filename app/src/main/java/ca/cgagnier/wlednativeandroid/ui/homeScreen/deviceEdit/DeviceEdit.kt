@@ -67,6 +67,7 @@ import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketStatus
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceVisibleSwitch
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.timezone.DeviceTimezoneDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateDetailsDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateDisclaimerDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateInstallingDialog
@@ -154,6 +155,7 @@ fun DeviceEditContent(
         Pair(Branch.STABLE, stringResource(R.string.stable)),
         Pair(Branch.BETA, stringResource(R.string.beta)),
     )
+    var showTimezoneDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -204,6 +206,14 @@ fun DeviceEditContent(
                     onCheckForUpdates = actions.onCheckForUpdates,
                     onSeeUpdateDetails = actions.onSeeUpdateDetails,
                 )
+                OutlinedButton(
+                    onClick = { showTimezoneDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                ) {
+                    Text(stringResource(R.string.timezone_button))
+                }
                 Spacer(Modifier.height(24.dp))
                 Text(
                     stringResource(
@@ -217,6 +227,9 @@ fun DeviceEditContent(
     }
 
     // Dialogs — shown conditionally based on uiState.
+    if (showTimezoneDialog) {
+        DeviceTimezoneDialog(device = device.device, onDismiss = { showTimezoneDialog = false })
+    }
     uiState.updateDetailsVersion?.let { versionDetails ->
         UpdateDetailsDialog(
             device = device,
