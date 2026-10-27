@@ -11,6 +11,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<UserPreferences
     val showOfflineDevicesLast get() = dataStore.data.map { it.showOfflineLast }
     val showHiddenDevices get() = dataStore.data.map { it.showHiddenDevices }
     val lastUpdateCheckDate get() = dataStore.data.map { it.lastUpdateCheckDate }
+    val encryptedSession get() = dataStore.data.map { it.encryptedSession }
 
     suspend fun updateThemeMode(themeSettings: ThemeSettings) {
         Log.d(TAG, "updateThemeMode")
@@ -57,6 +58,16 @@ class UserPreferencesRepository(private val dataStore: DataStore<UserPreferences
         dataStore.updateData {
             it.toBuilder()
                 .setLastUpdateCheckDate(lastUpdateCheckDate)
+                .setDateLastWritten(System.currentTimeMillis())
+                .build()
+        }
+    }
+
+    /** [encrypted] is already encrypted by the caller; never log it. */
+    suspend fun updateEncryptedSession(encrypted: String) {
+        dataStore.updateData {
+            it.toBuilder()
+                .setEncryptedSession(encrypted)
                 .setDateLastWritten(System.currentTimeMillis())
                 .build()
         }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ca.cgagnier.wlednativeandroid.repository.ThemeSettings
 import ca.cgagnier.wlednativeandroid.repository.UserPreferencesRepository
+import ca.cgagnier.wlednativeandroid.service.auth.AuthService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
@@ -14,8 +15,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val preferencesRepository: UserPreferencesRepository) :
-    ViewModel() {
+class SettingsViewModel @Inject constructor(
+    private val preferencesRepository: UserPreferencesRepository,
+    private val authService: AuthService,
+) : ViewModel() {
 
     private val theme = preferencesRepository.themeMode
     private val autoDiscovery = preferencesRepository.autoDiscovery
@@ -35,6 +38,12 @@ class SettingsViewModel @Inject constructor(private val preferencesRepository: U
             theme = theme,
         )
     }.stateIn(viewModelScope, WhileSubscribed(5000), SettingsState())
+
+    /** Ends the Sinag session; [onSignedOut] runs on the main thread afterwards. */
+    fun signOut(onSignedOut: () -> Unit) = viewModelScope.launch {
+        authService.signOut()
+        onSignedOut()
+    }
 
     fun setAutoDiscover(enabled: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         preferencesRepository.updateAutoDiscovery(enabled)

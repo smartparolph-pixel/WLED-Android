@@ -132,4 +132,41 @@
     <string name="control_off">Éteint</string>
     <string name="no_release_notes_provided">Aucune note de version fournie</string>
 
+
+    <!-- Sinag account screens -->
+    <string name="sinag_logo_description">Sinag par SinagTech Labs Inc.</string>
+    <string name="sinag_tagline">Every celebration, connected.</string>
+    <string name="sinag_name">Nom</string>
+    <string name="sinag_email">Courriel</string>
+    <string name="sinag_password">Mot de passe</string>
+    <string name="sinag_confirm_password">Confirmer le mot de passe</string>
+    <string name="sinag_show_password">Afficher</string>
+    <string name="sinag_hide_password">Masquer</string>
+    <string name="sinag_log_in">Se connecter</string>
+    <string name="sinag_forgot_password">Mot de passe oublié?</string>
+    <string name="sinag_new_to_sinag">Nouveau sur Sinag?</string>
+    <string name="sinag_sign_up_with_email">S\'inscrire avec un courriel</string>
+    <string name="sinag_privacy_policy">Politique de confidentialité</string>
+    <string name="sinag_create_account_title">Créez votre compte</string>
+    <string name="sinag_create_account_subtitle">Configurez votre parol en une minute.</string>
+    <string name="sinag_create_account">Créer un compte</string>
+    <string name="sinag_signup_agreement">En créant un compte, vous acceptez notre %1$s. Nous utilisons vos informations uniquement pour configurer votre compte et faire fonctionner vos parols.</string>
+    <string name="sinag_have_account">Vous avez déjà un compte?</string>
+    <string name="sinag_error_required">Ce champ est obligatoire</string>
+    <string name="sinag_error_email">Entrez une adresse courriel valide</string>
+    <string name="sinag_error_password_short">Utilisez au moins 8 caractères</string>
+    <string name="sinag_error_password_mismatch">Les mots de passe ne correspondent pas</string>
+    <string name="sinag_error_invalid_credentials">Courriel ou mot de passe incorrect.</string>
+    <string name="sinag_error_email_in_use">Un compte existe déjà avec ce courriel.</string>
+    <string name="sinag_error_network">Connexion impossible. Vérifiez votre connexion Internet et réessayez.</string>
+    <string name="sinag_error_unknown">Une erreur s\'est produite. Veuillez réessayer.</string>
+    <string name="sinag_reset_needs_email">Entrez votre courriel ci-dessus, puis touchez de nouveau Mot de passe oublié?.</string>
+    <string name="sinag_reset_sent">Si un compte existe pour ce courriel, nous avons envoyé un lien pour réinitialiser votre mot de passe.</string>
+    <string name="sinag_about">À propos</string>
+    <string name="sinag_version">Version</string>
+    <string name="sinag_terms">Conditions d\'utilisation</string>
+    <string name="sinag_sign_out">Se déconnecter</string>
+    <string name="sinag_footer_company">Sinag par SinagTech Labs Inc.</string>
+    <string name="sinag_powered_by">Propulsé par WLED</string>
+    <string name="sinag_license_notice">Basé sur WLED Native. Logiciel libre sous GPL-3.0, sans garantie. Voir le code source</string>
 </resources>
