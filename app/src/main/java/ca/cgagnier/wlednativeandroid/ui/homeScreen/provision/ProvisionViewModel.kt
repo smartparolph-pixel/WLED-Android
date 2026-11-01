@@ -128,11 +128,14 @@ class ProvisionViewModel @Inject constructor(private val provisioningService: Wl
         state = ProvisionState()
     }
 
-    /** e.g. "ManualJoinRequired at WledProvisioningService.kt:84 · Android 14, API 34". */
+    /** e.g. "ManualJoinRequired at WledProvisioningService.kt:84 · Android 14, API 34, join API found, …". */
     private fun debugDetail(e: Throwable): String {
         val origin = e.stackTrace.firstOrNull()?.let { " at ${it.fileName}:${it.lineNumber}" }.orEmpty()
         val cause = e.cause?.let { " (cause: ${it.javaClass.simpleName}: ${it.message})" }.orEmpty()
-        return "${e.javaClass.simpleName}$origin$cause · Android ${Build.VERSION.RELEASE}, API ${Build.VERSION.SDK_INT}"
+        val joinApi = runCatching { Class.forName("android.net.wifi.WifiNetworkSpecifier") }
+            .fold({ "found" }, { it.javaClass.simpleName })
+        return "${e.javaClass.simpleName}$origin$cause · Android ${Build.VERSION.RELEASE}, " +
+            "API ${Build.VERSION.SDK_INT}, join API $joinApi, ${Build.MANUFACTURER} ${Build.MODEL}"
     }
 
     private fun messageFor(e: Throwable): Int = when (e) {
