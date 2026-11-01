@@ -1,5 +1,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_logo">WLED 标志</string>
+    <string name="sinag_logo">Sinag 标志</string>
     <string name="add_a_device">添加新设备</string>
     <string name="add">添加</string>
     <string name="add_adding_device">正在添加 <xliff:g example="192.168.1.1" id="strength">%1$s</xliff:g></string>

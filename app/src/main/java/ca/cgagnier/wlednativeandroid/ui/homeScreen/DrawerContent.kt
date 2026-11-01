@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -63,8 +64,9 @@ private fun DrawerHeader() {
         horizontalArrangement = Arrangement.Center,
     ) {
         Image(
-            painter = painterResource(id = R.drawable.wled_logo_akemi),
-            contentDescription = stringResource(R.string.app_logo),
+            painter = painterResource(id = R.drawable.sinag_app_icon),
+            contentDescription = stringResource(R.string.sinag_logo),
+            modifier = Modifier.size(72.dp),
         )
     }
 }

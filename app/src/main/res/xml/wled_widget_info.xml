@@ -7,7 +7,7 @@
     android:targetCellWidth="3"
     android:targetCellHeight="1"
     android:resizeMode="horizontal"
-    android:previewImage="@mipmap/ic_launcher_rgb"
+    android:previewImage="@mipmap/ic_launcher_sinag"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen"
     android:configure="ca.cgagnier.wlednativeandroid.widget.WledWidgetConfigureActivity">

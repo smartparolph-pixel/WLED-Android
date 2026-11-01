@@ -1,5 +1,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_logo">WLED Logo</string>
+    <string name="sinag_logo">Sinag-Logo</string>
     <string name="add_a_device">Füge ein Gerät hinzu</string>
     <string name="add">Hinzufügen</string>
     <string name="add_adding_device"><xliff:g example="192.168.1.1" id="strength">%1$s</xliff:g> wird hinzugefügt</string>
