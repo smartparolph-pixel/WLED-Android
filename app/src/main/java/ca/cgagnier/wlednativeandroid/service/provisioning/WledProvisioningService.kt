@@ -1,5 +1,6 @@
 package ca.cgagnier.wlednativeandroid.service.provisioning
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -58,15 +59,12 @@ class WledProvisioningService @Inject constructor(
 ) {
     private val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
 
+    @SuppressLint("NewApi") // joinSetupNetwork is guarded by canJoinNetworks, which checks the API itself.
     fun provision(request: ProvisioningRequest): Flow<ProvisioningProgress> = flow {
-        val manualJoin = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+        val manualJoin = !canJoinNetworks
 
         emit(ProvisioningProgress.JoiningSetupNetwork)
-        val connection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            joinSetupNetwork(request)
-        } else {
-            manuallyJoinedNetwork()
-        }
+        val connection = if (manualJoin) manuallyJoinedNetwork() else joinSetupNetwork(request)
         val info = try {
             val http = httpClientFor(connection.network)
             val deviceInfo = try {
@@ -95,6 +93,14 @@ class WledProvisioningService @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     // region step 1: join AP
+
+    /**
+     * Whether the app can join the setup network itself (Android 10+). Checks for the API rather than
+     * trusting SDK_INT alone: ColorOS 14 has been seen reporting API 28 to the app on Android 14.
+     */
+    private val canJoinNetworks: Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ||
+            runCatching { Class.forName("android.net.wifi.WifiNetworkSpecifier") }.isSuccess
 
     private class ApConnection(val network: Network, val release: () -> Unit)
 
