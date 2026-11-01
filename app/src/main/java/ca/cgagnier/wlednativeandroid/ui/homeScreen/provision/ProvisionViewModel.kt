@@ -1,11 +1,13 @@
 package ca.cgagnier.wlednativeandroid.ui.homeScreen.provision
 
+import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningDefaults
@@ -31,6 +33,8 @@ sealed interface ProvisionStep {
     data class Form(
         val ssidError: Int? = null,
         val errorMessage: Int? = null,
+        /** Debug builds only: the underlying error, for testers who cannot read Logcat. */
+        val errorDetail: String? = null,
         val apSsidError: Int? = null,
         val apPasswordError: Int? = null,
     ) : ProvisionStep
@@ -89,7 +93,12 @@ class ProvisionViewModel @Inject constructor(private val provisioningService: Wl
             provisioningService.provision(request)
                 .catch { e ->
                     Log.w(TAG, "Provisioning failed", e)
-                    state = state.copy(step = ProvisionStep.Form(errorMessage = messageFor(e)))
+                    state = state.copy(
+                        step = ProvisionStep.Form(
+                            errorMessage = messageFor(e),
+                            errorDetail = if (BuildConfig.DEBUG) debugDetail(e) else null,
+                        ),
+                    )
                 }
                 .collect { progress ->
                     state = state.copy(
@@ -117,6 +126,13 @@ class ProvisionViewModel @Inject constructor(private val provisioningService: Wl
     fun clear() {
         job?.cancel()
         state = ProvisionState()
+    }
+
+    /** e.g. "ManualJoinRequired at WledProvisioningService.kt:84 · Android API 34". */
+    private fun debugDetail(e: Throwable): String {
+        val origin = e.stackTrace.firstOrNull()?.let { " at ${it.fileName}:${it.lineNumber}" }.orEmpty()
+        val cause = e.cause?.let { " (cause: ${it.javaClass.simpleName}: ${it.message})" }.orEmpty()
+        return "${e.javaClass.simpleName}$origin$cause · Android API ${Build.VERSION.SDK_INT}"
     }
 
     private fun messageFor(e: Throwable): Int = when (e) {

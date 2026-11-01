@@ -90,6 +90,13 @@ private fun FormStep(
             modifier = Modifier.padding(bottom = 12.dp),
         )
     }
+    step.errorDetail?.let {
+        Text(
+            text = it,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
+    }
     OutlinedTextField(
         value = state.homeSsid,
         onValueChange = viewModel::setSsid,
