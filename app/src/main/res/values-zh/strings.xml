@@ -144,7 +144,7 @@
     <string name="provision_step_rebooting">正在重启设备…</string>
     <string name="provision_step_waiting">正在你的 WiFi 中查找设备…</string>
     <string name="provision_error_ssid_required">请输入你的 WiFi 名称</string>
-    <string name="provision_error_manual_join">此 Android 版本无法自动连接设备。请在设置中连接到设备的 WiFi，然后重新打开应用。</string>
+    <string name="provision_error_manual_join">此 Android 版本无法自动连接设备。请在设置中连接到设备的 WiFi，然后返回并再次点按“开始”。</string>
     <string name="provision_error_ap_unavailable">无法连接到设备的设置网络。请确保设备已开机并靠近你的手机。</string>
     <string name="provision_error_not_wled">设置网络的响应不像 WLED 设备。</string>
     <string name="provision_error_rejected">设备未接受 WiFi 信息。</string>

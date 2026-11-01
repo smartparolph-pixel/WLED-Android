@@ -149,7 +149,7 @@
     <string name="provision_step_rebooting">Restarting the device…</string>
     <string name="provision_step_waiting">Looking for the device on your WiFi…</string>
     <string name="provision_error_ssid_required">Enter your WiFi name</string>
-    <string name="provision_error_manual_join">This Android version cannot join the device automatically. Connect to the device\'s WiFi in Settings, then open the app again.</string>
+    <string name="provision_error_manual_join">This Android version cannot join the device automatically. Connect to the device\'s WiFi in Settings, then come back and tap Start again.</string>
     <string name="provision_error_ap_unavailable">Could not connect to the device\'s setup network. Make sure it is powered on and close to your phone.</string>
     <string name="provision_error_not_wled">The setup network did not respond like a WLED device.</string>
     <string name="provision_error_rejected">The device did not accept the WiFi details.</string>

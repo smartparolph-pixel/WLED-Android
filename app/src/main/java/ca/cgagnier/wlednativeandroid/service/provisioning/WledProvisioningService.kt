@@ -41,7 +41,7 @@ private val JSON = "application/json".toMediaType()
 /**
  * Tapo-style onboarding for a WLED device:
  *
- *  1. Join the device's setup AP (system-confirmed, Android 10+).
+ *  1. Join the device's setup AP (system-confirmed on Android 10+; joined by the user in Settings before).
  *  2. Verify it is WLED and read its MAC (`GET /json/info`).
  *  3. Push home WiFi credentials (`POST /json/cfg`) and reboot it (`POST /json/state {"rb":true}`).
  *  4. Drop the AP, let the phone fall back to its normal WiFi.
@@ -59,15 +59,22 @@ class WledProvisioningService @Inject constructor(
     private val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
 
     fun provision(request: ProvisioningRequest): Flow<ProvisioningProgress> = flow {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            throw ProvisioningException.ManualJoinRequired()
-        }
+        val manualJoin = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
 
         emit(ProvisioningProgress.JoiningSetupNetwork)
-        val connection = joinSetupNetwork(request)
+        val connection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            joinSetupNetwork(request)
+        } else {
+            manuallyJoinedNetwork()
+        }
         val info = try {
             val http = httpClientFor(connection.network)
-            val deviceInfo = fetchInfo(http)
+            val deviceInfo = try {
+                fetchInfo(http)
+            } catch (e: ProvisioningException.NotAWledDevice) {
+                // On a manual join, a WiFi that is not the setup network means the user has not joined it yet.
+                throw if (manualJoin) ProvisioningException.ManualJoinRequired() else e
+            }
 
             emit(ProvisioningProgress.SendingCredentials)
             postCredentials(http, request)
@@ -123,6 +130,21 @@ class WledProvisioningService @Inject constructor(
             connectivityManager.requestNetwork(networkRequest, callback, ProvisioningDefaults.AP_JOIN_TIMEOUT_MS)
             cont.invokeOnCancellation { safeUnregister(callback) }
         }
+
+    /**
+     * Android 9 and older cannot join a network for the app, so the user joins the setup network in
+     * Settings first. Requests are still bound to that WiFi, because Android may keep mobile data as
+     * the default network while the WiFi has no internet.
+     */
+    private fun manuallyJoinedNetwork(): ApConnection {
+        @Suppress("DEPRECATION") // allNetworks is fine here: this path only runs on Android 9 and older.
+        val wifi = connectivityManager.allNetworks.firstOrNull { network ->
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+            capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+        } ?: throw ProvisioningException.ManualJoinRequired()
+        // Nothing to release: the phone returns to its usual WiFi when the device reboots.
+        return ApConnection(wifi) {}
+    }
 
     private fun safeUnregister(callback: ConnectivityManager.NetworkCallback) {
         try {

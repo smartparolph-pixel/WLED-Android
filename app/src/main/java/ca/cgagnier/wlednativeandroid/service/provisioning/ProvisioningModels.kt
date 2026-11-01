@@ -52,7 +52,7 @@ sealed interface ProvisioningProgress {
 }
 
 sealed class ProvisioningException(message: String, cause: Throwable? = null) : Exception(message, cause) {
-    /** Android < 10: the app cannot join networks programmatically. */
+    /** Android < 10: the user must join the setup network in Settings first. */
     class ManualJoinRequired : ProvisioningException("Manual join required")
     class SetupNetworkUnavailable : ProvisioningException("Setup network not found or declined")
     class NotAWledDevice(cause: Throwable? = null) : ProvisioningException("Not a WLED device", cause)
