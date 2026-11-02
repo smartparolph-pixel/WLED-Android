@@ -48,6 +48,25 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
     suspend fun install(device: Device, pack: PresetPack): PackInstallResult =
         install(deviceApiFactory.create(device), pack)
 
+    /**
+     * Adds every pack in [packs], [finish] last so its playlist is the one left playing. Results are in
+     * the order of [packs]. Stops early if the device cannot be reached.
+     */
+    suspend fun installAll(
+        device: Device,
+        packs: List<PresetPack> = PresetPacks.ALL,
+        finish: PresetPack = PresetPacks.PLAYS_AFTER_SETUP,
+    ): List<Pair<PresetPack, PackInstallResult>> {
+        val api = deviceApiFactory.create(device)
+        val results = mutableMapOf<PresetPack, PackInstallResult>()
+        for (pack in packs.filter { it != finish } + packs.filter { it == finish }) {
+            val result = install(api, pack)
+            results[pack] = result
+            if (result == PackInstallResult.Unreachable) break
+        }
+        return packs.map { it to (results[it] ?: PackInstallResult.Unreachable) }
+    }
+
     suspend fun install(api: DeviceApi, pack: PresetPack): PackInstallResult = withContext(Dispatchers.IO) {
         try {
             val effects = api.getEffects().body() ?: return@withContext PackInstallResult.Unreachable

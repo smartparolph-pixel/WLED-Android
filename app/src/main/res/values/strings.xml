@@ -231,6 +231,10 @@
     <string name="preset_pack_unverified">The device did not confirm every preset; check its Presets list.</string>
     <string name="preset_pack_nothing">Nothing could be added: this device has none of these effects or no free preset slots.</string>
     <string name="preset_pack_unreachable">Could not reach the device. Make sure it is on and try again.</string>
+    <string name="preset_pack_add_all">Add all playlists</string>
+    <string name="preset_pack_adding_all">Adding all playlists…</string>
+    <string name="preset_pack_all_added">Playlists added: %1$d. %2$s is playing now.</string>
+    <string name="preset_pack_not_added">Could not add: %1$s.</string>
 
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Time zone</string>

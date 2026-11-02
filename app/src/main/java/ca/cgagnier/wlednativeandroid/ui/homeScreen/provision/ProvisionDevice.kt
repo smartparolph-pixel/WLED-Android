@@ -34,10 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ca.cgagnier.wlednativeandroid.R
-import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningProgress
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
-import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.presetPackResultText
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.presetPacksSummaryText
 
 @Composable
 fun ProvisionDevice(onDismissRequest: () -> Unit, viewModel: ProvisionViewModel = hiltViewModel()) {
@@ -203,24 +202,20 @@ private fun SuccessStep(step: ProvisionStep.Success, onDismiss: () -> Unit) {
     Button(onClick = onDismiss) { Text(stringResource(R.string.done)) }
 }
 
-/** "Adding ✨ Twinkle Tonight…" while the preset packs are added, then what was added. */
+/** "Adding all playlists…" while the preset packs are added, then what was added. */
 @Composable
 private fun PresetPackStatus(step: ProvisionStep.Success) {
     if (step.addingPacks) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
             CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp).size(18.dp))
             Text(
-                text = stringResource(
-                    R.string.preset_pack_adding,
-                    PresetPacks.ALL.joinToString { it.playlist.name },
-                ),
+                text = stringResource(R.string.preset_pack_adding_all),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-    }
-    step.packResults.forEach {
+    } else if (step.packResults.isNotEmpty()) {
         Text(
-            text = presetPackResultText(it),
+            text = presetPacksSummaryText(step.packResults),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 12.dp),
         )

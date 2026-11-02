@@ -11,6 +11,7 @@ import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.service.presets.PackInstallResult
+import ca.cgagnier.wlednativeandroid.service.presets.PresetPack
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPackInstaller
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningDefaults
@@ -50,7 +51,7 @@ sealed interface ProvisionStep {
     data class Success(
         val device: Device,
         val addingPacks: Boolean = true,
-        val packResults: List<PackInstallResult> = emptyList(),
+        val packResults: List<Pair<PresetPack, PackInstallResult>> = emptyList(),
     ) : ProvisionStep
 }
 
@@ -139,9 +140,9 @@ class ProvisionViewModel @Inject constructor(
         return form.takeIf { it.ssidError != null || it.apSsidError != null || it.apPasswordError != null }
     }
 
-    /** Preloads the preset packs on the new device; its last playlist is left playing. */
+    /** Preloads every preset pack on the new device, leaving [PresetPacks.PLAYS_AFTER_SETUP] playing. */
     private suspend fun addPresetPacks(device: Device) {
-        val results = PresetPacks.ALL.map { presetPackInstaller.install(device, it) }
+        val results = presetPackInstaller.installAll(device)
         val step = state.step
         if (step is ProvisionStep.Success && step.device == device) {
             state = state.copy(step = step.copy(addingPacks = false, packResults = results))

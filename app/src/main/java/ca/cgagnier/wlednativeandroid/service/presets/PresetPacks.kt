@@ -28,23 +28,114 @@ data class PlaylistSpec(
 data class PresetPack(val presets: List<EffectPreset>, val playlist: PlaylistSpec)
 
 object PresetPacks {
-    val TWINKLE_TONIGHT = PresetPack(
-        presets = listOf(
-            EffectPreset("Twinklefox", effect = "Twinklefox"),
-            EffectPreset("Fairy", effect = "Fairy"),
-            EffectPreset("Fairytwinkle", effect = "Fairytwinkle"),
-            EffectPreset("Glitter", effect = "Glitter"),
-            EffectPreset("Sparkle", effect = "Sparkle"),
-        ),
+    private const val DEFAULT_SECONDS = 20
+    private const val DEFAULT_FADE = 1
+    private const val SLOW_SECONDS = 60
+    private const val SLOW_FADE = 3
+
+    /**
+     * A pack whose presets are named after their effects, so an effect used by several playlists is saved
+     * once. The playlist name starts with [icon], which is also its quick-load button.
+     */
+    private fun pack(
+        icon: String,
+        name: String,
+        effects: List<String>,
+        seconds: Int = DEFAULT_SECONDS,
+        fade: Int = DEFAULT_FADE,
+    ) = PresetPack(
+        presets = effects.map { EffectPreset(it, effect = it) },
         playlist = PlaylistSpec(
-            name = "✨ Twinkle Tonight",
-            quickLoad = "✨",
-            secondsPerPreset = 60,
-            fadeSeconds = 1,
+            name = "$icon $name",
+            quickLoad = icon,
+            secondsPerPreset = seconds,
+            fadeSeconds = fade,
         ),
     )
 
-    val ALL = listOf(TWINKLE_TONIGHT)
+    // Effect names are WLED 0.15.3's; ids in PresetPacksTest.
+
+    val TWINKLE_TONIGHT = pack(
+        "✨",
+        "Twinkle Tonight",
+        listOf("Twinklefox", "Fairy", "Fairytwinkle", "Glitter", "Sparkle"),
+        seconds = SLOW_SECONDS,
+    )
+
+    val SKY_FULL_OF_SPARKS = pack(
+        "🎆",
+        "Sky Full of Sparks",
+        listOf("Fireworks 1D", "Fireworks Starburst", "Fireworks", "Popcorn", "Sparkle+"),
+    )
+
+    val CHILL_MODE = pack(
+        "🌊",
+        "Chill Mode",
+        listOf("Pacifica", "Lake", "Noise Pal", "Flow", "Aurora"),
+        seconds = SLOW_SECONDS,
+        fade = SLOW_FADE,
+    )
+
+    val RAINBOW_RUSH = pack(
+        "🌈",
+        "Rainbow Rush",
+        listOf("Rainbow", "Colorwaves", "Pride 2015", "Theater Rainbow", "Chase Rainbow"),
+    )
+
+    val NORTHERN_GLOW = pack(
+        "🌌",
+        "Northern Glow",
+        listOf("Aurora", "Phased Noise", "Twinkleup", "Perlin Move", "Plasma"),
+    )
+
+    val FLAME_ON = pack(
+        "🔥",
+        "Flame On",
+        listOf("Candle", "Candle Multi", "Fire 2012", "Fire Flicker"),
+    )
+
+    /** A party mix that needs no microphone (WLED's sound-reactive effects stay dark without one). */
+    val BEAT_DROP = pack(
+        "🎵",
+        "Beat Drop",
+        listOf("Strobe Rainbow", "Bpm", "Ripple Rainbow", "Chase Flash Rnd", "Dynamic"),
+    )
+
+    val COMET_CHASERS = pack(
+        "☄️",
+        "Comet Chasers",
+        listOf("Meteor", "Lighthouse", "Sinelon Rainbow", "Multi Comet", "Juggle"),
+    )
+
+    val RISE_AND_SHINE = pack(
+        "🌅",
+        "Rise & Shine",
+        listOf("Sunrise", "Blends", "Breathe", "Fade", "Heartbeat"),
+        seconds = SLOW_SECONDS,
+        fade = SLOW_FADE,
+    )
+
+    val SPOOKY_SWITCH = pack(
+        "🎃",
+        "Spooky Switch",
+        listOf("Halloween Eyes", "Lightning", "Strobe Mega", "Washing Machine", "Dancing Shadows"),
+    )
+
+    val ALL = listOf(
+        TWINKLE_TONIGHT,
+        SKY_FULL_OF_SPARKS,
+        CHILL_MODE,
+        RAINBOW_RUSH,
+        NORTHERN_GLOW,
+        FLAME_ON,
+        BEAT_DROP,
+        COMET_CHASERS,
+        RISE_AND_SHINE,
+        SPOOKY_SWITCH,
+    )
+
+    /** The pack left playing after "Set up a new device" adds all of them. */
+    val PLAYS_AFTER_SETUP = TWINKLE_TONIGHT
 }
 
 /** What to do for one preset of a pack. */
