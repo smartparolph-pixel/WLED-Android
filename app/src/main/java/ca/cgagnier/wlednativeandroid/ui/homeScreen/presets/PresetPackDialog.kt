@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -38,6 +39,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.presets.PackSetupResult
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
+import ca.cgagnier.wlednativeandroid.service.presets.RepairResult
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 
 private val PLAYLIST_LIST_MAX_HEIGHT = 420.dp
@@ -84,7 +86,11 @@ fun PresetPackDialog(device: DeviceWithState, onDismiss: () -> Unit, viewModel: 
 
                     PackSetupResult.NothingAvailable -> Note(stringResource(R.string.preset_pack_nothing))
 
-                    PackSetupResult.PresetsUnreadable, PackSetupResult.Unreachable -> {
+                    is PackSetupResult.PresetsUnreadable -> Damaged(setup, viewModel) {
+                        viewModel.repair(device.device)
+                    }
+
+                    PackSetupResult.Unreachable -> {
                         Note(presetPackSetupText(setup))
                         TextButton(onClick = { viewModel.retry(device.device) }) {
                             Text(stringResource(R.string.retry_connection))
@@ -99,6 +105,53 @@ fun PresetPackDialog(device: DeviceWithState, onDismiss: () -> Unit, viewModel: 
                 )
             }
         }
+    }
+}
+
+/** The device's presets.json is damaged: what Repair would keep, and the Repair button (asks first). */
+@Composable
+private fun Damaged(setup: PackSetupResult.PresetsUnreadable, viewModel: PresetPackViewModel, onRepair: () -> Unit) {
+    var confirming by rememberSaveable { mutableStateOf(false) }
+    Note(stringResource(R.string.preset_pack_damaged, setup.kept, setup.dropped))
+    Text(
+        text = stringResource(R.string.preset_pack_damaged_detail, setup.problem),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 4.dp),
+    )
+    viewModel.repairProblem?.let {
+        Note(
+            stringResource(
+                if (it ==
+                    RepairResult.Locked
+                ) {
+                    R.string.preset_pack_repair_locked
+                } else {
+                    R.string.preset_pack_repair_failed
+                },
+            ),
+        )
+    }
+    if (viewModel.repairing) {
+        CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp).size(20.dp))
+    } else {
+        TextButton(onClick = { confirming = true }) { Text(stringResource(R.string.preset_pack_repair)) }
+    }
+    if (confirming) {
+        AlertDialog(
+            onDismissRequest = { confirming = false },
+            title = { Text(stringResource(R.string.preset_pack_repair_confirm_title)) },
+            text = { Text(stringResource(R.string.preset_pack_repair_confirm, setup.kept, setup.dropped)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirming = false
+                    onRepair()
+                }) { Text(stringResource(R.string.preset_pack_repair)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirming = false }) { Text(stringResource(R.string.cancel)) }
+            },
+        )
     }
 }
 
@@ -200,7 +253,7 @@ fun presetPackSetupText(setup: PackSetupResult): String = when (setup) {
 
     PackSetupResult.NothingAvailable -> stringResource(R.string.preset_pack_nothing)
 
-    PackSetupResult.PresetsUnreadable -> stringResource(R.string.preset_editor_unreadable)
+    is PackSetupResult.PresetsUnreadable -> stringResource(R.string.preset_pack_damaged, setup.kept, setup.dropped)
 
     PackSetupResult.Unreachable -> stringResource(R.string.preset_pack_unreachable)
 }

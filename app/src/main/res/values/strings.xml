@@ -230,6 +230,13 @@
     <string name="preset_pack_unverified">The device did not confirm every preset; check its Presets list.</string>
     <string name="preset_pack_nothing">Nothing could be added: this device has none of these effects or no free preset slots.</string>
     <string name="preset_pack_unreachable">Could not reach the device. Make sure it is on and try again.</string>
+    <string name="preset_pack_damaged">This device\'s presets file is damaged, so nothing was changed. Repair keeps the %1$d presets and playlists that are intact and removes %2$d damaged parts; missing playlists are then added again.</string>
+    <string name="preset_pack_damaged_detail">Details: %1$s</string>
+    <string name="preset_pack_repair">Repair</string>
+    <string name="preset_pack_repair_confirm_title">Repair presets file?</string>
+    <string name="preset_pack_repair_confirm">The device\'s presets.json will be replaced with a clean copy holding the %1$d intact presets and playlists. The %2$d damaged parts cannot be recovered.</string>
+    <string name="preset_pack_repair_locked">This device has a settings PIN. Unlock it on the device\'s web page (Config), then try again.</string>
+    <string name="preset_pack_repair_failed">Could not repair the file. Check the connection to the device and try again.</string>
 
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Time zone</string>

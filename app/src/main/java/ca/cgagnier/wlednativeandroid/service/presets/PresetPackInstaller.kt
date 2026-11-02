@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -19,12 +20,24 @@ import javax.inject.Singleton
 private const val TAG = "PresetPackInstaller"
 private val JSON = "application/json".toMediaType()
 private const val HTTP_NOT_FOUND = 404
+private const val HTTP_UNAUTHORIZED = 401
 
 /** Gives the device time to write presets.json after a preset is saved (written right away). */
 private const val PRESET_GAP_MS = 500L
 
 /** Playlists are written in the device's main loop after the reply, so they get longer. */
 private const val PLAYLIST_GAP_MS = 1000L
+
+enum class RepairResult {
+    Repaired,
+
+    /** The file reads fine (or could not be fetched); nothing was uploaded. */
+    NotNeeded,
+
+    /** The device has a settings PIN that is not unlocked. */
+    Locked,
+    Failed,
+}
 
 sealed interface PackSetupResult {
     /**
@@ -46,10 +59,13 @@ sealed interface PackSetupResult {
     data object NothingAvailable : PackSetupResult
 
     /**
-     * The device answered but its presets.json could not be read (e.g. it is damaged). Nothing is written
-     * then, since saving into a file that cannot be read can lose every preset in it.
+     * The device answered but its presets.json is not valid JSON (damaged). Nothing is written then,
+     * since saving into a file that cannot be read can lose every preset in it. [repairPresets] can
+     * rebuild it from the [kept] entries that are intact, leaving out [dropped] damaged parts.
+     *
+     * @param problem Where the file stops being valid, for diagnosis.
      */
-    data object PresetsUnreadable : PackSetupResult
+    data class PresetsUnreadable(val kept: Int, val dropped: Int, val problem: String) : PackSetupResult
 
     data object Unreachable : PackSetupResult
 }
@@ -93,11 +109,49 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
     /** Adds what is missing. Does not start anything; [ensureAll] for a device does. */
     suspend fun ensureAll(api: DeviceApi, packs: List<PresetPack> = PresetPacks.ALL): PackSetupResult {
         val effects = api.getEffects().body()
-        val presets = effects?.let { readPresets(api) }
+        val text = effects?.let { presetsText(api) }
+        val presets = text?.let { parsePresets(it) }
         return when {
-            effects == null -> PackSetupResult.Unreachable
-            presets == null -> PackSetupResult.PresetsUnreadable
+            effects == null || text == null -> PackSetupResult.Unreachable
+
+            presets == null -> PresetsFileRepair.repair(text).let {
+                PackSetupResult.PresetsUnreadable(it.kept, it.dropped, it.problem.orEmpty())
+            }
+
             else -> install(api, PresetPackPlanner.planAll(packs, presets, effects), presets)
+        }
+    }
+
+    /**
+     * Replaces a damaged presets.json with the entries that are still intact ([PresetsFileRepair]),
+     * uploading it the way WLED's own backup restore does. Nothing is changed if the file reads fine.
+     */
+    suspend fun repairPresets(device: Device): RepairResult = withContext(Dispatchers.IO) {
+        val api = deviceApiFactory.create(device)
+        try {
+            val text = presetsText(api)
+            if (text == null || parsePresets(text) != null) return@withContext RepairResult.NotNeeded
+            val repaired = PresetsFileRepair.repair(text).toJson()
+            val file = MultipartBody.Part.createFormData(
+                "data",
+                "/presets.json",
+                repaired.toRequestBody(JSON),
+            )
+            val response = api.uploadFile(file)
+            checked.remove(device.macAddress)
+            when {
+                response.code() == HTTP_UNAUTHORIZED -> RepairResult.Locked
+
+                !response.isSuccessful -> RepairResult.Failed
+
+                else -> {
+                    delay(PLAYLIST_GAP_MS)
+                    RepairResult.Repaired
+                }
+            }
+        } catch (e: IOException) {
+            Log.w(TAG, "Could not repair presets.json", e)
+            RepairResult.Failed
         }
     }
 
@@ -190,12 +244,14 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
      * The device's presets, or null if presets.json exists but cannot be parsed (an empty or cut-off file
      * included). A device that never had a preset has no presets.json, which counts as empty.
      */
-    suspend fun readPresets(api: DeviceApi): Map<*, *>? {
+    suspend fun readPresets(api: DeviceApi): Map<*, *>? = presetsText(api)?.let { parsePresets(it) }
+
+    /** presets.json as text; `{}` when the device has none yet. Null only if the response was empty. */
+    private suspend fun presetsText(api: DeviceApi): String? {
         val response = api.getPresets()
-        if (response.code() == HTTP_NOT_FOUND) return emptyMap<Any, Any>()
+        if (response.code() == HTTP_NOT_FOUND) return "{}"
         if (!response.isSuccessful) throw IOException("presets.json: HTTP ${response.code()}")
-        val body = response.body()?.string().orEmpty()
-        return parsePresets(body)
+        return response.body()?.string()
     }
 
     private fun parsePresets(body: String): Map<*, *>? = try {

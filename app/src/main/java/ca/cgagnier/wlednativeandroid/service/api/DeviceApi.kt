@@ -55,6 +55,11 @@ interface DeviceApi {
     @POST("json/cfg")
     suspend fun postConfig(@Body config: RequestBody): Response<ResponseBody>
 
+    /** Writes a file on the device, as WLED's backup restore does (e.g. presets.json). */
+    @Multipart
+    @POST("upload")
+    suspend fun uploadFile(@Part file: MultipartBody.Part): Response<ResponseBody>
+
     @Multipart
     @POST("update")
     suspend fun updateDevice(@Part binaryFile: MultipartBody.Part): Response<ResponseBody>

@@ -227,6 +227,13 @@
     <string name="preset_pack_unverified">L\'appareil n\'a pas confirmé tous les préréglages ; vérifiez sa liste de préréglages.</string>
     <string name="preset_pack_nothing">Rien n\'a pu être ajouté : cet appareil n\'a aucun de ces effets ou plus d\'emplacement libre.</string>
     <string name="preset_pack_unreachable">Impossible de joindre l\'appareil. Vérifiez qu\'il est allumé et réessayez.</string>
+    <string name="preset_pack_damaged">Le fichier de presets de cet appareil est endommagé, rien n\'a donc été modifié. Réparer conserve les %1$d presets et playlists intacts et retire %2$d parties endommagées ; les playlists manquantes sont ensuite rajoutées.</string>
+    <string name="preset_pack_damaged_detail">Détails : %1$s</string>
+    <string name="preset_pack_repair">Réparer</string>
+    <string name="preset_pack_repair_confirm_title">Réparer le fichier de presets ?</string>
+    <string name="preset_pack_repair_confirm">Le presets.json de l\'appareil sera remplacé par une copie propre contenant les %1$d presets et playlists intacts. Les %2$d parties endommagées ne peuvent pas être récupérées.</string>
+    <string name="preset_pack_repair_locked">Cet appareil a un code PIN de réglages. Déverrouillez-le sur la page web de l\'appareil (Config), puis réessayez.</string>
+    <string name="preset_pack_repair_failed">Impossible de réparer le fichier. Vérifiez la connexion à l\'appareil et réessayez.</string>
 
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Fuseau horaire</string>
