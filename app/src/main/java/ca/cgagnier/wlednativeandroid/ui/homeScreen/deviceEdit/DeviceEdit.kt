@@ -241,7 +241,7 @@ fun DeviceEditContent(
         DeviceTimezoneDialog(device = device.device, onDismiss = { showTimezoneDialog = false })
     }
     if (showPresetPackDialog) {
-        PresetPackDialog(device = device.device, onDismiss = { showPresetPackDialog = false })
+        PresetPackDialog(device = device, onDismiss = { showPresetPackDialog = false })
     }
     uiState.updateDetailsVersion?.let { versionDetails ->
         UpdateDetailsDialog(

@@ -89,7 +89,7 @@ fun DeviceShortcutBar(devices: List<DeviceWithState>) {
         val key = "shortcut:${shortcut.name}:${device.device.macAddress}"
         when (shortcut) {
             Shortcut.SCHEDULE -> ScheduleDialog(device, close, hiltViewModel(key = key))
-            Shortcut.PRESETS -> PresetPackDialog(device.device, close, hiltViewModel(key = key))
+            Shortcut.PRESETS -> PresetPackDialog(device, close, hiltViewModel(key = key))
             Shortcut.TIME_ZONE -> DeviceTimezoneDialog(device.device, close, hiltViewModel(key = key))
         }
     }

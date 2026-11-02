@@ -36,7 +36,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningProgress
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
-import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.presetPacksSummaryText
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.presetPackSetupText
 
 @Composable
 fun ProvisionDevice(onDismissRequest: () -> Unit, viewModel: ProvisionViewModel = hiltViewModel()) {
@@ -202,20 +202,20 @@ private fun SuccessStep(step: ProvisionStep.Success, onDismiss: () -> Unit) {
     Button(onClick = onDismiss) { Text(stringResource(R.string.done)) }
 }
 
-/** "Adding all playlists…" while the preset packs are added, then what was added. */
+/** "Preparing playlists…" while the playlists are added, then the result. */
 @Composable
 private fun PresetPackStatus(step: ProvisionStep.Success) {
     if (step.addingPacks) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
             CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp).size(18.dp))
             Text(
-                text = stringResource(R.string.preset_pack_adding_all),
+                text = stringResource(R.string.preset_pack_preparing),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-    } else if (step.packResults.isNotEmpty()) {
+    } else if (step.presets != null) {
         Text(
-            text = presetPacksSummaryText(step.packResults),
+            text = presetPackSetupText(step.presets),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 12.dp),
         )

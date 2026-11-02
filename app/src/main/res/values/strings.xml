@@ -222,19 +222,14 @@
     <!-- Preset packs -->
     <string name="preset_pack_button">Presets &amp; playlists</string>
     <string name="preset_pack_title">Presets &amp; playlists</string>
-    <string name="preset_pack_hint">Adds ready-made presets and a playlist to this device and starts the playlist. Presets already on the device are kept, so nothing is added twice.</string>
-    <string name="preset_pack_add">Add %1$s</string>
-    <string name="preset_pack_adding">Adding %1$s…</string>
-    <string name="preset_pack_added">%1$s was added and is playing now.</string>
-    <string name="preset_pack_already">%1$s is already on this device and is playing now.</string>
+    <string name="preset_pack_hint">Tap a playlist to play it on this device.</string>
+    <string name="preset_pack_preparing">Preparing playlists…</string>
+    <string name="preset_pack_playing">Playing</string>
+    <string name="preset_pack_ready">Playlists ready. %1$s is playing now.</string>
     <string name="preset_pack_unavailable">Not available on this device: %1$s.</string>
     <string name="preset_pack_unverified">The device did not confirm every preset; check its Presets list.</string>
     <string name="preset_pack_nothing">Nothing could be added: this device has none of these effects or no free preset slots.</string>
     <string name="preset_pack_unreachable">Could not reach the device. Make sure it is on and try again.</string>
-    <string name="preset_pack_add_all">Add all playlists</string>
-    <string name="preset_pack_adding_all">Adding all playlists…</string>
-    <string name="preset_pack_all_added">Playlists added: %1$d. %2$s is playing now.</string>
-    <string name="preset_pack_not_added">Could not add: %1$s.</string>
 
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Time zone</string>

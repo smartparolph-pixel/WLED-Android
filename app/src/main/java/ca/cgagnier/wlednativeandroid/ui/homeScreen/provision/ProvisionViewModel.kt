@@ -10,8 +10,7 @@ import androidx.lifecycle.viewModelScope
 import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.Device
-import ca.cgagnier.wlednativeandroid.service.presets.PackInstallResult
-import ca.cgagnier.wlednativeandroid.service.presets.PresetPack
+import ca.cgagnier.wlednativeandroid.service.presets.PackSetupResult
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPackInstaller
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningDefaults
@@ -45,14 +44,11 @@ sealed interface ProvisionStep {
     data class Working(val progress: ProvisioningProgress) : ProvisionStep
 
     /**
-     * @param addingPacks The preset packs are still being added to the new device.
-     * @param packResults One result per pack in [PresetPacks.ALL].
+     * @param addingPacks The playlists are still being added to the new device.
+     * @param presets What adding the playlists did.
      */
-    data class Success(
-        val device: Device,
-        val addingPacks: Boolean = true,
-        val packResults: List<Pair<PresetPack, PackInstallResult>> = emptyList(),
-    ) : ProvisionStep
+    data class Success(val device: Device, val addingPacks: Boolean = true, val presets: PackSetupResult? = null) :
+        ProvisionStep
 }
 
 data class ProvisionState(
@@ -142,10 +138,10 @@ class ProvisionViewModel @Inject constructor(
 
     /** Preloads every preset pack on the new device, leaving [PresetPacks.PLAYS_AFTER_SETUP] playing. */
     private suspend fun addPresetPacks(device: Device) {
-        val results = presetPackInstaller.installAll(device)
+        val results = presetPackInstaller.ensureAll(device, play = PresetPacks.PLAYS_AFTER_SETUP)
         val step = state.step
         if (step is ProvisionStep.Success && step.device == device) {
-            state = state.copy(step = step.copy(addingPacks = false, packResults = results))
+            state = state.copy(step = step.copy(addingPacks = false, presets = results))
         }
     }
 

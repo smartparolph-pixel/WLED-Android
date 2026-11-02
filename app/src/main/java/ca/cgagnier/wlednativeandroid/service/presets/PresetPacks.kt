@@ -134,8 +134,8 @@ object PresetPacks {
         SPOOKY_SWITCH,
     )
 
-    /** The pack left playing after "Set up a new device" adds all of them. */
-    val PLAYS_AFTER_SETUP = TWINKLE_TONIGHT
+    /** The default playlist: started after "Set up a new device" and when playlists are first added. */
+    val PLAYS_AFTER_SETUP = SKY_FULL_OF_SPARKS
 }
 
 /** What to do for one preset of a pack. */
@@ -156,7 +156,7 @@ sealed interface PresetStep {
 
 /** What to do for the playlist. */
 sealed interface PlaylistStep {
-    /** Already on the device with exactly these presets: only start it. */
+    /** Already on the device with exactly these presets; nothing to save. */
     data class Play(val id: Int) : PlaylistStep
 
     /** Save at [id] (new, or replacing a same-named playlist whose presets changed), which also starts it. */
@@ -165,6 +165,14 @@ sealed interface PlaylistStep {
     /** None of the presets could be added, or no free slot is left. */
     data object Skip : PlaylistStep
 }
+
+/** The playlist's preset id once the plan is carried out, or null if it is skipped. */
+val PlaylistStep.playlistId: Int?
+    get() = when (this) {
+        is PlaylistStep.Play -> id
+        is PlaylistStep.Save -> id
+        PlaylistStep.Skip -> null
+    }
 
 data class PackPlan(val presets: List<PresetStep>, val playlist: PlaylistStep) {
     val created get() = presets.filterIsInstance<PresetStep.Create>()
@@ -178,6 +186,26 @@ data class PackPlan(val presets: List<PresetStep>, val playlist: PlaylistStep) {
  */
 object PresetPackPlanner {
     const val MAX_PRESET_ID = 250
+
+    /**
+     * Plans several packs from one read of `/presets.json`: each pack sees what the packs before it will
+     * save, so shared effects (e.g. Aurora) are saved once and ids never collide.
+     */
+    fun planAll(
+        packs: List<PresetPack>,
+        presetsJson: Map<*, *>,
+        effects: List<String>,
+    ): List<Pair<PresetPack, PackPlan>> {
+        val device = presetsJson.entries.associate { it.key.toString() to it.value }.toMutableMap()
+        return packs.map { pack ->
+            val plan = plan(pack, device, effects)
+            plan.created.forEach { device[it.id.toString()] = mapOf("n" to it.name) }
+            (plan.playlist as? PlaylistStep.Save)?.let {
+                device[it.id.toString()] = mapOf("n" to pack.playlist.name, "playlist" to mapOf("ps" to it.presetIds))
+            }
+            pack to plan
+        }
+    }
 
     /**
      * @param presetsJson The device's `/presets.json`.
@@ -288,7 +316,7 @@ object PresetPackPayloads {
         return toJson(body)
     }
 
-    /** Starts an existing preset or playlist. */
+    /** Starts a preset or playlist. */
     fun playJson(id: Int): String = toJson(mapOf("ps" to id))
 
     private fun toJson(value: Any): String = moshi.adapter(Any::class.java).toJson(value)

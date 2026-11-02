@@ -155,7 +155,7 @@ class PresetPacksTest {
             val icon = it.playlist.quickLoad!!
             assertTrue(it.playlist.name, it.playlist.name.startsWith("$icon "))
         }
-        assertEquals("✨ Twinkle Tonight", PresetPacks.PLAYS_AFTER_SETUP.playlist.name)
+        assertEquals("🎆 Sky Full of Sparks", PresetPacks.PLAYS_AFTER_SETUP.playlist.name)
     }
 
     @Test
@@ -176,5 +176,36 @@ class PresetPacksTest {
         val plan = PresetPackPlanner.plan(PresetPacks.NORTHERN_GLOW, presets, effects)
         assertEquals(listOf(PresetStep.Reuse("Aurora", 5)), plan.reused)
         assertEquals(4, plan.created.size)
+    }
+
+    @Test
+    fun planAllSavesEverythingOnceFromOneRead() {
+        val plans = PresetPackPlanner.planAll(PresetPacks.ALL, parse("{}"), effects)
+        // 48 distinct effects (Aurora is shared) plus 10 playlists, on ids 1..58 without gaps or clashes.
+        val created = plans.flatMap { it.second.created.map { step -> step.id } }
+        val playlists = plans.map { it.second.playlist as PlaylistStep.Save }
+        assertEquals(48, created.size)
+        assertEquals((1..58).toList(), (created + playlists.map { it.id }).sorted())
+        val aurora = plans.flatMap { it.second.presets }.filter { it.name == "Aurora" }
+        assertEquals(1, aurora.filterIsInstance<PresetStep.Create>().size)
+        assertEquals(1, aurora.filterIsInstance<PresetStep.Reuse>().size)
+    }
+
+    @Test
+    fun planAllOnAFullyPreparedDeviceChangesNothing() {
+        // Simulate the device after the first run, then plan again: nothing is created or saved.
+        val device = mutableMapOf<String, Any>()
+        PresetPackPlanner.planAll(PresetPacks.ALL, emptyMap<String, Any>(), effects).forEach { (pack, plan) ->
+            plan.created.forEach { device[it.id.toString()] = mapOf("n" to it.name) }
+            val save = plan.playlist as PlaylistStep.Save
+            device[save.id.toString()] = mapOf("n" to pack.playlist.name, "playlist" to mapOf("ps" to save.presetIds))
+        }
+        val again = PresetPackPlanner.planAll(
+            PresetPacks.ALL,
+            parse(moshi.adapter(Map::class.java).toJson(device)),
+            effects,
+        )
+        assertTrue(again.all { it.second.created.isEmpty() && it.second.playlist is PlaylistStep.Play })
+        assertEquals(10, again.mapNotNull { it.second.playlist.playlistId }.toSet().size)
     }
 }

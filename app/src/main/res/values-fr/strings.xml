@@ -219,19 +219,14 @@
     <!-- Preset packs -->
     <string name="preset_pack_button">Préréglages et playlists</string>
     <string name="preset_pack_title">Préréglages et playlists</string>
-    <string name="preset_pack_hint">Ajoute des préréglages prêts à l\'emploi et une playlist à cet appareil, puis lance la playlist. Les préréglages déjà présents sont conservés : rien n\'est ajouté en double.</string>
-    <string name="preset_pack_add">Ajouter %1$s</string>
-    <string name="preset_pack_adding">Ajout de %1$s…</string>
-    <string name="preset_pack_added">%1$s a été ajouté et joue maintenant.</string>
-    <string name="preset_pack_already">%1$s est déjà sur cet appareil et joue maintenant.</string>
+    <string name="preset_pack_hint">Touchez une playlist pour la lancer sur cet appareil.</string>
+    <string name="preset_pack_preparing">Préparation des playlists…</string>
+    <string name="preset_pack_playing">En cours</string>
+    <string name="preset_pack_ready">Playlists prêtes. %1$s joue maintenant.</string>
     <string name="preset_pack_unavailable">Non disponible sur cet appareil : %1$s.</string>
     <string name="preset_pack_unverified">L\'appareil n\'a pas confirmé tous les préréglages ; vérifiez sa liste de préréglages.</string>
     <string name="preset_pack_nothing">Rien n\'a pu être ajouté : cet appareil n\'a aucun de ces effets ou plus d\'emplacement libre.</string>
     <string name="preset_pack_unreachable">Impossible de joindre l\'appareil. Vérifiez qu\'il est allumé et réessayez.</string>
-    <string name="preset_pack_add_all">Ajouter toutes les playlists</string>
-    <string name="preset_pack_adding_all">Ajout de toutes les playlists…</string>
-    <string name="preset_pack_all_added">Playlists ajoutées : %1$d. %2$s joue maintenant.</string>
-    <string name="preset_pack_not_added">Impossible d\'ajouter : %1$s.</string>
 
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Fuseau horaire</string>

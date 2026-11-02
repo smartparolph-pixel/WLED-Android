@@ -6,52 +6,48 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ca.cgagnier.wlednativeandroid.model.Device
-import ca.cgagnier.wlednativeandroid.service.presets.PackInstallResult
+import ca.cgagnier.wlednativeandroid.service.presets.PackSetupResult
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPack
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPackInstaller
-import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PresetPackViewModel @Inject constructor(private val installer: PresetPackInstaller) : ViewModel() {
-    /** The pack being added, if any. */
-    var working by mutableStateOf<PresetPack?>(null)
-        private set
-    var addingAll by mutableStateOf(false)
+    /** Null while the playlists are being checked (and added if missing). */
+    var setup by mutableStateOf<PackSetupResult?>(null)
         private set
 
-    /** Result of the last single "Add" tap. */
-    var result by mutableStateOf<PackInstallResult?>(null)
+    /** The playlist being started, if any. */
+    var starting by mutableStateOf<PresetPack?>(null)
+        private set
+    var playFailed by mutableStateOf(false)
         private set
 
-    /** Results of the last "Add all", in [PresetPacks.ALL] order. */
-    var allResults by mutableStateOf<List<Pair<PresetPack, PackInstallResult>>?>(null)
-        private set
+    private var preparedFor: String? = null
 
-    val busy: Boolean get() = working != null || addingAll
-
-    fun install(device: Device, pack: PresetPack) {
-        if (busy) return
-        working = pack
-        result = null
-        allResults = null
-        viewModelScope.launch {
-            result = installer.install(device, pack)
-            working = null
-        }
+    /** Adds any missing playlists without asking; done once per device unless it failed. */
+    fun prepare(device: Device) {
+        if (preparedFor == device.macAddress && setup != null && setup != PackSetupResult.Unreachable) return
+        preparedFor = device.macAddress
+        setup = null
+        viewModelScope.launch { setup = installer.ensureAll(device) }
     }
 
-    /** Adds every pack, ending on [PresetPacks.PLAYS_AFTER_SETUP] so that one is left playing. */
-    fun installAll(device: Device) {
-        if (busy) return
-        addingAll = true
-        result = null
-        allResults = null
+    fun retry(device: Device) {
+        preparedFor = null
+        prepare(device)
+    }
+
+    fun play(device: Device, pack: PresetPack) {
+        val id = (setup as? PackSetupResult.Ready)?.playlistIds?.get(pack) ?: return
+        if (starting != null) return
+        starting = pack
+        playFailed = false
         viewModelScope.launch {
-            allResults = installer.installAll(device)
-            addingAll = false
+            playFailed = !installer.play(device, id)
+            starting = null
         }
     }
 }

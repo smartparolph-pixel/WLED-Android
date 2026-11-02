@@ -19,94 +19,112 @@ private val JSON = "application/json".toMediaType()
 /** Gives the device time to write presets.json between saves; back-to-back writes can corrupt it. */
 private const val SAVE_GAP_MS = 500L
 
-sealed interface PackInstallResult {
+sealed interface PackSetupResult {
     /**
-     * @param created Names of the presets added now.
-     * @param unavailable Names that could not be added (effect missing or no free slot).
-     * @param verified The presets and playlist were found on the device afterwards.
+     * @param playlistIds Preset id of each pack's playlist on the device.
+     * @param created Number of presets and playlists saved now (0 when everything was already there).
+     * @param unavailable Effects that could not be added (missing in the firmware or no free slot).
+     * @param verified Everything was found in presets.json afterwards.
      */
-    data class Done(
-        val playlistName: String,
-        val created: List<String>,
+    data class Ready(
+        val playlistIds: Map<PresetPack, Int>,
+        val created: Int,
         val unavailable: List<String>,
         val verified: Boolean,
-    ) : PackInstallResult
+    ) : PackSetupResult
 
-    /** None of the pack's effects exist on the device, or it has no free preset slots. */
-    data object NothingAvailable : PackInstallResult
+    /** None of the packs' effects exist on the device, or it has no free preset slots. */
+    data object NothingAvailable : PackSetupResult
 
-    data object Unreachable : PackInstallResult
+    data object Unreachable : PackSetupResult
 }
 
 /**
- * Adds a [PresetPack] to a device and starts its playlist. Safe to run again: presets and playlists
- * already on the device (matched by name) are reused, so nothing is duplicated.
+ * Makes sure every [PresetPack] is on a device, without asking: missing presets and playlists are added,
+ * those already there (matched by name) are left alone, so it is safe to run every time.
  */
 class PresetPackInstaller @Inject constructor(private val deviceApiFactory: DeviceApiFactory) {
     private val moshi = Moshi.Builder().build()
 
-    suspend fun install(device: Device, pack: PresetPack): PackInstallResult =
-        install(deviceApiFactory.create(device), pack)
+    suspend fun ensureAll(device: Device, play: PresetPack? = null): PackSetupResult =
+        ensureAll(deviceApiFactory.create(device), play)
 
     /**
-     * Adds every pack in [packs], [finish] last so its playlist is the one left playing. Results are in
-     * the order of [packs]. Stops early if the device cannot be reached.
+     * Saving a preset or playlist also applies it to the lights, so the lights change while anything is
+     * added. Afterwards [play] is started if given, or [PresetPacks.PLAYS_AFTER_SETUP] if anything was
+     * added, so the device never ends on a random effect.
      */
-    suspend fun installAll(
-        device: Device,
+    suspend fun ensureAll(
+        api: DeviceApi,
+        play: PresetPack? = null,
         packs: List<PresetPack> = PresetPacks.ALL,
-        finish: PresetPack = PresetPacks.PLAYS_AFTER_SETUP,
-    ): List<Pair<PresetPack, PackInstallResult>> {
-        val api = deviceApiFactory.create(device)
-        val results = mutableMapOf<PresetPack, PackInstallResult>()
-        for (pack in packs.filter { it != finish } + packs.filter { it == finish }) {
-            val result = install(api, pack)
-            results[pack] = result
-            if (result == PackInstallResult.Unreachable) break
-        }
-        return packs.map { it to (results[it] ?: PackInstallResult.Unreachable) }
-    }
-
-    suspend fun install(api: DeviceApi, pack: PresetPack): PackInstallResult = withContext(Dispatchers.IO) {
+    ): PackSetupResult = withContext(Dispatchers.IO) {
         try {
-            val effects = api.getEffects().body() ?: return@withContext PackInstallResult.Unreachable
-            val plan = PresetPackPlanner.plan(pack, readPresets(api), effects)
-            if (plan.playlist == PlaylistStep.Skip) return@withContext PackInstallResult.NothingAvailable
-
-            plan.created.forEach { step ->
-                if (!api.postState(PresetPackPayloads.presetJson(step).toRequestBody(JSON)).isSuccessful) {
-                    return@withContext PackInstallResult.Unreachable
-                }
-                delay(SAVE_GAP_MS)
+            val effects = api.getEffects().body() ?: return@withContext PackSetupResult.Unreachable
+            val plans = PresetPackPlanner.planAll(packs, readPresets(api), effects)
+            if (plans.all { it.second.playlist == PlaylistStep.Skip }) {
+                return@withContext PackSetupResult.NothingAvailable
             }
-            val playBody = when (val playlist = plan.playlist) {
-                is PlaylistStep.Save -> PresetPackPayloads.playlistJson(pack.playlist, playlist)
-                is PlaylistStep.Play -> PresetPackPayloads.playJson(playlist.id)
-                PlaylistStep.Skip -> null
-            }
-            playBody?.let { api.postState(it.toRequestBody(JSON)) }
-            delay(SAVE_GAP_MS)
+            if (!save(api, plans)) return@withContext PackSetupResult.Unreachable
 
-            PackInstallResult.Done(
-                playlistName = pack.playlist.name,
-                created = plan.created.map { it.name },
-                unavailable = plan.unavailable.map { it.name },
-                verified = verify(api, plan, pack),
+            val ids = plans.mapNotNull { (pack, plan) -> plan.playlist.playlistId?.let { pack to it } }.toMap()
+            val created = plans.sumOf { (_, plan) ->
+                plan.created.size + if (plan.playlist is PlaylistStep.Save) 1 else 0
+            }
+            (play ?: PresetPacks.PLAYS_AFTER_SETUP.takeIf { created > 0 })
+                ?.let { ids[it] }
+                ?.let { api.postState(PresetPackPayloads.playJson(it).toRequestBody(JSON)) }
+
+            PackSetupResult.Ready(
+                playlistIds = ids,
+                created = created,
+                unavailable = plans.flatMap { (_, plan) -> plan.unavailable.map { it.name } }.distinct(),
+                verified = created == 0 || verify(api, plans),
             )
         } catch (e: IOException) {
-            Log.w(TAG, "Could not add preset pack", e)
-            PackInstallResult.Unreachable
+            Log.w(TAG, "Could not set up preset packs", e)
+            PackSetupResult.Unreachable
         }
     }
 
+    /** Starts a playlist (or preset) by id. */
+    suspend fun play(device: Device, id: Int): Boolean = withContext(Dispatchers.IO) {
+        try {
+            deviceApiFactory.create(device)
+                .postState(PresetPackPayloads.playJson(id).toRequestBody(JSON))
+                .isSuccessful
+        } catch (e: IOException) {
+            Log.w(TAG, "Could not start preset $id", e)
+            false
+        }
+    }
+
+    /** Carries out the plans: new presets first, then each playlist. */
+    private suspend fun save(api: DeviceApi, plans: List<Pair<PresetPack, PackPlan>>): Boolean {
+        for ((pack, plan) in plans) {
+            val bodies = plan.created.map { PresetPackPayloads.presetJson(it) } +
+                listOfNotNull(
+                    (plan.playlist as? PlaylistStep.Save)?.let {
+                        PresetPackPayloads.playlistJson(pack.playlist, it)
+                    },
+                )
+            for (body in bodies) {
+                if (!api.postState(body.toRequestBody(JSON)).isSuccessful) return false
+                delay(SAVE_GAP_MS)
+            }
+        }
+        return true
+    }
+
     /**
-     * Reads presets.json back. Planning again without any effects can only reuse what is on the device,
-     * so every preset should come back as reused and the playlist as "just play it".
+     * Reads presets.json back once. Planning again without any effects can only reuse what is on the
+     * device, so every playlist that was planned should now be found as is.
      */
-    private suspend fun verify(api: DeviceApi, plan: PackPlan, pack: PresetPack): Boolean {
-        val after = PresetPackPlanner.plan(pack, readPresets(api), effects = emptyList())
-        val expected = (plan.created + plan.reused).map { it.name }.toSet()
-        return after.reused.map { it.name }.toSet() == expected && after.playlist is PlaylistStep.Play
+    private suspend fun verify(api: DeviceApi, plans: List<Pair<PresetPack, PackPlan>>): Boolean {
+        val after = PresetPackPlanner.planAll(plans.map { it.first }, readPresets(api), effects = emptyList())
+        return plans.zip(after).all { (before, now) ->
+            before.second.playlist == PlaylistStep.Skip || now.second.playlist is PlaylistStep.Play
+        }
     }
 
     private suspend fun readPresets(api: DeviceApi): Map<*, *> {
