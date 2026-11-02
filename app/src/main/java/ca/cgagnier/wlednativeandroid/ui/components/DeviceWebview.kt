@@ -44,12 +44,12 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -77,7 +77,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -100,6 +99,9 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+/** The muted Sinag lockup on the "device unreachable" screen takes this share of the width. */
+private const val LOCKUP_WIDTH_FRACTION = 0.7f
 
 private const val TAG = "ui.components.DeviceWebView"
 
@@ -282,7 +284,7 @@ fun DeviceErrorScreen(onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
-        Image(painter = painterResource(id = R.drawable.akemi_018_teeth), contentDescription = null)
+        SinagLockup(modifier = Modifier.fillMaxWidth(LOCKUP_WIDTH_FRACTION), mono = true)
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.device_error_title),

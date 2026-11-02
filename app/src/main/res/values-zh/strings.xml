@@ -1,5 +1,4 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_logo">WLED 标志</string>
     <string name="sinag_logo">Sinag 标志</string>
     <string name="add_a_device">添加新设备</string>
     <string name="add">添加</string>
@@ -37,7 +36,6 @@
     <string name="device_is_hidden">设备隐藏</string>
     <string name="hidden_status">（隐藏）</string>
     <string name="you_dont_have_any_visible_devices">你没有任何可见的设备</string>
-    <string name="awkward_akemi_character">尴尬的吉祥物 Akemi</string>
     <string name="settings">设置</string>
     <string name="theme">主题</string>
     <string name="light">亮色</string>

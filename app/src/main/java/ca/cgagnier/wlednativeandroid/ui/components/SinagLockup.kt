@@ -10,19 +10,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import ca.cgagnier.wlednativeandroid.R
 
-/** Both lockup drawables are 727 × 350. */
+/** All lockup drawables are 727 × 350. */
 private const val LOCKUP_ASPECT_RATIO = 727f / 350f
 private const val DARK_SURFACE_LUMINANCE = 0.5f
 
 /**
- * The Sinag lockup: the color version on light backgrounds, the reversed one on dark backgrounds,
- * following the app's current theme. Size it with a height; the width follows.
+ * The Sinag lockup, following the app's current theme: the color version on light backgrounds and the
+ * reversed one on dark backgrounds, or with [mono] the black and white versions (for muted states such
+ * as "device unreachable"). Size it with a height or a width; the other side follows.
  */
 @Composable
-fun SinagLockup(modifier: Modifier = Modifier) {
+fun SinagLockup(modifier: Modifier = Modifier, mono: Boolean = false) {
     val dark = MaterialTheme.colorScheme.surface.luminance() < DARK_SURFACE_LUMINANCE
+    val drawable = when {
+        mono && dark -> R.drawable.sinag_lockup_mono_white
+        mono -> R.drawable.sinag_lockup_mono_black
+        dark -> R.drawable.sinag_lockup_reversed
+        else -> R.drawable.sinag_lockup_color
+    }
     Image(
-        painter = painterResource(if (dark) R.drawable.sinag_lockup_reversed else R.drawable.sinag_lockup_color),
+        painter = painterResource(drawable),
         contentDescription = stringResource(R.string.sinag_logo),
         modifier = modifier.aspectRatio(LOCKUP_ASPECT_RATIO),
     )
