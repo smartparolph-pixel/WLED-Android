@@ -36,6 +36,14 @@ interface DeviceApi {
     @GET("json/eff")
     suspend fun getEffects(): Response<List<String>>
 
+    /** Effect metadata (sliders, defaults), in effect id order; "" for an effect without any. */
+    @GET("json/fxdata")
+    suspend fun getEffectData(): Response<List<String>>
+
+    /** Palette names, in palette id order. */
+    @GET("json/pal")
+    suspend fun getPalettes(): Response<List<String>>
+
     @GET("json/state")
     suspend fun getState(): Response<State>
 

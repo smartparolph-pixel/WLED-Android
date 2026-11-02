@@ -7,6 +7,8 @@ data class EffectPreset(
     val name: String,
     /** The effect's name exactly as the firmware lists it in `/json/eff`. */
     val effect: String,
+    /** Overrides the effect's default speed, when that default does not suit a playlist. */
+    val speed: Int? = null,
 )
 
 /** A playlist that plays the pack's presets in order. */
@@ -25,13 +27,24 @@ data class PlaylistSpec(
  * Presets plus the playlist that plays them. To ship another set, add a pack to [PresetPacks.ALL]; the
  * installer, the button on the device screen and the step after device setup all pick it up.
  */
-data class PresetPack(val presets: List<EffectPreset>, val playlist: PlaylistSpec)
+data class PresetPack(
+    val presets: List<EffectPreset>,
+    val playlist: PlaylistSpec,
+    /** Kept exactly as defined: not editable in the app, and put back if changed on the device. */
+    val locked: Boolean = false,
+)
 
 object PresetPacks {
     private const val DEFAULT_SECONDS = 20
     private const val DEFAULT_FADE = 1
     private const val SLOW_SECONDS = 60
     private const val SLOW_FADE = 3
+
+    /**
+     * Speeds that differ from the effect's default. Sunrise's speed is its length in minutes (60 by
+     * default), which looks dark for most of a 60 s playlist slot; 1 makes it rise within the slot.
+     */
+    private val SPEEDS = mapOf("Sunrise" to 1)
 
     /**
      * A pack whose presets are named after their effects, so an effect used by several playlists is saved
@@ -44,7 +57,7 @@ object PresetPacks {
         seconds: Int = DEFAULT_SECONDS,
         fade: Int = DEFAULT_FADE,
     ) = PresetPack(
-        presets = effects.map { EffectPreset(it, effect = it) },
+        presets = effects.map { EffectPreset(it, effect = it, speed = SPEEDS[it]) },
         playlist = PlaylistSpec(
             name = "$icon $name",
             quickLoad = icon,
@@ -121,7 +134,7 @@ object PresetPacks {
         listOf("Halloween Eyes", "Lightning", "Strobe Mega", "Washing Machine", "Dancing Shadows"),
     )
 
-    val ALL = listOf(
+    private val THEMED = listOf(
         TWINKLE_TONIGHT,
         SKY_FULL_OF_SPARKS,
         CHILL_MODE,
@@ -134,6 +147,24 @@ object PresetPacks {
         SPOOKY_SWITCH,
     )
 
+    /** Every effect of the other playlists in a new random order each loop. It cannot be edited. */
+    val RANDOM = PresetPack(
+        presets = THEMED.flatMap { it.presets }.distinctBy { it.name },
+        playlist = PlaylistSpec(
+            name = "🎲 Random",
+            quickLoad = "🎲",
+            secondsPerPreset = DEFAULT_SECONDS,
+            fadeSeconds = DEFAULT_FADE,
+            shuffle = true,
+        ),
+        locked = true,
+    )
+
+    val ALL = THEMED + RANDOM
+
+    /** The built-in pack whose playlist has this name, if any. */
+    fun byPlaylistName(name: String): PresetPack? = ALL.firstOrNull { it.playlist.name == name }
+
     /** The default playlist: started after "Set up a new device" and when playlists are first added. */
     val PLAYS_AFTER_SETUP = SKY_FULL_OF_SPARKS
 }
@@ -145,7 +176,9 @@ sealed interface PresetStep {
     /** A preset with this name is already on the device; it is used as is. */
     data class Reuse(override val name: String, val id: Int) : PresetStep
 
-    data class Create(override val name: String, val id: Int, val effectId: Int) : PresetStep
+    /** Save at [id]: a new preset, or one put back to its defaults. */
+    data class Create(override val name: String, val id: Int, val effectId: Int, val speed: Int? = null) :
+        PresetStep
 
     /** The device's firmware has no effect with this name. */
     data class MissingEffect(override val name: String, val effect: String) : PresetStep
@@ -156,10 +189,10 @@ sealed interface PresetStep {
 
 /** What to do for the playlist. */
 sealed interface PlaylistStep {
-    /** Already on the device with exactly these presets; nothing to save. */
+    /** Already on the device (possibly edited by the user, which is kept); nothing to save. */
     data class Play(val id: Int) : PlaylistStep
 
-    /** Save at [id] (new, or replacing a same-named playlist whose presets changed), which also starts it. */
+    /** Save at [id] (new, reset to default, or a locked playlist that was changed), which also starts it. */
     data class Save(val id: Int, val presetIds: List<Int>) : PlaylistStep
 
     /** None of the presets could be added, or no free slot is left. */
@@ -182,7 +215,8 @@ data class PackPlan(val presets: List<PresetStep>, val playlist: PlaylistStep) {
 
 /**
  * Decides what to add to a device, so a pack can be installed any number of times without making
- * duplicates. Matching is by name: a preset or playlist with the same name is reused, not added again.
+ * duplicates. Matching is by name: a preset or playlist with the same name is reused, not added again,
+ * so the user's edits to it are kept. Only a [PresetPack.locked] playlist is put back if it changed.
  */
 object PresetPackPlanner {
     const val MAX_PRESET_ID = 250
@@ -199,7 +233,9 @@ object PresetPackPlanner {
         val device = presetsJson.entries.associate { it.key.toString() to it.value }.toMutableMap()
         return packs.map { pack ->
             val plan = plan(pack, device, effects)
-            plan.created.forEach { device[it.id.toString()] = mapOf("n" to it.name) }
+            plan.created.forEach { step ->
+                device[step.id.toString()] = mapOf("n" to step.name, "seg" to mapOf("sx" to step.speed))
+            }
             (plan.playlist as? PlaylistStep.Save)?.let {
                 device[it.id.toString()] = mapOf("n" to pack.playlist.name, "playlist" to mapOf("ps" to it.presetIds))
             }
@@ -211,12 +247,23 @@ object PresetPackPlanner {
      * @param presetsJson The device's `/presets.json`.
      * @param effects The device's `/json/eff`: effect names, index = effect id.
      */
-    fun plan(pack: PresetPack, presetsJson: Map<*, *>, effects: List<String>): PackPlan {
+    fun plan(pack: PresetPack, presetsJson: Map<*, *>, effects: List<String>): PackPlan =
+        plan(pack, presetsJson, effects, reset = false)
+
+    /**
+     * "Reset to default": saves the pack's presets and playlist again as defined, at the ids they have
+     * now (or new ones if missing), undoing the user's edits.
+     */
+    fun reset(pack: PresetPack, presetsJson: Map<*, *>, effects: List<String>): PackPlan =
+        plan(pack, presetsJson, effects, reset = true)
+
+    private fun plan(pack: PresetPack, presetsJson: Map<*, *>, effects: List<String>, reset: Boolean): PackPlan {
         val existing = existingPresets(presetsJson)
         val slots = FreeSlots(existing.keys)
-        val steps = pack.presets.map { presetStep(it, existing, effects, slots) }
+        val steps = pack.presets.map { presetStep(it, existing, effects, slots, reset) }
         val presetIds = steps.mapNotNull { it.presetId }
-        return PackPlan(steps, playlistStep(pack.playlist, presetIds, existing, slots))
+        val playlist = playlistStep(pack, presetIds, existing, slots, reset || pack.locked)
+        return PackPlan(steps, playlist)
     }
 
     private fun presetStep(
@@ -224,30 +271,36 @@ object PresetPackPlanner {
         existing: Map<Int, Existing>,
         effects: List<String>,
         slots: FreeSlots,
+        reset: Boolean,
     ): PresetStep {
-        val reuseId = existing.entries.firstOrNull { it.value.name == preset.name }?.key
+        val current = existing.entries.firstOrNull { it.value.name == preset.name }
         val effectId = effects.indexOf(preset.effect)
+        // A preset the app saved before its speed override existed has no speed: give it the override.
+        val outdated = current != null && preset.speed != null && current.value.speed == null
         return when {
-            reuseId != null -> PresetStep.Reuse(preset.name, reuseId)
+            current != null && !reset && !(outdated && effectId >= 0) -> PresetStep.Reuse(preset.name, current.key)
 
             effectId < 0 -> PresetStep.MissingEffect(preset.name, preset.effect)
 
-            else -> slots.next()?.let { PresetStep.Create(preset.name, it, effectId) }
+            else -> (current?.key ?: slots.next())?.let { PresetStep.Create(preset.name, it, effectId, preset.speed) }
                 ?: PresetStep.NoFreeSlot(preset.name)
         }
     }
 
     private fun playlistStep(
-        spec: PlaylistSpec,
+        pack: PresetPack,
         presetIds: List<Int>,
         existing: Map<Int, Existing>,
         slots: FreeSlots,
+        enforce: Boolean,
     ): PlaylistStep {
         if (presetIds.isEmpty()) return PlaylistStep.Skip
-        val current = existing.entries.firstOrNull { it.value.name == spec.name }
+        val current = existing.entries.firstOrNull { it.value.name == pack.playlist.name }
+        val keep = current != null && current.value.playlistPresets != null &&
+            (!enforce || current.value.playlistPresets == presetIds)
         return when {
             current == null -> slots.next()?.let { PlaylistStep.Save(it, presetIds) } ?: PlaylistStep.Skip
-            current.value.playlistPresets == presetIds -> PlaylistStep.Play(current.key)
+            keep -> PlaylistStep.Play(current.key)
             else -> PlaylistStep.Save(current.key, presetIds)
         }
     }
@@ -266,7 +319,7 @@ object PresetPackPlanner {
             else -> null
         }
 
-    private data class Existing(val name: String, val playlistPresets: List<Int>?)
+    private data class Existing(val name: String, val playlistPresets: List<Int>?, val speed: Int?)
 
     private fun existingPresets(presetsJson: Map<*, *>): Map<Int, Existing> =
         presetsJson.entries.mapNotNull { (key, value) ->
@@ -274,7 +327,8 @@ object PresetPackPlanner {
             val preset = (value as? Map<*, *>)?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
             val name = (preset["n"] as? String)?.takeIf { it.isNotBlank() } ?: "Preset $id"
             val playlist = (preset["playlist"] as? Map<*, *>)?.get("ps") as? List<*>
-            id to Existing(name, playlist?.mapNotNull { (it as? Number)?.toInt() })
+            val speed = ((preset["seg"] as? Map<*, *>)?.get("sx") as? Number)?.toInt()
+            id to Existing(name, playlist?.mapNotNull { (it as? Number)?.toInt() }, speed)
         }.toMap()
 }
 
@@ -283,14 +337,21 @@ object PresetPackPayloads {
     private const val TENTHS_PER_SECOND = 10
     private val moshi: Moshi = Moshi.Builder().build()
 
-    /** Saves a preset that turns the light on and runs [effectId] with the effect's default settings. */
+    /**
+     * Saves a preset that turns the light on and runs the effect with its default settings (the firmware
+     * applies `fxdef` before `sx`, so a speed override wins).
+     */
     fun presetJson(step: PresetStep.Create): String = toJson(
         mapOf(
             "psave" to step.id,
             "n" to step.name,
             "o" to true,
             "on" to true,
-            "seg" to mapOf("fx" to step.effectId, "fxdef" to true),
+            "seg" to listOfNotNull(
+                "fx" to step.effectId,
+                "fxdef" to true,
+                step.speed?.let { "sx" to it },
+            ).toMap(),
         ),
     )
 

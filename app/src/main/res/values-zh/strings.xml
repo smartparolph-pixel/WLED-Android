@@ -229,4 +229,54 @@
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">时区</string>
     <string name="shortcut_pick_device">选择设备</string>
+
+    <!-- Preset editor -->
+    <string name="preset_editor_edit">编辑</string>
+    <string name="preset_editor_title">编辑预设和播放列表</string>
+    <string name="preset_editor_new_playlist">新建播放列表</string>
+    <string name="preset_editor_edit_playlist">编辑播放列表</string>
+    <string name="preset_editor_edit_effect">编辑效果</string>
+    <string name="preset_editor_playlists">播放列表</string>
+    <string name="preset_editor_effects">效果</string>
+    <string name="preset_editor_list_hint">效果设置是共享的：更改会体现在所有播放该效果的播放列表中，包括 Random。</string>
+    <string name="preset_editor_playlist_summary">%1$d 个效果 · 每个 %2$d 秒</string>
+    <string name="preset_editor_random_summary">每轮以新的随机顺序播放所有效果。不可更改。</string>
+    <string name="preset_editor_locked">已锁定</string>
+    <string name="preset_editor_effect_default">默认设置</string>
+    <string name="preset_editor_effect_custom">自定义设置</string>
+    <string name="preset_editor_name">名称</string>
+    <string name="preset_editor_timing">时间</string>
+    <string name="preset_editor_seconds">每个效果播放</string>
+    <string name="preset_editor_fade">效果间淡入淡出</string>
+    <string name="preset_editor_seconds_value">%1$d 秒</string>
+    <string name="preset_editor_less">减少</string>
+    <string name="preset_editor_more">增加</string>
+    <string name="preset_editor_shuffle">随机播放</string>
+    <string name="preset_editor_shuffle_hint">每轮随机新顺序</string>
+    <string name="preset_editor_playlist_effects">效果</string>
+    <string name="preset_editor_add_effects">添加效果</string>
+    <string name="preset_editor_missing">缺失的预设 %1$d</string>
+    <string name="preset_editor_move_up">上移</string>
+    <string name="preset_editor_move_down">下移</string>
+    <string name="preset_editor_remove">移除</string>
+    <string name="preset_editor_reset">恢复默认</string>
+    <string name="preset_editor_reset_playlist_hint">恢复此播放列表原有的效果和时间，以及这些效果的默认设置。</string>
+    <string name="preset_editor_delete">删除播放列表</string>
+    <string name="preset_editor_settings">设置</string>
+    <string name="preset_editor_speed">速度</string>
+    <string name="preset_editor_intensity">强度</string>
+    <string name="preset_editor_palette">调色板</string>
+    <string name="preset_editor_set_brightness">设置亮度</string>
+    <string name="preset_editor_brightness_hint">关闭时保持灯光当前亮度。</string>
+    <string name="preset_editor_brightness">亮度</string>
+    <string name="preset_editor_preview_hint">调整时灯光会实时显示变化。保存后才会保留。</string>
+    <string name="preset_editor_used_in">用于：%1$s</string>
+    <string name="preset_editor_unreadable">无法读取设备的预设文件，因此未做任何更改。请重试；如仍出现，请在设备网页上检查预设。</string>
+    <string name="preset_editor_error_name">请输入名称。</string>
+    <string name="preset_editor_error_name_long">名称太长。</string>
+    <string name="preset_editor_error_name_taken">已有同名的播放列表。</string>
+    <string name="preset_editor_error_no_effects">请至少添加一个效果。</string>
+    <string name="preset_editor_error_too_many">一个播放列表最多 100 个效果。</string>
+    <string name="preset_editor_error_full">此设备已没有空闲的预设位置。</string>
+    <string name="preset_editor_error_save">保存失败。请检查与设备的连接后重试。</string>
 </resources>

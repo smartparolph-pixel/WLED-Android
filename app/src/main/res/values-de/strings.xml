@@ -232,4 +232,54 @@
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Zeitzone</string>
     <string name="shortcut_pick_device">Gerät auswählen</string>
+
+    <!-- Preset editor -->
+    <string name="preset_editor_edit">Bearbeiten</string>
+    <string name="preset_editor_title">Presets &amp; Playlists bearbeiten</string>
+    <string name="preset_editor_new_playlist">Neue Playlist</string>
+    <string name="preset_editor_edit_playlist">Playlist bearbeiten</string>
+    <string name="preset_editor_edit_effect">Effekt bearbeiten</string>
+    <string name="preset_editor_playlists">Playlists</string>
+    <string name="preset_editor_effects">Effekte</string>
+    <string name="preset_editor_list_hint">Effekt-Einstellungen gelten überall: Eine Änderung wirkt in jeder Playlist mit diesem Effekt, auch in Random.</string>
+    <string name="preset_editor_playlist_summary">%1$d Effekte · je %2$d s</string>
+    <string name="preset_editor_random_summary">Alle Effekte in jeder Runde neu gemischt. Nicht änderbar.</string>
+    <string name="preset_editor_locked">Gesperrt</string>
+    <string name="preset_editor_effect_default">Standardeinstellungen</string>
+    <string name="preset_editor_effect_custom">Eigene Einstellungen</string>
+    <string name="preset_editor_name">Name</string>
+    <string name="preset_editor_timing">Zeiten</string>
+    <string name="preset_editor_seconds">Jeder Effekt läuft</string>
+    <string name="preset_editor_fade">Überblendung</string>
+    <string name="preset_editor_seconds_value">%1$d s</string>
+    <string name="preset_editor_less">Weniger</string>
+    <string name="preset_editor_more">Mehr</string>
+    <string name="preset_editor_shuffle">Zufällig</string>
+    <string name="preset_editor_shuffle_hint">Jede Runde neu gemischt</string>
+    <string name="preset_editor_playlist_effects">Effekte</string>
+    <string name="preset_editor_add_effects">Effekte hinzufügen</string>
+    <string name="preset_editor_missing">Fehlendes Preset %1$d</string>
+    <string name="preset_editor_move_up">Nach oben</string>
+    <string name="preset_editor_move_down">Nach unten</string>
+    <string name="preset_editor_remove">Entfernen</string>
+    <string name="preset_editor_reset">Auf Standard zurücksetzen</string>
+    <string name="preset_editor_reset_playlist_hint">Stellt die ursprünglichen Effekte und Zeiten dieser Playlist sowie die Standardeinstellungen dieser Effekte wieder her.</string>
+    <string name="preset_editor_delete">Playlist löschen</string>
+    <string name="preset_editor_settings">Einstellungen</string>
+    <string name="preset_editor_speed">Geschwindigkeit</string>
+    <string name="preset_editor_intensity">Intensität</string>
+    <string name="preset_editor_palette">Palette</string>
+    <string name="preset_editor_set_brightness">Helligkeit festlegen</string>
+    <string name="preset_editor_brightness_hint">Aus: Die aktuelle Helligkeit bleibt.</string>
+    <string name="preset_editor_brightness">Helligkeit</string>
+    <string name="preset_editor_preview_hint">Änderungen sind sofort an den Lichtern zu sehen. Speichern, um sie zu behalten.</string>
+    <string name="preset_editor_used_in">Verwendet in: %1$s</string>
+    <string name="preset_editor_unreadable">Die Preset-Datei des Geräts konnte nicht gelesen werden, daher wurde nichts geändert. Versuche es erneut; falls es wieder passiert, prüfe die Presets auf der Webseite des Geräts.</string>
+    <string name="preset_editor_error_name">Gib einen Namen ein.</string>
+    <string name="preset_editor_error_name_long">Der Name ist zu lang.</string>
+    <string name="preset_editor_error_name_taken">Eine andere Playlist hat bereits diesen Namen.</string>
+    <string name="preset_editor_error_no_effects">Füge mindestens einen Effekt hinzu.</string>
+    <string name="preset_editor_error_too_many">Eine Playlist kann höchstens 100 Effekte haben.</string>
+    <string name="preset_editor_error_full">Auf diesem Gerät ist kein Preset-Platz mehr frei.</string>
+    <string name="preset_editor_error_save">Speichern fehlgeschlagen. Prüfe die Verbindung zum Gerät und versuche es erneut.</string>
 </resources>

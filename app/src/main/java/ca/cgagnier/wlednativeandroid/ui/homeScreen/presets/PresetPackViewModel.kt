@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.service.presets.PackSetupResult
-import ca.cgagnier.wlednativeandroid.service.presets.PresetPack
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPackInstaller
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -19,8 +18,8 @@ class PresetPackViewModel @Inject constructor(private val installer: PresetPackI
     var setup by mutableStateOf<PackSetupResult?>(null)
         private set
 
-    /** The playlist being started, if any. */
-    var starting by mutableStateOf<PresetPack?>(null)
+    /** Id of the playlist being started, if any. */
+    var starting by mutableStateOf<Int?>(null)
         private set
     var playFailed by mutableStateOf(false)
         private set
@@ -29,7 +28,7 @@ class PresetPackViewModel @Inject constructor(private val installer: PresetPackI
 
     /** Adds any missing playlists without asking; done once per device unless it failed. */
     fun prepare(device: Device) {
-        if (preparedFor == device.macAddress && setup != null && setup != PackSetupResult.Unreachable) return
+        if (preparedFor == device.macAddress && setup is PackSetupResult.Ready) return
         preparedFor = device.macAddress
         setup = null
         viewModelScope.launch { setup = installer.ensureAll(device) }
@@ -40,10 +39,14 @@ class PresetPackViewModel @Inject constructor(private val installer: PresetPackI
         prepare(device)
     }
 
-    fun play(device: Device, pack: PresetPack) {
-        val id = (setup as? PackSetupResult.Ready)?.playlistIds?.get(pack) ?: return
+    /** Checks again, e.g. after the editor changed something (cheap when nothing changed). */
+    fun refresh(device: Device) {
+        viewModelScope.launch { installer.ensureAll(device).let { if (it is PackSetupResult.Ready) setup = it } }
+    }
+
+    fun play(device: Device, id: Int) {
         if (starting != null) return
-        starting = pack
+        starting = id
         playFailed = false
         viewModelScope.launch {
             playFailed = !installer.play(device, id)

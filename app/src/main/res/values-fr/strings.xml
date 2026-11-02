@@ -231,4 +231,54 @@
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Fuseau horaire</string>
     <string name="shortcut_pick_device">Choisir un appareil</string>
+
+    <!-- Preset editor -->
+    <string name="preset_editor_edit">Modifier</string>
+    <string name="preset_editor_title">Modifier presets et playlists</string>
+    <string name="preset_editor_new_playlist">Nouvelle playlist</string>
+    <string name="preset_editor_edit_playlist">Modifier la playlist</string>
+    <string name="preset_editor_edit_effect">Modifier l\'effet</string>
+    <string name="preset_editor_playlists">Playlists</string>
+    <string name="preset_editor_effects">Effets</string>
+    <string name="preset_editor_list_hint">Les réglages d\'un effet sont partagés : un changement s\'applique à toutes les playlists qui le jouent, Random compris.</string>
+    <string name="preset_editor_playlist_summary">%1$d effets · %2$d s chacun</string>
+    <string name="preset_editor_random_summary">Tous les effets dans un nouvel ordre aléatoire à chaque tour. Non modifiable.</string>
+    <string name="preset_editor_locked">Verrouillée</string>
+    <string name="preset_editor_effect_default">Réglages par défaut</string>
+    <string name="preset_editor_effect_custom">Réglages personnalisés</string>
+    <string name="preset_editor_name">Nom</string>
+    <string name="preset_editor_timing">Durées</string>
+    <string name="preset_editor_seconds">Chaque effet dure</string>
+    <string name="preset_editor_fade">Fondu entre les effets</string>
+    <string name="preset_editor_seconds_value">%1$d s</string>
+    <string name="preset_editor_less">Moins</string>
+    <string name="preset_editor_more">Plus</string>
+    <string name="preset_editor_shuffle">Aléatoire</string>
+    <string name="preset_editor_shuffle_hint">Nouvel ordre à chaque tour</string>
+    <string name="preset_editor_playlist_effects">Effets</string>
+    <string name="preset_editor_add_effects">Ajouter des effets</string>
+    <string name="preset_editor_missing">Preset %1$d manquant</string>
+    <string name="preset_editor_move_up">Monter</string>
+    <string name="preset_editor_move_down">Descendre</string>
+    <string name="preset_editor_remove">Retirer</string>
+    <string name="preset_editor_reset">Rétablir par défaut</string>
+    <string name="preset_editor_reset_playlist_hint">Remet les effets et durées d\'origine de cette playlist, ainsi que les réglages par défaut de ces effets.</string>
+    <string name="preset_editor_delete">Supprimer la playlist</string>
+    <string name="preset_editor_settings">Réglages</string>
+    <string name="preset_editor_speed">Vitesse</string>
+    <string name="preset_editor_intensity">Intensité</string>
+    <string name="preset_editor_palette">Palette</string>
+    <string name="preset_editor_set_brightness">Définir la luminosité</string>
+    <string name="preset_editor_brightness_hint">Désactivé : la luminosité actuelle est conservée.</string>
+    <string name="preset_editor_brightness">Luminosité</string>
+    <string name="preset_editor_preview_hint">Les changements s\'affichent sur les lumières en direct. Enregistrez pour les garder.</string>
+    <string name="preset_editor_used_in">Utilisé dans : %1$s</string>
+    <string name="preset_editor_unreadable">Le fichier de presets de l\'appareil est illisible, rien n\'a donc été modifié. Réessayez ; si cela se reproduit, vérifiez les presets sur la page web de l\'appareil.</string>
+    <string name="preset_editor_error_name">Saisissez un nom.</string>
+    <string name="preset_editor_error_name_long">Le nom est trop long.</string>
+    <string name="preset_editor_error_name_taken">Une autre playlist porte déjà ce nom.</string>
+    <string name="preset_editor_error_no_effects">Ajoutez au moins un effet.</string>
+    <string name="preset_editor_error_too_many">Une playlist peut contenir au plus 100 effets.</string>
+    <string name="preset_editor_error_full">Plus aucun emplacement de preset libre sur cet appareil.</string>
+    <string name="preset_editor_error_save">Échec de l\'enregistrement. Vérifiez la connexion à l\'appareil et réessayez.</string>
 </resources>

@@ -234,4 +234,54 @@
     <!-- Main page shortcuts -->
     <string name="shortcut_time_zone">Time zone</string>
     <string name="shortcut_pick_device">Choose a device</string>
+
+    <!-- Preset editor -->
+    <string name="preset_editor_edit">Edit</string>
+    <string name="preset_editor_title">Edit presets &amp; playlists</string>
+    <string name="preset_editor_new_playlist">New playlist</string>
+    <string name="preset_editor_edit_playlist">Edit playlist</string>
+    <string name="preset_editor_edit_effect">Edit effect</string>
+    <string name="preset_editor_playlists">Playlists</string>
+    <string name="preset_editor_effects">Effects</string>
+    <string name="preset_editor_list_hint">Effect settings are shared: a change shows in every playlist that plays the effect, Random included.</string>
+    <string name="preset_editor_playlist_summary">%1$d effects · %2$d s each</string>
+    <string name="preset_editor_random_summary">Every effect in a new random order each loop. It can\'t be changed.</string>
+    <string name="preset_editor_locked">Locked</string>
+    <string name="preset_editor_effect_default">Default settings</string>
+    <string name="preset_editor_effect_custom">Custom settings</string>
+    <string name="preset_editor_name">Name</string>
+    <string name="preset_editor_timing">Timing</string>
+    <string name="preset_editor_seconds">Each effect plays</string>
+    <string name="preset_editor_fade">Fade between effects</string>
+    <string name="preset_editor_seconds_value">%1$d s</string>
+    <string name="preset_editor_less">Less</string>
+    <string name="preset_editor_more">More</string>
+    <string name="preset_editor_shuffle">Shuffle</string>
+    <string name="preset_editor_shuffle_hint">New random order each loop</string>
+    <string name="preset_editor_playlist_effects">Effects</string>
+    <string name="preset_editor_add_effects">Add effects</string>
+    <string name="preset_editor_missing">Missing preset %1$d</string>
+    <string name="preset_editor_move_up">Move up</string>
+    <string name="preset_editor_move_down">Move down</string>
+    <string name="preset_editor_remove">Remove</string>
+    <string name="preset_editor_reset">Reset to default</string>
+    <string name="preset_editor_reset_playlist_hint">Puts back this playlist\'s original effects and timing, and those effects\' default settings.</string>
+    <string name="preset_editor_delete">Delete playlist</string>
+    <string name="preset_editor_settings">Settings</string>
+    <string name="preset_editor_speed">Speed</string>
+    <string name="preset_editor_intensity">Intensity</string>
+    <string name="preset_editor_palette">Palette</string>
+    <string name="preset_editor_set_brightness">Set brightness</string>
+    <string name="preset_editor_brightness_hint">Off keeps the brightness the lights already have.</string>
+    <string name="preset_editor_brightness">Brightness</string>
+    <string name="preset_editor_preview_hint">Changes show on the lights as you adjust them. Save to keep them.</string>
+    <string name="preset_editor_used_in">Used in: %1$s</string>
+    <string name="preset_editor_unreadable">The device\'s presets file could not be read, so nothing was changed. Try again; if it keeps happening, check Presets on the device\'s web page.</string>
+    <string name="preset_editor_error_name">Enter a name.</string>
+    <string name="preset_editor_error_name_long">The name is too long.</string>
+    <string name="preset_editor_error_name_taken">Another playlist already has this name.</string>
+    <string name="preset_editor_error_no_effects">Add at least one effect.</string>
+    <string name="preset_editor_error_too_many">A playlist can have at most 100 effects.</string>
+    <string name="preset_editor_error_full">This device has no free preset slot left.</string>
+    <string name="preset_editor_error_save">Could not save. Check the connection to the device and try again.</string>
 </resources>

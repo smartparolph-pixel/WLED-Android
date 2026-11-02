@@ -73,7 +73,7 @@ class PresetPacksTest {
     }
 
     @Test
-    fun deletedPresetIsRecreatedAndPlaylistUpdatedInPlace() {
+    fun deletedPresetIsRecreatedButTheUsersPlaylistIsKept() {
         val presets = """{
             "1":{"n":"Twinklefox"},"3":{"n":"Fairytwinkle"},"4":{"n":"Glitter"},"5":{"n":"Sparkle"},
             "6":{"n":"✨ Twinkle Tonight","playlist":{"ps":[1,2,3,4,5]}}
@@ -81,10 +81,73 @@ class PresetPacksTest {
         val plan = PresetPackPlanner.plan(pack, parse(presets), effects)
         assertEquals(listOf(PresetStep.Create("Fairy", 2, 49)), plan.created)
         assertEquals(PlaylistStep.Play(6), plan.playlist)
+    }
 
-        val moved = presets.replace("\"5\":{\"n\":\"Sparkle\"}", "\"9\":{\"n\":\"Sparkle\"}")
-        val replan = PresetPackPlanner.plan(pack, parse(moved), effects)
-        assertEquals(PlaylistStep.Save(6, listOf(1, 2, 3, 4, 9)), replan.playlist)
+    @Test
+    fun playlistEditedByTheUserIsKept() {
+        val presets = """{
+            "1":{"n":"Twinklefox"},"2":{"n":"Fairy"},"3":{"n":"Fairytwinkle"},"4":{"n":"Glitter"},"5":{"n":"Sparkle"},
+            "6":{"n":"✨ Twinkle Tonight","playlist":{"ps":[5,1],"dur":[100,100]}}
+        }"""
+        val plan = PresetPackPlanner.plan(pack, parse(presets), effects)
+        assertTrue(plan.created.isEmpty())
+        assertEquals(PlaylistStep.Play(6), plan.playlist)
+    }
+
+    @Test
+    fun resetSavesThePackAgainAtTheSameIds() {
+        val presets = """{
+            "1":{"n":"Twinklefox","seg":{"fx":80,"sx":10}},"2":{"n":"Fairy"},"3":{"n":"Fairytwinkle"},
+            "4":{"n":"Glitter"},"5":{"n":"Sparkle"},"6":{"n":"✨ Twinkle Tonight","playlist":{"ps":[5,1]}}
+        }"""
+        val plan = PresetPackPlanner.reset(pack, parse(presets), effects)
+        assertEquals(listOf(1, 2, 3, 4, 5), plan.created.map { it.id })
+        assertEquals(PlaylistStep.Save(6, listOf(1, 2, 3, 4, 5)), plan.playlist)
+    }
+
+    @Test
+    fun lockedRandomPlaylistIsPutBackWhenChanged() {
+        val device = mutableMapOf<String, Any>()
+        val ids = PresetPacks.RANDOM.presets.mapIndexed { i, p ->
+            device["${i + 1}"] = mapOf("n" to p.name, "seg" to mapOf("sx" to p.speed))
+            i + 1
+        }
+        device["60"] = mapOf("n" to "🎲 Random", "playlist" to mapOf("ps" to listOf(1, 2)))
+        assertEquals(PlaylistStep.Save(60, ids), PresetPackPlanner.plan(PresetPacks.RANDOM, device, effects).playlist)
+        device["60"] = mapOf("n" to "🎲 Random", "playlist" to mapOf("ps" to ids))
+        assertEquals(PlaylistStep.Play(60), PresetPackPlanner.plan(PresetPacks.RANDOM, device, effects).playlist)
+    }
+
+    @Test
+    fun randomShufflesEveryEffectForever() {
+        val random = PresetPacks.RANDOM
+        assertTrue(random.locked)
+        assertEquals(48, random.presets.size)
+        assertTrue(random.presets.size <= 100) // WLED's playlist limit
+        assertEquals(PlaylistSpec("🎲 Random", "🎲", 20, 1, loop = true, shuffle = true), random.playlist)
+        assertTrue(PresetPacks.ALL.filter { it != random }.none { it.locked })
+    }
+
+    @Test
+    fun sunriseGetsAOneMinuteSpeedAndOldCopiesAreUpdated() {
+        val sunrise = PresetPacks.RISE_AND_SHINE.presets.first()
+        assertEquals(EffectPreset("Sunrise", "Sunrise", speed = 1), sunrise)
+        val body = parse(PresetPackPayloads.presetJson(PresetStep.Create("Sunrise", 7, 104, 1)))
+        assertEquals(mapOf("fx" to 104.0, "fxdef" to true, "sx" to 1.0), body["seg"])
+
+        // Saved by an earlier version without a speed: overwritten in place. Edited by the user: kept.
+        val old = PresetPackPlanner.plan(
+            PresetPacks.RISE_AND_SHINE,
+            parse("""{"7":{"n":"Sunrise","seg":{"fx":104}}}"""),
+            effects,
+        )
+        assertEquals(PresetStep.Create("Sunrise", 7, 104, 1), old.presets.first())
+        val edited = PresetPackPlanner.plan(
+            PresetPacks.RISE_AND_SHINE,
+            parse("""{"7":{"n":"Sunrise","seg":{"sx":5}}}"""),
+            effects,
+        )
+        assertEquals(PresetStep.Reuse("Sunrise", 7), edited.presets.first())
     }
 
     @Test
@@ -148,9 +211,9 @@ class PresetPacksTest {
     }
 
     @Test
-    fun tenPlaylistsEachStartingWithItsIcon() {
-        assertEquals(10, PresetPacks.ALL.size)
-        assertEquals(10, PresetPacks.ALL.map { it.playlist.name }.toSet().size)
+    fun elevenPlaylistsEachStartingWithItsIcon() {
+        assertEquals(11, PresetPacks.ALL.size)
+        assertEquals(11, PresetPacks.ALL.map { it.playlist.name }.toSet().size)
         PresetPacks.ALL.forEach {
             val icon = it.playlist.quickLoad!!
             assertTrue(it.playlist.name, it.playlist.name.startsWith("$icon "))
@@ -181,14 +244,14 @@ class PresetPacksTest {
     @Test
     fun planAllSavesEverythingOnceFromOneRead() {
         val plans = PresetPackPlanner.planAll(PresetPacks.ALL, parse("{}"), effects)
-        // 48 distinct effects (Aurora is shared) plus 10 playlists, on ids 1..58 without gaps or clashes.
+        // 48 distinct effects (Aurora is shared) plus 11 playlists, on ids 1..59 without gaps or clashes.
         val created = plans.flatMap { it.second.created.map { step -> step.id } }
         val playlists = plans.map { it.second.playlist as PlaylistStep.Save }
         assertEquals(48, created.size)
-        assertEquals((1..58).toList(), (created + playlists.map { it.id }).sorted())
+        assertEquals((1..59).toList(), (created + playlists.map { it.id }).sorted())
         val aurora = plans.flatMap { it.second.presets }.filter { it.name == "Aurora" }
         assertEquals(1, aurora.filterIsInstance<PresetStep.Create>().size)
-        assertEquals(1, aurora.filterIsInstance<PresetStep.Reuse>().size)
+        assertEquals(2, aurora.filterIsInstance<PresetStep.Reuse>().size) // Northern Glow and Random
     }
 
     @Test
@@ -196,7 +259,7 @@ class PresetPacksTest {
         // Simulate the device after the first run, then plan again: nothing is created or saved.
         val device = mutableMapOf<String, Any>()
         PresetPackPlanner.planAll(PresetPacks.ALL, emptyMap<String, Any>(), effects).forEach { (pack, plan) ->
-            plan.created.forEach { device[it.id.toString()] = mapOf("n" to it.name) }
+            plan.created.forEach { device[it.id.toString()] = mapOf("n" to it.name, "seg" to mapOf("sx" to it.speed)) }
             val save = plan.playlist as PlaylistStep.Save
             device[save.id.toString()] = mapOf("n" to pack.playlist.name, "playlist" to mapOf("ps" to save.presetIds))
         }
@@ -206,6 +269,6 @@ class PresetPacksTest {
             effects,
         )
         assertTrue(again.all { it.second.created.isEmpty() && it.second.playlist is PlaylistStep.Play })
-        assertEquals(10, again.mapNotNull { it.second.playlist.playlistId }.toSet().size)
+        assertEquals(11, again.mapNotNull { it.second.playlist.playlistId }.toSet().size)
     }
 }
