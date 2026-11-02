@@ -51,6 +51,9 @@ class DeviceListDetailViewModel @Inject constructor(
     private val _isAddDeviceDialogVisible = MutableStateFlow(false)
     val isAddDeviceDialogVisible: StateFlow<Boolean> = _isAddDeviceDialogVisible
 
+    private val _isProvisionDialogVisible = MutableStateFlow(false)
+    val isProvisionDialogVisible: StateFlow<Boolean> = _isProvisionDialogVisible
+
     init {
         // This ensures onResume/onPause are called only when the APP goes background/foreground,
         // not when the screen rotates.
@@ -120,5 +123,13 @@ class DeviceListDetailViewModel @Inject constructor(
         _isAddDeviceDialogVisible.update {
             false
         }
+    }
+
+    fun showProvisionDialog() {
+        _isProvisionDialogVisible.update { true }
+    }
+
+    fun hideProvisionDialog() {
+        _isProvisionDialogVisible.update { false }
     }
 }

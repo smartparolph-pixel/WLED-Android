@@ -1,6 +1,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" translatable="false">WLED</string>
-    <string name="app_logo">WLED Logo</string>
+    <string name="app_name" translatable="false">Sinag</string>
+    <string name="sinag_logo">Sinag logo</string>
     <string name="add_a_device">Add a New Device</string>
     <string name="add">Add</string>
     <string name="add_adding_device">Adding <xliff:g example="192.168.1.1" id="strength">%1$s</xliff:g></string>
@@ -40,7 +40,6 @@
     <string name="device_is_hidden">Device is Hidden</string>
     <string name="hidden_status">(Hidden)</string>
     <string name="you_dont_have_any_visible_devices">You don\'t have any visible devices</string>
-    <string name="awkward_akemi_character">Awkward Akemi character</string>
     <string name="settings">Settings</string>
     <string name="theme">Theme</string>
     <string name="light">Light</string>
@@ -134,4 +133,162 @@
     <string name="control_off">Off</string>
     <string name="no_release_notes_provided">No release notes provided</string>
 
+
+    <!-- Device setup over its own WiFi (provisioning) -->
+    <string name="provision_menu_item">Set up a new device</string>
+    <string name="provision_title">Set up new device</string>
+    <string name="provision_instructions">Power on your device, then enter the WiFi network it should join. Your phone will ask permission to connect to the device\'s setup network.</string>
+    <string name="provision_home_wifi_name">Home WiFi name</string>
+    <string name="provision_home_wifi_password">Home WiFi password</string>
+    <string name="provision_show_password">Show password</string>
+    <string name="provision_hide_password">Hide password</string>
+    <string name="provision_start">Start</string>
+    <string name="provision_step_joining">Connecting to the device…</string>
+    <string name="provision_step_sending">Sending WiFi details…</string>
+    <string name="provision_step_rebooting">Restarting the device…</string>
+    <string name="provision_step_waiting">Looking for the device on your WiFi…</string>
+    <string name="provision_error_ssid_required">Enter your WiFi name</string>
+    <string name="provision_error_manual_join">This Android version cannot join the device automatically. Connect to the device\'s WiFi in Settings, then come back and tap Start again.</string>
+    <string name="provision_error_ap_unavailable">Could not connect to the device\'s setup network. Make sure it is powered on and close to your phone.</string>
+    <string name="provision_error_not_wled">The setup network did not respond like a WLED device.</string>
+    <string name="provision_error_rejected">The device did not accept the WiFi details.</string>
+    <string name="provision_error_not_found">The device did not show up on your WiFi. Check the name and password, then try again.</string>
+    <string name="provision_error_generic">Something went wrong. Please try again.</string>
+    <string name="provision_setup_network_options">Setup network options</string>
+    <string name="provision_setup_network_hint">Only change these if your device\'s setup network is not called WLED-AP, for example on products with their own name.</string>
+    <string name="provision_setup_network_name">Setup network name starts with</string>
+    <string name="provision_setup_network_password">Setup network password (empty if open)</string>
+    <string name="provision_error_ap_name_required">Enter the start of the setup network name</string>
+    <string name="provision_error_ap_password_length">WiFi passwords are 8 to 63 characters</string>
+    <string name="provision_secure_tip">Tip: protect your device by setting a settings PIN and enabling the OTA lock under Config → Security &amp; Updates.</string>
+    <string name="timezone_button">Set device time zone</string>
+    <string name="timezone_title">Device time zone</string>
+    <string name="timezone_selected">Selected: %1$s</string>
+    <string name="timezone_search">Search city, country or UTC offset</string>
+    <string name="timezone_pin">Device settings PIN</string>
+    <string name="timezone_apply">Apply</string>
+    <string name="timezone_applied">Saved. The device now uses %1$s and gets its time from the internet.</string>
+    <string name="timezone_not_exact">This device\'s firmware does not know the daylight saving rules of this zone. The time is correct now, but will not change automatically for daylight saving.</string>
+    <string name="timezone_error_pin">This device is protected by a settings PIN. Enter it and try again.</string>
+    <string name="timezone_error_unreachable">Could not reach the device. Make sure it is on and connected.</string>
+    <string name="timezone_error_generic">The device did not accept the time zone.</string>
+
+    <!-- Schedules -->
+    <string name="schedule_title">Schedule</string>
+    <string name="schedule_add">Add schedule</string>
+    <string name="schedule_new">New Schedule</string>
+    <string name="schedule_edit">Edit Schedule</string>
+    <string name="schedule_save">Save</string>
+    <string name="schedule_empty">No schedules yet. Tap + to add one.</string>
+    <string name="schedule_full">This device cannot hold more schedules.</string>
+    <string name="schedule_on">ON</string>
+    <string name="schedule_off">OFF</string>
+    <string name="schedule_no_preset">No preset</string>
+    <string name="schedule_at">At</string>
+    <string name="schedule_custom_time">Custom Time</string>
+    <string name="schedule_sunrise">Sunrise</string>
+    <string name="schedule_sunset">Sunset</string>
+    <string name="schedule_type_time">Type time</string>
+    <string name="schedule_use_dial">Use clock</string>
+    <string name="schedule_at_sunrise">At sunrise</string>
+    <string name="schedule_before_sunrise">%1$d min before sunrise</string>
+    <string name="schedule_after_sunrise">%1$d min after sunrise</string>
+    <string name="schedule_at_sunset">At sunset</string>
+    <string name="schedule_before_sunset">%1$d min before sunset</string>
+    <string name="schedule_after_sunset">%1$d min after sunset</string>
+    <string name="schedule_offset_earlier">− 5 min</string>
+    <string name="schedule_offset_later">+ 5 min</string>
+    <string name="schedule_location_missing">Sunrise and sunset need the device\'s location.</string>
+    <string name="schedule_use_phone_location">Use phone location</string>
+    <string name="schedule_location_set">Your phone\'s location will be saved to the device.</string>
+    <string name="schedule_location_failed">Could not get your location.</string>
+    <string name="schedule_turn_device">Turn Device</string>
+    <string name="schedule_turn_on">On</string>
+    <string name="schedule_turn_off">Off</string>
+    <string name="schedule_preset">Preset: %1$s</string>
+    <string name="schedule_repeat">Repeat</string>
+    <string name="schedule_every_day">Every day</string>
+    <string name="schedule_every_list">Every %1$s</string>
+    <string name="schedule_pick_day">Select at least one day</string>
+    <string name="schedule_delete">Delete Schedule</string>
+    <string name="schedule_every_hour">Every hour at :%1$02d</string>
+    <string name="schedule_pin">Device settings PIN</string>
+    <string name="schedule_retry">Retry</string>
+    <string name="schedule_error_unreachable">Could not reach the device. Make sure it is on and connected.</string>
+    <string name="schedule_error_pin">This device is protected by a settings PIN. Enter it and try again.</string>
+    <string name="schedule_error_rejected">The device did not accept the schedules.</string>
+    <string name="schedule_error_no_preset_slot">The device has no free preset slot for the on/off action.</string>
+
+    <!-- Preset packs -->
+    <string name="preset_pack_button">Presets &amp; playlists</string>
+    <string name="preset_pack_title">Presets &amp; playlists</string>
+    <string name="preset_pack_hint">Tap a playlist to play it on this device.</string>
+    <string name="preset_pack_preparing">Preparing playlists…</string>
+    <string name="preset_pack_playing">Playing</string>
+    <string name="preset_pack_ready">Playlists ready. %1$s is playing now.</string>
+    <string name="preset_pack_unavailable">Not available on this device: %1$s.</string>
+    <string name="preset_pack_unverified">The device did not confirm every preset; check its Presets list.</string>
+    <string name="preset_pack_nothing">Nothing could be added: this device has none of these effects or no free preset slots.</string>
+    <string name="preset_pack_unreachable">Could not reach the device. Make sure it is on and try again.</string>
+    <string name="preset_pack_damaged">This device\'s presets file is damaged, so nothing was changed. Repair keeps the %1$d presets and playlists that are intact and removes %2$d damaged parts; missing playlists are then added again.</string>
+    <string name="preset_pack_damaged_detail">Details: %1$s</string>
+    <string name="preset_pack_repair">Repair</string>
+    <string name="preset_pack_repair_confirm_title">Repair presets file?</string>
+    <string name="preset_pack_repair_confirm">The device\'s presets.json will be replaced with a clean copy holding the %1$d intact presets and playlists. The %2$d damaged parts cannot be recovered.</string>
+    <string name="preset_pack_repair_locked">This device has a settings PIN. Unlock it on the device\'s web page (Config), then try again.</string>
+    <string name="preset_pack_repair_failed">Could not repair the file. Check the connection to the device and try again.</string>
+
+    <!-- Main page shortcuts -->
+    <string name="shortcut_time_zone">Time zone</string>
+    <string name="shortcut_pick_device">Choose a device</string>
+
+    <!-- Preset editor -->
+    <string name="preset_editor_edit">Edit</string>
+    <string name="preset_editor_title">Edit presets &amp; playlists</string>
+    <string name="preset_editor_new_playlist">New playlist</string>
+    <string name="preset_editor_edit_playlist">Edit playlist</string>
+    <string name="preset_editor_edit_effect">Edit effect</string>
+    <string name="preset_editor_playlists">Playlists</string>
+    <string name="preset_editor_effects">Effects</string>
+    <string name="preset_editor_list_hint">Effect settings are shared: a change shows in every playlist that plays the effect, Random included.</string>
+    <string name="preset_editor_playlist_summary">%1$d effects · %2$d s each</string>
+    <string name="preset_editor_random_summary">Every effect in a new random order each loop. It can\'t be changed.</string>
+    <string name="preset_editor_locked">Locked</string>
+    <string name="preset_editor_effect_default">Default settings</string>
+    <string name="preset_editor_effect_custom">Custom settings</string>
+    <string name="preset_editor_name">Name</string>
+    <string name="preset_editor_timing">Timing</string>
+    <string name="preset_editor_seconds">Each effect plays</string>
+    <string name="preset_editor_fade">Fade between effects</string>
+    <string name="preset_editor_seconds_value">%1$d s</string>
+    <string name="preset_editor_less">Less</string>
+    <string name="preset_editor_more">More</string>
+    <string name="preset_editor_shuffle">Shuffle</string>
+    <string name="preset_editor_shuffle_hint">New random order each loop</string>
+    <string name="preset_editor_playlist_effects">Effects</string>
+    <string name="preset_editor_add_effects">Add effects</string>
+    <string name="preset_editor_missing">Missing preset %1$d</string>
+    <string name="preset_editor_move_up">Move up</string>
+    <string name="preset_editor_move_down">Move down</string>
+    <string name="preset_editor_remove">Remove</string>
+    <string name="preset_editor_reset">Reset to default</string>
+    <string name="preset_editor_reset_playlist_hint">Puts back this playlist\'s original effects and timing, and those effects\' default settings.</string>
+    <string name="preset_editor_delete">Delete playlist</string>
+    <string name="preset_editor_settings">Settings</string>
+    <string name="preset_editor_speed">Speed</string>
+    <string name="preset_editor_intensity">Intensity</string>
+    <string name="preset_editor_palette">Palette</string>
+    <string name="preset_editor_set_brightness">Set brightness</string>
+    <string name="preset_editor_brightness_hint">Off keeps the brightness the lights already have.</string>
+    <string name="preset_editor_brightness">Brightness</string>
+    <string name="preset_editor_preview_hint">Changes show on the lights as you adjust them. Save to keep them.</string>
+    <string name="preset_editor_used_in">Used in: %1$s</string>
+    <string name="preset_editor_unreadable">The device\'s presets file could not be read, so nothing was changed. Try again; if it keeps happening, check Presets on the device\'s web page.</string>
+    <string name="preset_editor_error_name">Enter a name.</string>
+    <string name="preset_editor_error_name_long">The name is too long.</string>
+    <string name="preset_editor_error_name_taken">Another playlist already has this name.</string>
+    <string name="preset_editor_error_no_effects">Add at least one effect.</string>
+    <string name="preset_editor_error_too_many">A playlist can have at most 100 effects.</string>
+    <string name="preset_editor_error_full">This device has no free preset slot left.</string>
+    <string name="preset_editor_error_save">Could not save. Check the connection to the device and try again.</string>
 </resources>
