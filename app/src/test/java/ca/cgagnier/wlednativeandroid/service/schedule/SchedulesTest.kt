@@ -112,6 +112,7 @@ class SchedulesTest {
             """{"psave":249,"n":"Schedule: Off","on":false,"o":true}""",
             SchedulePresets.saveJson(249, SchedulePresets.OFF_NAME, on = false),
         )
+        assertEquals("""{"on":true}""", SchedulePresets.powerJson(on = true))
     }
 
     @Test

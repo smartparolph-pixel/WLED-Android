@@ -195,6 +195,9 @@ object SchedulePresets {
     /** Body for `POST /json/state` that saves a preset containing only `{"on": on}`. */
     fun saveJson(id: Int, name: String, on: Boolean): String =
         moshi.adapter(Any::class.java).toJson(mapOf("psave" to id, "n" to name, "on" to on, "o" to true))
+
+    /** Body for `POST /json/state` that only switches the light on or off. */
+    fun powerJson(on: Boolean): String = moshi.adapter(Any::class.java).toJson(mapOf("on" to on))
 }
 
 /** Body for `POST /json/cfg` that replaces the schedule list and optionally fixes time settings. */

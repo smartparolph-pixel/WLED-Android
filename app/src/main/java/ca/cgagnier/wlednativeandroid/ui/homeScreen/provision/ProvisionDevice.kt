@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,8 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ca.cgagnier.wlednativeandroid.R
+import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningProgress
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.presetPackResultText
 
 @Composable
 fun ProvisionDevice(onDismissRequest: () -> Unit, viewModel: ProvisionViewModel = hiltViewModel()) {
@@ -191,10 +194,35 @@ private fun SuccessStep(step: ProvisionStep.Success, onDismiss: () -> Unit) {
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(bottom = 12.dp),
     )
+    PresetPackStatus(step)
     Text(
         text = stringResource(R.string.provision_secure_tip),
         style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.padding(bottom = 16.dp),
     )
     Button(onClick = onDismiss) { Text(stringResource(R.string.done)) }
+}
+
+/** "Adding ✨ Twinkle Tonight…" while the preset packs are added, then what was added. */
+@Composable
+private fun PresetPackStatus(step: ProvisionStep.Success) {
+    if (step.addingPacks) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
+            CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp).size(18.dp))
+            Text(
+                text = stringResource(
+                    R.string.preset_pack_adding,
+                    PresetPacks.ALL.joinToString { it.playlist.name },
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+    step.packResults.forEach {
+        Text(
+            text = presetPackResultText(it),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
+    }
 }

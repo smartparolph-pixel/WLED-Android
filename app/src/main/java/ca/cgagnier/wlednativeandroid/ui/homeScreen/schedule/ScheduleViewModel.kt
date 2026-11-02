@@ -241,13 +241,26 @@ class ScheduleViewModel @Inject constructor(private val deviceApiFactory: Device
                 null
             }
 
-            api.postState(SchedulePresets.saveJson(free, name, on).toRequestBody(JSON)).isSuccessful -> {
+            createPreset(api, free, name, on) -> {
                 state = state.copy(presets = state.presets + (free to name))
                 free
             }
 
             else -> null
         }
+    }
+
+    /**
+     * Saves the preset. The device applies a save request to the lights as it saves it, so saving
+     * "Schedule: Off" would switch the light off; it is switched back to how it was right after.
+     */
+    private suspend fun createPreset(api: DeviceApi, id: Int, name: String, on: Boolean): Boolean {
+        val wasOn = api.getState().body()?.isOn
+        val saved = api.postState(SchedulePresets.saveJson(id, name, on).toRequestBody(JSON)).isSuccessful
+        if (saved && wasOn != null && wasOn != on) {
+            api.postState(SchedulePresets.powerJson(wasOn).toRequestBody(JSON))
+        }
+        return saved
     }
 
     /** Writes the full list; also turns on internet time (with the phone's zone) if it is off. */

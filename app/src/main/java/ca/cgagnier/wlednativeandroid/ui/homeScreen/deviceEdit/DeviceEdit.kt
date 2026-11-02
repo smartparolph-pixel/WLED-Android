@@ -67,6 +67,7 @@ import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketStatus
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceVisibleSwitch
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.PresetPackDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.timezone.DeviceTimezoneDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateDetailsDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateDisclaimerDialog
@@ -156,6 +157,7 @@ fun DeviceEditContent(
         Pair(Branch.BETA, stringResource(R.string.beta)),
     )
     var showTimezoneDialog by remember { mutableStateOf(false) }
+    var showPresetPackDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -214,6 +216,14 @@ fun DeviceEditContent(
                 ) {
                     Text(stringResource(R.string.timezone_button))
                 }
+                OutlinedButton(
+                    onClick = { showPresetPackDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                ) {
+                    Text(stringResource(R.string.preset_pack_button))
+                }
                 Spacer(Modifier.height(24.dp))
                 Text(
                     stringResource(
@@ -229,6 +239,9 @@ fun DeviceEditContent(
     // Dialogs — shown conditionally based on uiState.
     if (showTimezoneDialog) {
         DeviceTimezoneDialog(device = device.device, onDismiss = { showTimezoneDialog = false })
+    }
+    if (showPresetPackDialog) {
+        PresetPackDialog(device = device.device, onDismiss = { showPresetPackDialog = false })
     }
     uiState.updateDetailsVersion?.let { versionDetails ->
         UpdateDetailsDialog(

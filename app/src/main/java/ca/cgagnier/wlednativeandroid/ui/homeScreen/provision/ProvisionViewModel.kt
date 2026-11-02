@@ -10,6 +10,9 @@ import androidx.lifecycle.viewModelScope
 import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.Device
+import ca.cgagnier.wlednativeandroid.service.presets.PackInstallResult
+import ca.cgagnier.wlednativeandroid.service.presets.PresetPackInstaller
+import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningDefaults
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningException
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningProgress
@@ -39,7 +42,16 @@ sealed interface ProvisionStep {
         val apPasswordError: Int? = null,
     ) : ProvisionStep
     data class Working(val progress: ProvisioningProgress) : ProvisionStep
-    data class Success(val device: Device) : ProvisionStep
+
+    /**
+     * @param addingPacks The preset packs are still being added to the new device.
+     * @param packResults One result per pack in [PresetPacks.ALL].
+     */
+    data class Success(
+        val device: Device,
+        val addingPacks: Boolean = true,
+        val packResults: List<PackInstallResult> = emptyList(),
+    ) : ProvisionStep
 }
 
 data class ProvisionState(
@@ -53,7 +65,10 @@ data class ProvisionState(
 )
 
 @HiltViewModel
-class ProvisionViewModel @Inject constructor(private val provisioningService: WledProvisioningService) : ViewModel() {
+class ProvisionViewModel @Inject constructor(
+    private val provisioningService: WledProvisioningService,
+    private val presetPackInstaller: PresetPackInstaller,
+) : ViewModel() {
 
     var state by mutableStateOf(ProvisionState())
         private set
@@ -107,6 +122,7 @@ class ProvisionViewModel @Inject constructor(private val provisioningService: Wl
                             else -> ProvisionStep.Working(progress)
                         },
                     )
+                    if (progress is ProvisioningProgress.Done) addPresetPacks(progress.device)
                 }
         }
     }
@@ -121,6 +137,15 @@ class ProvisionViewModel @Inject constructor(private val provisioningService: Wl
             },
         )
         return form.takeIf { it.ssidError != null || it.apSsidError != null || it.apPasswordError != null }
+    }
+
+    /** Preloads the preset packs on the new device; its last playlist is left playing. */
+    private suspend fun addPresetPacks(device: Device) {
+        val results = PresetPacks.ALL.map { presetPackInstaller.install(device, it) }
+        val step = state.step
+        if (step is ProvisionStep.Success && step.device == device) {
+            state = state.copy(step = step.copy(addingPacks = false, packResults = results))
+        }
     }
 
     fun clear() {

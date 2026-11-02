@@ -32,6 +32,13 @@ interface DeviceApi {
     @GET("presets.json")
     suspend fun getPresets(): Response<ResponseBody>
 
+    /** Effect names, in effect id order. */
+    @GET("json/eff")
+    suspend fun getEffects(): Response<List<String>>
+
+    @GET("json/state")
+    suspend fun getState(): Response<State>
+
     /** Raw state call, e.g. to save a preset. */
     @POST("json/state")
     suspend fun postState(@Body state: RequestBody): Response<ResponseBody>

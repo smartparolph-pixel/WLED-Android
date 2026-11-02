@@ -216,4 +216,17 @@
     <string name="schedule_error_pin">Dieses Gerät ist durch eine Einstellungs-PIN geschützt. Gib sie ein und versuche es erneut.</string>
     <string name="schedule_error_rejected">Das Gerät hat die Zeitpläne nicht akzeptiert.</string>
     <string name="schedule_error_no_preset_slot">Das Gerät hat keinen freien Preset-Platz für die An/Aus-Aktion.</string>
+
+    <!-- Preset packs -->
+    <string name="preset_pack_button">Presets &amp; Playlists</string>
+    <string name="preset_pack_title">Presets &amp; Playlists</string>
+    <string name="preset_pack_hint">Fügt fertige Presets und eine Playlist zu diesem Gerät hinzu und startet die Playlist. Vorhandene Presets bleiben erhalten, nichts wird doppelt angelegt.</string>
+    <string name="preset_pack_add">%1$s hinzufügen</string>
+    <string name="preset_pack_adding">%1$s wird hinzugefügt…</string>
+    <string name="preset_pack_added">%1$s wurde hinzugefügt und läuft jetzt.</string>
+    <string name="preset_pack_already">%1$s ist bereits auf diesem Gerät und läuft jetzt.</string>
+    <string name="preset_pack_unavailable">Auf diesem Gerät nicht verfügbar: %1$s.</string>
+    <string name="preset_pack_unverified">Das Gerät hat nicht alle Presets bestätigt; prüfe seine Preset-Liste.</string>
+    <string name="preset_pack_nothing">Nichts hinzugefügt: Dieses Gerät hat keinen dieser Effekte oder keine freien Preset-Plätze.</string>
+    <string name="preset_pack_unreachable">Gerät nicht erreichbar. Stelle sicher, dass es eingeschaltet ist, und versuche es erneut.</string>
 </resources>
