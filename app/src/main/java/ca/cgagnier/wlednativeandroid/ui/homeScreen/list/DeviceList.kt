@@ -49,6 +49,7 @@ import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceInfoTwoRows
 import ca.cgagnier.wlednativeandroid.ui.components.SinagLockup
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.shortcuts.DeviceShortcutBar
 import ca.cgagnier.wlednativeandroid.ui.theme.DeviceTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -140,6 +141,7 @@ fun DeviceList(
                 onAddDevice = onAddDevice,
             )
         },
+        bottomBar = { DeviceShortcutBar(devices = visibleDevices) },
     ) { innerPadding ->
         PullToRefreshBox(
             modifier = Modifier.padding(innerPadding),

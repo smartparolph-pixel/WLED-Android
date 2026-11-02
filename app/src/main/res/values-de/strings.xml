@@ -229,4 +229,8 @@
     <string name="preset_pack_unverified">Das Gerät hat nicht alle Presets bestätigt; prüfe seine Preset-Liste.</string>
     <string name="preset_pack_nothing">Nichts hinzugefügt: Dieses Gerät hat keinen dieser Effekte oder keine freien Preset-Plätze.</string>
     <string name="preset_pack_unreachable">Gerät nicht erreichbar. Stelle sicher, dass es eingeschaltet ist, und versuche es erneut.</string>
+
+    <!-- Main page shortcuts -->
+    <string name="shortcut_time_zone">Zeitzone</string>
+    <string name="shortcut_pick_device">Gerät auswählen</string>
 </resources>
