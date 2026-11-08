@@ -114,7 +114,7 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
         return when {
             effects == null || text == null -> PackSetupResult.Unreachable
 
-            presets == null -> PresetsFileRepair.repair(text).let {
+            presets == null || PresetsFileRepair.problem(text) != null -> PresetsFileRepair.repair(text).let {
                 PackSetupResult.PresetsUnreadable(it.kept, it.dropped, it.problem.orEmpty())
             }
 
@@ -130,7 +130,7 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
         val api = deviceApiFactory.create(device)
         try {
             val text = presetsText(api)
-            if (text == null || parsePresets(text) != null) return@withContext RepairResult.NotNeeded
+            if (text == null || PresetsFileRepair.problem(text) == null) return@withContext RepairResult.NotNeeded
             val repaired = PresetsFileRepair.repair(text).toJson()
             val file = MultipartBody.Part.createFormData(
                 "data",

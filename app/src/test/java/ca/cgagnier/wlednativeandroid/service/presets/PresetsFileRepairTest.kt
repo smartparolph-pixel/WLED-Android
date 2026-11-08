@@ -61,4 +61,24 @@ class PresetsFileRepairTest {
         assertEquals("""{"0":{}}""", result.toJson())
         assertEquals(0, result.kept)
     }
+
+    @Test
+    fun decimalNumbersAreFoundAndWrittenBackWhole() {
+        // As an earlier repair wrote it: valid JSON, but WLED ignores a decimal effect, speed or palette.
+        val decimals = """{"0":{},"1":{"n":"Twinklefox","on":true,"seg":{"fx":80.0,"fxdef":true,"sx":1.0}},""" +
+            """"6":{"n":"✨ Twinkle Tonight","playlist":{"ps":[1.0],"dur":[600.0],"transition":[10.0],"r":false}}}"""
+        assertNotNull(PresetsFileRepair.problem(decimals))
+        val json = PresetsFileRepair.repair(decimals).toJson()
+        assertNull(PresetsFileRepair.problem(json))
+        assertEquals(
+            """{"0":{},"1":{"n":"Twinklefox","on":true,"seg":{"fx":80,"fxdef":true,"sx":1}},""" +
+                """"6":{"n":"✨ Twinkle Tonight","playlist":{"ps":[1],"dur":[600],"transition":[10],"r":false}}}""",
+            json,
+        )
+    }
+
+    @Test
+    fun decimalsInsideNamesAreNotMistakenForNumbers() {
+        assertNull(PresetsFileRepair.problem("""{"0":{},"2":{"n":"Mode 1.0","seg":{"fx":9}}}"""))
+    }
 }

@@ -14,10 +14,17 @@ import java.io.IOException
  *
  * This scans the file for `"id":{...}` entries, keeps every one that parses, and drops the rest. When an
  * id appears twice, the first one is kept, as that is the one the firmware loads.
+ *
+ * It also fixes numbers written as decimals (`"fx":80.0`), as an earlier app version did when repairing:
+ * the firmware ignores a decimal effect, speed or palette, so presets would play without changing the
+ * lights. The repaired file always has whole numbers.
  */
 object PresetsFileRepair {
     private val moshi = Moshi.Builder().build()
     private val entryStart = Regex("\"(\\d{1,3})\"\\s*:\\s*\\{")
+
+    /** A JSON number value written with a zero fraction, e.g. `:80.0` or `[1.0,` (WLED never writes these). */
+    private val decimalWhole = Regex("[:\\[,]\\s*-?\\d+\\.0+\\s*(?=[,\\]}])")
 
     /**
      * @param presets The entries kept, by id, in file order.
@@ -26,16 +33,16 @@ object PresetsFileRepair {
      */
     data class Result(val presets: Map<String, Any?>, val dropped: Int, val problem: String?) {
         /** The repaired file, always valid JSON. */
-        fun toJson(): String = moshi.adapter(Any::class.java).toJson(presets)
+        fun toJson(): String = moshi.adapter(Any::class.java).toJson(wholeNumbers(presets))
 
         /** Presets and playlists kept, not counting the empty entry "0". */
         val kept get() = presets.keys.count { it != "0" }
     }
 
-    /** Why the file cannot be read as is, or null if it parses. */
+    /** Why the file cannot be used as is, or null if it parses and the firmware can read its numbers. */
     fun problem(text: String): String? = try {
         moshi.adapter(Map::class.java).fromJson(text)
-        null
+        decimalWhole.find(text)?.let { "Numbers saved as decimals (e.g. ${it.value.trimStart(':', '[', ',').trim()})" }
     } catch (e: JsonDataException) {
         e.message ?: e.toString()
     } catch (e: IOException) {
@@ -86,4 +93,19 @@ object PresetsFileRepair {
     /** The entry, or null if it is not valid JSON (any parse error means "damaged" here). */
     private fun parseObject(json: String): Map<*, *>? =
         runCatching { moshi.adapter(Map::class.java).fromJson(json) }.getOrNull()
+
+    /** Copies JSON as parsed by Moshi (every number a Double), turning whole values back into integers. */
+    private fun wholeNumbers(value: Any?): Any? = when (value) {
+        is Double -> if (value % 1.0 == 0.0 && value in Long.MIN_VALUE.toDouble()..Long.MAX_VALUE.toDouble()) {
+            value.toLong()
+        } else {
+            value
+        }
+
+        is Map<*, *> -> value.entries.associate { (key, item) -> key.toString() to wholeNumbers(item) }
+
+        is List<*> -> value.map { wholeNumbers(it) }
+
+        else -> value
+    }
 }
