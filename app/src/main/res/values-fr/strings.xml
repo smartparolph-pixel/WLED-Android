@@ -288,4 +288,20 @@
     <string name="preset_editor_error_too_many">Une playlist peut contenir au plus 100 effets.</string>
     <string name="preset_editor_error_full">Plus aucun emplacement de preset libre sur cet appareil.</string>
     <string name="preset_editor_error_save">Échec de l\'enregistrement. Vérifiez la connexion à l\'appareil et réessayez.</string>
+
+    <!-- App lock -->
+    <string name="app_lock">Verrouillage de l\'app</string>
+    <string name="app_lock_switch">Déverrouiller pour ouvrir Sinag</string>
+    <string name="app_lock_hint">Utilise l\'empreinte, le visage ou le verrouillage d\'écran de ce téléphone. Sinag n\'enregistre rien. Le widget de l\'écran d\'accueil continue de fonctionner.</string>
+    <string name="app_lock_needs_screen_lock">Configurez un verrouillage d\'écran (code, schéma, mot de passe, empreinte ou visage) sur ce téléphone pour utiliser le verrouillage de l\'app.</string>
+    <string name="app_lock_relock">Redemander après que Sinag est resté en arrière-plan :</string>
+    <string name="app_lock_relock_immediately">Immédiatement</string>
+    <string name="app_lock_relock_two_minutes">Après 2 minutes</string>
+    <string name="app_lock_relock_five_minutes">Après 5 minutes</string>
+    <string name="app_lock_confirm_title">Confirmez votre identité</string>
+    <string name="app_lock_prompt_title">Déverrouiller Sinag</string>
+    <string name="app_lock_locked">Sinag est verrouillée</string>
+    <string name="app_lock_unlock">Déverrouiller</string>
+    <string name="app_lock_turned_off_title">Verrouillage de l\'app désactivé</string>
+    <string name="app_lock_turned_off">Ce téléphone n\'a plus de verrouillage d\'écran, le verrouillage de l\'app a donc été désactivé. Configurez un verrouillage d\'écran pour le réactiver.</string>
 </resources>

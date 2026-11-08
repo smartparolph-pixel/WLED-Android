@@ -2,10 +2,10 @@ package ca.cgagnier.wlednativeandroid.ui
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -31,15 +31,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import ca.cgagnier.wlednativeandroid.FileUploadContract
 import ca.cgagnier.wlednativeandroid.FileUploadContractResult
 import ca.cgagnier.wlednativeandroid.R
+import ca.cgagnier.wlednativeandroid.repository.UserPreferencesRepository
+import ca.cgagnier.wlednativeandroid.service.applock.AppLockManager
+import ca.cgagnier.wlednativeandroid.service.applock.AppLockState
+import ca.cgagnier.wlednativeandroid.ui.applock.AppLockGate
 import ca.cgagnier.wlednativeandroid.ui.theme.WLEDNativeTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
+    @Inject
+    lateinit var appLock: AppLockManager
+
+    @Inject
+    lateinit var preferences: UserPreferencesRepository
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -59,9 +74,12 @@ class MainActivity : ComponentActivity() {
     private var navigationEvent by mutableStateOf<NavigationEvent?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splash = installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // Keep the splash up while App lock reads its setting, so nothing shows before the lock screen.
+        splash.setKeepOnScreenCondition { appLock.state.value == AppLockState.Checking }
+        hideFromRecentsWhileLocked()
 
         viewModel.handleIntent(intent)
 
@@ -73,10 +91,22 @@ class MainActivity : ComponentActivity() {
                         navigationEvent = event
                     },
                 )
-                MainNavHost(startDeviceAddress = navigationEvent)
+                AppLockGate(appLock) {
+                    MainNavHost(startDeviceAddress = navigationEvent)
+                }
             }
         }
         viewModel.downloadUpdateMetadata()
+    }
+
+    /** With App lock on, the recent-apps screen shows no preview of the app (Android 13+). */
+    private fun hideFromRecentsWhileLocked() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                preferences.appLockEnabled.collect { setRecentsScreenshotEnabled(!it) }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

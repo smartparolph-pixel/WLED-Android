@@ -291,4 +291,20 @@
     <string name="preset_editor_error_too_many">A playlist can have at most 100 effects.</string>
     <string name="preset_editor_error_full">This device has no free preset slot left.</string>
     <string name="preset_editor_error_save">Could not save. Check the connection to the device and try again.</string>
+
+    <!-- App lock -->
+    <string name="app_lock">App lock</string>
+    <string name="app_lock_switch">Require unlock to open Sinag</string>
+    <string name="app_lock_hint">Uses this phone\'s fingerprint, face or screen lock. Nothing is stored by Sinag. The home-screen widget keeps working.</string>
+    <string name="app_lock_needs_screen_lock">Set up a screen lock (PIN, pattern, password, fingerprint or face) on this phone to use App lock.</string>
+    <string name="app_lock_relock">Ask again after Sinag has been in the background:</string>
+    <string name="app_lock_relock_immediately">Immediately</string>
+    <string name="app_lock_relock_two_minutes">After 2 minutes</string>
+    <string name="app_lock_relock_five_minutes">After 5 minutes</string>
+    <string name="app_lock_confirm_title">Confirm it\'s you</string>
+    <string name="app_lock_prompt_title">Unlock Sinag</string>
+    <string name="app_lock_locked">Sinag is locked</string>
+    <string name="app_lock_unlock">Unlock</string>
+    <string name="app_lock_turned_off_title">App lock turned off</string>
+    <string name="app_lock_turned_off">This phone no longer has a screen lock, so App lock was turned off. Set up a screen lock to turn it on again.</string>
 </resources>

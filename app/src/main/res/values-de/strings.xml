@@ -289,4 +289,20 @@
     <string name="preset_editor_error_too_many">Eine Playlist kann höchstens 100 Effekte haben.</string>
     <string name="preset_editor_error_full">Auf diesem Gerät ist kein Preset-Platz mehr frei.</string>
     <string name="preset_editor_error_save">Speichern fehlgeschlagen. Prüfe die Verbindung zum Gerät und versuche es erneut.</string>
+
+    <!-- App lock -->
+    <string name="app_lock">App-Sperre</string>
+    <string name="app_lock_switch">Zum Öffnen von Sinag entsperren</string>
+    <string name="app_lock_hint">Verwendet Fingerabdruck, Gesicht oder Displaysperre dieses Telefons. Sinag speichert nichts davon. Das Startbildschirm-Widget funktioniert weiter.</string>
+    <string name="app_lock_needs_screen_lock">Richte auf diesem Telefon eine Displaysperre ein (PIN, Muster, Passwort, Fingerabdruck oder Gesicht), um die App-Sperre zu nutzen.</string>
+    <string name="app_lock_relock">Erneut fragen, nachdem Sinag im Hintergrund war:</string>
+    <string name="app_lock_relock_immediately">Sofort</string>
+    <string name="app_lock_relock_two_minutes">Nach 2 Minuten</string>
+    <string name="app_lock_relock_five_minutes">Nach 5 Minuten</string>
+    <string name="app_lock_confirm_title">Bestätige, dass du es bist</string>
+    <string name="app_lock_prompt_title">Sinag entsperren</string>
+    <string name="app_lock_locked">Sinag ist gesperrt</string>
+    <string name="app_lock_unlock">Entsperren</string>
+    <string name="app_lock_turned_off_title">App-Sperre ausgeschaltet</string>
+    <string name="app_lock_turned_off">Dieses Telefon hat keine Displaysperre mehr, daher wurde die App-Sperre ausgeschaltet. Richte eine Displaysperre ein, um sie wieder einzuschalten.</string>
 </resources>

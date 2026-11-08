@@ -11,6 +11,26 @@ class UserPreferencesRepository(private val dataStore: DataStore<UserPreferences
     val showOfflineDevicesLast get() = dataStore.data.map { it.showOfflineLast }
     val showHiddenDevices get() = dataStore.data.map { it.showHiddenDevices }
     val lastUpdateCheckDate get() = dataStore.data.map { it.lastUpdateCheckDate }
+    val appLockEnabled get() = dataStore.data.map { it.appLockEnabled }
+    val appLockTimeout get() = dataStore.data.map { it.appLockTimeout }
+
+    suspend fun updateAppLockEnabled(enabled: Boolean) {
+        dataStore.updateData {
+            it.toBuilder()
+                .setAppLockEnabled(enabled)
+                .setDateLastWritten(System.currentTimeMillis())
+                .build()
+        }
+    }
+
+    suspend fun updateAppLockTimeout(timeout: AppLockTimeout) {
+        dataStore.updateData {
+            it.toBuilder()
+                .setAppLockTimeout(timeout)
+                .setDateLastWritten(System.currentTimeMillis())
+                .build()
+        }
+    }
 
     suspend fun updateThemeMode(themeSettings: ThemeSettings) {
         Log.d(TAG, "updateThemeMode")
