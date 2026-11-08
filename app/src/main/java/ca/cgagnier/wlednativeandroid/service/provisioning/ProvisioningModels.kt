@@ -27,6 +27,12 @@ object ProvisioningDefaults {
 
     /** Time given to WLED to persist cfg.json before we ask it to reboot. */
     const val CONFIG_WRITE_GRACE_MS = 2_000L
+
+    /**
+     * Brightness limiter for the lanterns' 5 V 3 A (15 W) power supply, set during setup: 2000 mA leaves
+     * headroom below the supply's rating. WLED dims all LEDs to stay under it.
+     */
+    const val POWER_LIMIT_MA = 2000
 }
 
 data class ProvisioningRequest(
@@ -71,7 +77,12 @@ object ProvisioningPayloads {
      * the JSON untouched, so unlike posting the whole /settings/wifi HTML form this cannot reset
      * AP behaviour, static IP, mDNS name, etc. [timezone] adds `if.ntp`, which is equally partial.
      */
-    fun wifiConfigJson(ssid: String, password: String, timezone: WledTimezoneSetting? = null): String {
+    fun wifiConfigJson(
+        ssid: String,
+        password: String,
+        timezone: WledTimezoneSetting? = null,
+        led: Map<String, Any>? = null,
+    ): String {
         val payload = mutableMapOf<String, Any>(
             "nw" to mapOf(
                 "ins" to listOf(
@@ -80,7 +91,50 @@ object ProvisioningPayloads {
             ),
         )
         if (timezone != null) payload["if"] = mapOf("ntp" to TimezonePayloads.ntpConfig(timezone))
+        if (led != null) payload["hw"] = mapOf("led" to led)
         return moshi.adapter(Any::class.java).toJson(payload)
+    }
+
+    /**
+     * `hw.led` for `POST /json/cfg` that sets the brightness limiter to [limitMa], built from the
+     * device's current `/json/cfg`.
+     *
+     * WLED 0.15 enforces the limit per LED output (`hw.led.ins[].maxpwr`); `hw.led.maxpwr` is only the
+     * total shown on the settings page. Its settings page splits the total across outputs by LED count,
+     * and so does this. Sending `ins` makes the firmware rebuild every output from the list, so each one
+     * is sent back whole, with only `maxpwr` changed. Numbers are kept whole: WLED reads `160.0` as "not
+     * an integer" and would fall back to its defaults (e.g. 1 LED).
+     *
+     * @return null if the config has no LED outputs, so nothing is changed.
+     */
+    fun powerLimitConfig(cfg: Map<*, *>, limitMa: Int = ProvisioningDefaults.POWER_LIMIT_MA): Map<String, Any>? {
+        val led = (cfg["hw"] as? Map<*, *>)?.get("led") as? Map<*, *>
+        val outputs = (led?.get("ins") as? List<*>).orEmpty().filterIsInstance<Map<*, *>>()
+        val lengths = outputs.map { (it["len"] as? Number)?.toInt() ?: 0 }
+        val total = lengths.sum()
+        if (outputs.isEmpty() || total <= 0) return null
+        var left = limitMa
+        val ins = outputs.mapIndexed { index, output ->
+            val share = if (index == outputs.lastIndex) left else (limitMa.toLong() * lengths[index] / total).toInt()
+            left -= share
+            wholeNumbers(output) as Map<*, *> + ("maxpwr" to share)
+        }
+        return mapOf("maxpwr" to limitMa, "ins" to ins)
+    }
+
+    /** Copies JSON as parsed by Moshi, turning whole-valued doubles back into integers. */
+    private fun wholeNumbers(value: Any?): Any? = when (value) {
+        is Double -> if (value % 1.0 == 0.0 && value in Long.MIN_VALUE.toDouble()..Long.MAX_VALUE.toDouble()) {
+            value.toLong()
+        } else {
+            value
+        }
+
+        is Map<*, *> -> value.entries.associate { (key, item) -> key.toString() to wholeNumbers(item) }
+
+        is List<*> -> value.map { wholeNumbers(it) }
+
+        else -> value
     }
 
     /** Body for `POST /json/state` that makes WLED reboot. */

@@ -15,6 +15,7 @@ import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.model.wledapi.Info
 import ca.cgagnier.wlednativeandroid.service.DeviceDiscovery
 import ca.cgagnier.wlednativeandroid.service.DeviceFirstContactService
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
@@ -44,7 +45,8 @@ private val JSON = "application/json".toMediaType()
  *
  *  1. Join the device's setup AP (system-confirmed on Android 10+; joined by the user in Settings before).
  *  2. Verify it is WLED and read its MAC (`GET /json/info`).
- *  3. Push home WiFi credentials (`POST /json/cfg`) and reboot it (`POST /json/state {"rb":true}`).
+ *  3. Push home WiFi credentials and the brightness limiter for the lanterns' power supply
+ *     (`POST /json/cfg`), then reboot it (`POST /json/state {"rb":true}`).
  *  4. Drop the AP, let the phone fall back to its normal WiFi.
  *  5. Wait for the device to re-appear over mDNS, matching on MAC, and add it to the app.
  *
@@ -75,7 +77,7 @@ class WledProvisioningService @Inject constructor(
             }
 
             emit(ProvisioningProgress.SendingCredentials)
-            postCredentials(http, request)
+            postCredentials(http, request, powerLimit(http))
 
             emit(ProvisioningProgress.RebootingDevice)
             delay(ProvisioningDefaults.CONFIG_WRITE_GRACE_MS)
@@ -189,8 +191,31 @@ class WledProvisioningService @Inject constructor(
         }
     }
 
-    private fun postCredentials(http: OkHttpClient, request: ProvisioningRequest) {
-        val body = ProvisioningPayloads.wifiConfigJson(request.homeSsid, request.homePassword, request.timezone)
+    /**
+     * The brightness limiter for the lanterns' power supply ([ProvisioningDefaults.POWER_LIMIT_MA]), sent
+     * with the WiFi credentials. Null if the device's LED setup could not be read: setup goes on without it.
+     */
+    private fun powerLimit(http: OkHttpClient): Map<String, Any>? = try {
+        http.newCall(Request.Builder().url(apUrl("/json/cfg")).build()).execute().use { response ->
+            val cfg = if (response.isSuccessful) {
+                moshi.adapter(
+                    Map::class.java,
+                ).fromJson(response.body.string())
+            } else {
+                null
+            }
+            cfg?.let { ProvisioningPayloads.powerLimitConfig(it) }
+        }
+    } catch (e: IOException) {
+        Log.w(TAG, "Could not read the LED setup; leaving the brightness limiter as it is", e)
+        null
+    } catch (e: JsonDataException) {
+        Log.w(TAG, "Unexpected LED setup; leaving the brightness limiter as it is", e)
+        null
+    }
+
+    private fun postCredentials(http: OkHttpClient, request: ProvisioningRequest, led: Map<String, Any>?) {
+        val body = ProvisioningPayloads.wifiConfigJson(request.homeSsid, request.homePassword, request.timezone, led)
         val call = Request.Builder()
             .url(apUrl("/json/cfg"))
             .post(body.toRequestBody(JSON))
