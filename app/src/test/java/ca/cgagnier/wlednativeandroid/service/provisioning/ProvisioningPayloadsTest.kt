@@ -70,4 +70,11 @@ class ProvisioningPayloadsTest {
         assertEquals(null, ProvisioningPayloads.powerLimitConfig(parse("""{"hw":{"led":{}}}""")))
         assertEquals(null, ProvisioningPayloads.powerLimitConfig(parse("""{}""")))
     }
+
+    @Test
+    fun deviceNameIsSavedOnTheDevice() {
+        val json = ProvisioningPayloads.wifiConfigJson("Home", "secret123", name = "Living Room Parol")
+        assertEquals("""{"nw":{"ins":[{"ssid":"Home","psk":"secret123"}]},"id":{"name":"Living Room Parol"}}""", json)
+        assertFalse(ProvisioningPayloads.wifiConfigJson("Home", "secret123", name = " ").contains("\"id\""))
+    }
 }

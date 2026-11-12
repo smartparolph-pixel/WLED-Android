@@ -40,6 +40,7 @@ sealed interface ProvisionStep {
         val errorDetail: String? = null,
         val apSsidError: Int? = null,
         val apPasswordError: Int? = null,
+        val nameError: Int? = null,
     ) : ProvisionStep
     data class Working(val progress: ProvisioningProgress) : ProvisionStep
 
@@ -52,6 +53,8 @@ sealed interface ProvisionStep {
 }
 
 data class ProvisionState(
+    /** The lantern's name, saved on it so every phone shows the same name. */
+    val deviceName: String = ProvisioningDefaults.DEVICE_NAME,
     val homeSsid: String = "",
     val homePassword: String = "",
     /** Start of the device's setup network name. Factory-flashed products may use their own. */
@@ -70,6 +73,10 @@ class ProvisionViewModel @Inject constructor(
     var state by mutableStateOf(ProvisionState())
         private set
     private var job: Job? = null
+
+    fun setDeviceName(value: String) {
+        if (state.step is ProvisionStep.Form) state = state.copy(deviceName = value)
+    }
 
     fun setSsid(value: String) {
         if (state.step is ProvisionStep.Form) state = state.copy(homeSsid = value)
@@ -99,6 +106,7 @@ class ProvisionViewModel @Inject constructor(
             apSsidPrefix = state.apSsidPrefix.trim(),
             apPassword = state.apPassword.ifEmpty { null },
             timezone = TimezoneCatalog.settingFor(TimeZone.getDefault().id, System.currentTimeMillis()),
+            deviceName = state.deviceName.trim(),
         )
         state = state.copy(step = ProvisionStep.Working(ProvisioningProgress.JoiningSetupNetwork))
         job = viewModelScope.launch {
@@ -126,14 +134,24 @@ class ProvisionViewModel @Inject constructor(
 
     /** Returns the form with its errors, or null when everything is valid. */
     private fun validate(): ProvisionStep.Form? {
+        val name = state.deviceName.trim()
         val form = ProvisionStep.Form(
+            nameError = when {
+                name.isEmpty() -> R.string.provision_error_name_required
+
+                name.toByteArray(Charsets.UTF_8).size > ProvisioningDefaults.DEVICE_NAME_MAX_BYTES ->
+                    R.string.provision_error_name_too_long
+
+                else -> null
+            },
             ssidError = R.string.provision_error_ssid_required.takeIf { state.homeSsid.isBlank() },
             apSsidError = R.string.provision_error_ap_name_required.takeIf { state.apSsidPrefix.isBlank() },
             apPasswordError = R.string.provision_error_ap_password_length.takeIf {
                 state.apPassword.isNotEmpty() && state.apPassword.length !in WPA2_MIN_LENGTH..WPA2_MAX_LENGTH
             },
         )
-        return form.takeIf { it.ssidError != null || it.apSsidError != null || it.apPasswordError != null }
+        val errors = listOf(form.nameError, form.ssidError, form.apSsidError, form.apPasswordError)
+        return form.takeIf { errors.any { it != null } }
     }
 
     /** Preloads every preset pack on the new device, leaving [PresetPacks.PLAYS_AFTER_SETUP] playing. */

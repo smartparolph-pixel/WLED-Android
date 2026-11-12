@@ -234,7 +234,6 @@
     <string name="preset_pack_repair_failed">修复失败。请检查与设备的连接后重试。</string>
 
     <!-- Main page shortcuts -->
-    <string name="shortcut_time_zone">时区</string>
     <string name="shortcut_pick_device">选择设备</string>
 
     <!-- Preset editor -->
@@ -302,4 +301,17 @@
     <string name="app_lock_unlock">解锁</string>
     <string name="app_lock_turned_off_title">应用锁已关闭</string>
     <string name="app_lock_turned_off">本机已不再设置屏幕锁，因此应用锁已关闭。设置屏幕锁后可重新开启。</string>
+
+    <!-- Share Parol and lantern name -->
+    <string name="shortcut_share">分享 Parol</string>
+    <string name="share_title">分享 %1$s</string>
+    <string name="share_qr_description">在另一部手机上添加 %1$s 的二维码</string>
+    <string name="share_instructions">另一部手机连接同一 WiFi 后，打开 Sinag，在菜单中选择“扫描 Parol 二维码”，或用手机相机扫描此码。</string>
+    <string name="share_scan_menu_item">扫描 Parol 二维码</string>
+    <string name="share_scan_not_parol">此二维码不是 Sinag 灯笼二维码。</string>
+    <string name="share_scan_unavailable">此手机无法使用二维码扫描。</string>
+    <string name="provision_device_name">灯笼名称</string>
+    <string name="provision_device_name_hint">会显示在所有使用此灯笼的手机上。</string>
+    <string name="provision_error_name_required">请输入灯笼名称。</string>
+    <string name="provision_error_name_too_long">名称太长。</string>
 </resources>

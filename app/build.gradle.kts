@@ -103,6 +103,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.google.code.scanner)
+    implementation(libs.zxing.core)
     implementation(libs.androidx.adaptive)
     implementation(libs.androidx.adaptive.layout)
     implementation(libs.androidx.adaptive.navigation)

@@ -37,6 +37,15 @@ class DeepLinkHandler @Inject constructor() {
         private const val SCHEME_HTTP = "http"
         private val MAC_ADDRESS_REGEX = Regex("^[0-9A-Fa-f]{12}$")
 
+        /** The link a "Share Parol" QR code holds; opening it on another phone adds the lantern there. */
+        fun shareLink(address: String): String = "$SCHEME_WLED://$address"
+
+        /** Opens [uri] (e.g. a scanned share link) in [MainActivity], which adds and shows the lantern. */
+        fun createViewIntent(context: Context, uri: Uri): Intent = Intent(Intent.ACTION_VIEW, uri)
+            .setClass(context, MainActivity::class.java)
+            .setPackage(context.packageName)
+            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
         /**
          * Creates an Intent to open the app with the specified device.
          * This is shared between widgets, device controls, and other launch points.
@@ -45,6 +54,7 @@ class DeepLinkHandler @Inject constructor() {
          * @param macAddress The device's MAC address
          * @return An Intent configured to open the device in the app
          */
+
         fun createDeviceIntent(context: Context, macAddress: String): Intent =
             Intent(Intent.ACTION_VIEW, "$SCHEME_WLED://$macAddress".toUri())
                 .setClass(context, MainActivity::class.java)

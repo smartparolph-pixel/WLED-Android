@@ -237,7 +237,6 @@
     <string name="preset_pack_repair_failed">Reparatur fehlgeschlagen. Prüfe die Verbindung zum Gerät und versuche es erneut.</string>
 
     <!-- Main page shortcuts -->
-    <string name="shortcut_time_zone">Zeitzone</string>
     <string name="shortcut_pick_device">Gerät auswählen</string>
 
     <!-- Preset editor -->
@@ -305,4 +304,17 @@
     <string name="app_lock_unlock">Entsperren</string>
     <string name="app_lock_turned_off_title">App-Sperre ausgeschaltet</string>
     <string name="app_lock_turned_off">Dieses Telefon hat keine Displaysperre mehr, daher wurde die App-Sperre ausgeschaltet. Richte eine Displaysperre ein, um sie wieder einzuschalten.</string>
+
+    <!-- Share Parol and lantern name -->
+    <string name="shortcut_share">Parol teilen</string>
+    <string name="share_title">%1$s teilen</string>
+    <string name="share_qr_description">QR-Code, um %1$s auf einem anderen Telefon hinzuzufügen</string>
+    <string name="share_instructions">Verbinde das andere Telefon mit demselben WLAN, öffne Sinag und wähle im Menü „Parol-QR-Code scannen“ – oder scanne diesen Code mit der Kamera des Telefons.</string>
+    <string name="share_scan_menu_item">Parol-QR-Code scannen</string>
+    <string name="share_scan_not_parol">Dieser QR-Code ist kein Sinag-Laternen-Code.</string>
+    <string name="share_scan_unavailable">Der QR-Scanner ist auf diesem Telefon nicht verfügbar.</string>
+    <string name="provision_device_name">Name der Laterne</string>
+    <string name="provision_device_name_hint">Wird auf jedem Telefon angezeigt, das diese Laterne nutzt.</string>
+    <string name="provision_error_name_required">Gib einen Namen für die Laterne ein.</string>
+    <string name="provision_error_name_too_long">Der Name ist zu lang.</string>
 </resources>

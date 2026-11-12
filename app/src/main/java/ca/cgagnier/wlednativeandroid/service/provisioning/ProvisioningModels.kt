@@ -33,6 +33,12 @@ object ProvisioningDefaults {
      * headroom below the supply's rating. WLED dims all LEDs to stay under it.
      */
     const val POWER_LIMIT_MA = 2000
+
+    /** Suggested name for a new lantern; the user can change it before setup starts. */
+    const val DEVICE_NAME = "Living Room Parol"
+
+    /** WLED keeps 32 bytes of the device name (`id.name`). */
+    const val DEVICE_NAME_MAX_BYTES = 32
 }
 
 data class ProvisioningRequest(
@@ -45,6 +51,8 @@ data class ProvisioningRequest(
     val apPassword: String? = ProvisioningDefaults.AP_PASSWORD,
     /** Sent along with the credentials so the device shows local time right away. Null leaves it unchanged. */
     val timezone: WledTimezoneSetting? = null,
+    /** Saved on the device (`id.name`), so every phone shows the same name. Null leaves it unchanged. */
+    val deviceName: String? = null,
 )
 
 /** Steps surfaced to the UI. */
@@ -82,6 +90,7 @@ object ProvisioningPayloads {
         password: String,
         timezone: WledTimezoneSetting? = null,
         led: Map<String, Any>? = null,
+        name: String? = null,
     ): String {
         val payload = mutableMapOf<String, Any>(
             "nw" to mapOf(
@@ -92,6 +101,7 @@ object ProvisioningPayloads {
         )
         if (timezone != null) payload["if"] = mapOf("ntp" to TimezonePayloads.ntpConfig(timezone))
         if (led != null) payload["hw"] = mapOf("led" to led)
+        if (!name.isNullOrBlank()) payload["id"] = mapOf("name" to name)
         return moshi.adapter(Any::class.java).toJson(payload)
     }
 

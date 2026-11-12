@@ -38,7 +38,7 @@ import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.PresetPackDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.schedule.ScheduleDialog
-import ca.cgagnier.wlednativeandroid.ui.homeScreen.timezone.DeviceTimezoneDialog
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.share.ShareDeviceDialog
 
 private const val DISABLED_ALPHA = 0.38f
 
@@ -46,12 +46,13 @@ private const val DISABLED_ALPHA = 0.38f
 private enum class Shortcut(@param:StringRes val label: Int, @param:DrawableRes val icon: Int) {
     SCHEDULE(R.string.schedule_title, R.drawable.baseline_date_range_24),
     PRESETS(R.string.preset_pack_button, R.drawable.baseline_auto_awesome_24),
-    TIME_ZONE(R.string.shortcut_time_zone, R.drawable.baseline_public_24),
+    SHARE(R.string.shortcut_share, R.drawable.baseline_qr_code_24),
 }
 
 /**
- * Bottom bar on the main page with shortcuts to Schedule, Presets & playlists and Time zone. With one
- * device the feature opens for it straight away; with several, a list asks which one first.
+ * Bottom bar on the main page with shortcuts to Schedule, Presets & playlists and Share Parol. With one
+ * device the feature opens for it straight away; with several, a list asks which one first. The time zone,
+ * set during setup, stays on the device's edit screen.
  */
 @Composable
 fun DeviceShortcutBar(devices: List<DeviceWithState>) {
@@ -90,7 +91,7 @@ fun DeviceShortcutBar(devices: List<DeviceWithState>) {
         when (shortcut) {
             Shortcut.SCHEDULE -> ScheduleDialog(device, close, hiltViewModel(key = key))
             Shortcut.PRESETS -> PresetPackDialog(device, close, hiltViewModel(key = key))
-            Shortcut.TIME_ZONE -> DeviceTimezoneDialog(device.device, close, hiltViewModel(key = key))
+            Shortcut.SHARE -> ShareDeviceDialog(device.device, close)
         }
     }
 }

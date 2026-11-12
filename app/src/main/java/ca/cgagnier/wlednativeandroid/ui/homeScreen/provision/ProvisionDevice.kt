@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -99,6 +100,7 @@ private fun FormStep(
             modifier = Modifier.padding(bottom = 12.dp),
         )
     }
+    DeviceNameField(state, step, viewModel)
     OutlinedTextField(
         value = state.homeSsid,
         onValueChange = viewModel::setSsid,
@@ -129,6 +131,23 @@ private fun FormStep(
         TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         Button(onClick = viewModel::start) { Text(stringResource(R.string.provision_start)) }
     }
+}
+
+/** The lantern's name, pre-filled with a suggestion; saved on the lantern so every phone shows it. */
+@Composable
+private fun DeviceNameField(state: ProvisionState, step: ProvisionStep.Form, viewModel: ProvisionViewModel) {
+    OutlinedTextField(
+        value = state.deviceName,
+        onValueChange = viewModel::setDeviceName,
+        label = { Text(stringResource(R.string.provision_device_name)) },
+        isError = step.nameError != null,
+        supportingText = {
+            Text(stringResource(step.nameError ?: R.string.provision_device_name_hint))
+        },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, capitalization = KeyboardCapitalization.Words),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 /**

@@ -236,7 +236,6 @@
     <string name="preset_pack_repair_failed">Impossible de réparer le fichier. Vérifiez la connexion à l\'appareil et réessayez.</string>
 
     <!-- Main page shortcuts -->
-    <string name="shortcut_time_zone">Fuseau horaire</string>
     <string name="shortcut_pick_device">Choisir un appareil</string>
 
     <!-- Preset editor -->
@@ -304,4 +303,17 @@
     <string name="app_lock_unlock">Déverrouiller</string>
     <string name="app_lock_turned_off_title">Verrouillage de l\'app désactivé</string>
     <string name="app_lock_turned_off">Ce téléphone n\'a plus de verrouillage d\'écran, le verrouillage de l\'app a donc été désactivé. Configurez un verrouillage d\'écran pour le réactiver.</string>
+
+    <!-- Share Parol and lantern name -->
+    <string name="shortcut_share">Partager le Parol</string>
+    <string name="share_title">Partager %1$s</string>
+    <string name="share_qr_description">QR code pour ajouter %1$s sur un autre téléphone</string>
+    <string name="share_instructions">Sur l\'autre téléphone, connectez-vous au même WiFi, ouvrez Sinag et choisissez Scanner un QR code Parol dans le menu, ou scannez ce code avec l\'appareil photo du téléphone.</string>
+    <string name="share_scan_menu_item">Scanner un QR code Parol</string>
+    <string name="share_scan_not_parol">Ce QR code n\'est pas un code de lanterne Sinag.</string>
+    <string name="share_scan_unavailable">Le scanner de QR code n\'est pas disponible sur ce téléphone.</string>
+    <string name="provision_device_name">Nom de la lanterne</string>
+    <string name="provision_device_name_hint">Affiché sur chaque téléphone qui utilise cette lanterne.</string>
+    <string name="provision_error_name_required">Saisissez un nom pour la lanterne.</string>
+    <string name="provision_error_name_too_long">Le nom est trop long.</string>
 </resources>

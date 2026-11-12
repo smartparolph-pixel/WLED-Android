@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
@@ -30,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.share.scanShareCode
 import ca.cgagnier.wlednativeandroid.util.openUriSafely
 
 @Composable
@@ -101,6 +103,19 @@ private fun DrawerMainActions(
         },
         selected = false,
         onClick = provisionDevice,
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+    )
+    val context = LocalContext.current
+    NavigationDrawerItem(
+        label = { Text(text = stringResource(R.string.share_scan_menu_item)) },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.baseline_qr_code_24),
+                contentDescription = stringResource(R.string.share_scan_menu_item),
+            )
+        },
+        selected = false,
+        onClick = { scanShareCode(context) },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
     )
     ToggleHiddenDeviceButton(showHiddenDevices, toggleShowHiddenDevices)

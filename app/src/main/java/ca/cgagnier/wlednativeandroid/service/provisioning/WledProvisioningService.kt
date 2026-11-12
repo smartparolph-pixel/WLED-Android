@@ -215,7 +215,13 @@ class WledProvisioningService @Inject constructor(
     }
 
     private fun postCredentials(http: OkHttpClient, request: ProvisioningRequest, led: Map<String, Any>?) {
-        val body = ProvisioningPayloads.wifiConfigJson(request.homeSsid, request.homePassword, request.timezone, led)
+        val body = ProvisioningPayloads.wifiConfigJson(
+            request.homeSsid,
+            request.homePassword,
+            request.timezone,
+            led,
+            request.deviceName,
+        )
         val call = Request.Builder()
             .url(apUrl("/json/cfg"))
             .post(body.toRequestBody(JSON))
