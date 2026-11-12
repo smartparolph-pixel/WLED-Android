@@ -5,7 +5,7 @@ download page when it is not.
 
 | File | Upload to | Notes |
 |---|---|---|
-| `smartparol.html` | `https://sinagtechlabs.com/smartparol.html` (and the same on `www.`) | Fill in `APP_STORE_URL` and `ANDROID_PACKAGE` at the top of the script once the apps are published. |
+| `sinaginstall.html` | `https://sinagtechlabs.com/sinaginstall.html` (and the same on `www.`) | Fill in `APP_STORE_URL` and `ANDROID_PACKAGE` at the top of the script once the apps are published. |
 | `.well-known/apple-app-site-association` | `https://sinagtechlabs.com/.well-known/apple-app-site-association` | No file extension. Served as `application/json` over HTTPS, no redirects. Replace `TEAMID.BUNDLEID` with Sinag's Apple Team ID and bundle id. |
 | `.well-known/assetlinks.json` | `https://sinagtechlabs.com/.well-known/assetlinks.json` | Replace the package name and the SHA-256 of the **Play app signing** key (Play Console → Setup → App signing). |
 
@@ -13,7 +13,7 @@ Both `.well-known` files must also be served on `www.sinagtechlabs.com` if links
 
 ## Link format
 
-`https://sinagtechlabs.com/smartparol.html?a=<lantern address>`, e.g. `?a=192.168.68.60`.
+`https://sinagtechlabs.com/sinaginstall.html?a=<lantern address>`, e.g. `?a=192.168.68.60`.
 The address only works on the lantern's home WiFi, so the link reveals nothing useful elsewhere.
 
 ## Before switching the QR code to this link

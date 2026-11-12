@@ -29,7 +29,7 @@ sealed class DeepLink {
  * - wled://{mac_address} - e.g., wled://AABBCCDDEEFF
  * - wled://{ip_or_hostname} - e.g., wled://192.168.1.50 or wled://wled.local
  * - http://4.3.2.1 - Default WLED AP mode IP
- * - https://sinagtechlabs.com/smartparol.html?a={ip_or_hostname} - a "Share Parol" web link
+ * - https://sinagtechlabs.com/sinaginstall.html?a={ip_or_hostname} - a "Share Parol" web link
  */
 class DeepLinkHandler @Inject constructor() {
 
@@ -38,13 +38,13 @@ class DeepLinkHandler @Inject constructor() {
         private const val SCHEME_HTTP = "http"
         private const val SCHEME_HTTPS = "https"
         private val WEB_HOSTS = setOf("sinagtechlabs.com", "www.sinagtechlabs.com")
-        private const val WEB_SHARE_PATH = "/smartparol.html"
+        private const val WEB_SHARE_PATH = "/sinaginstall.html"
         private const val WEB_SHARE_PAGE = "https://sinagtechlabs.com$WEB_SHARE_PATH"
         private const val WEB_ADDRESS_PARAM = "a"
         private val ADDRESS_REGEX = Regex("^[A-Za-z0-9.-]{1,253}$")
 
         /**
-         * The QR code uses the web link once sinagtechlabs.com/smartparol.html and the app-link files are
+         * The QR code uses the web link once sinagtechlabs.com/sinaginstall.html and the app-link files are
          * live (see docs/website); until then it uses the wled:// link, which needs Sinag installed.
          */
         const val SHARE_QR_USES_WEB_LINK = false

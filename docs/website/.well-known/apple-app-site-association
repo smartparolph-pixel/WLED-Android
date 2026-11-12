@@ -4,7 +4,7 @@
       {
         "appIDs": ["TEAMID.BUNDLEID"],
         "components": [
-          { "/": "/smartparol.html", "comment": "Share Parol links: opens Sinag when installed" }
+          { "/": "/sinaginstall.html", "comment": "Share Parol links: opens Sinag when installed" }
         ]
       }
     ]
