@@ -319,4 +319,7 @@
     <string name="provision_device_name_hint">Shown on every phone that uses this lantern.</string>
     <string name="provision_error_name_required">Enter a name for the lantern.</string>
     <string name="provision_error_name_too_long">The name is too long.</string>
+    <string name="share_get_app">Don\'t have Sinag? Get it free from the App Store or Google Play.</string>
+    <string name="share_link">Share link</string>
+    <string name="share_message">Add my Parol “%1$s” in the Sinag app (on the same WiFi): %2$s</string>
 </resources>

@@ -316,4 +316,7 @@
     <string name="provision_device_name_hint">Affiché sur chaque téléphone qui utilise cette lanterne.</string>
     <string name="provision_error_name_required">Saisissez un nom pour la lanterne.</string>
     <string name="provision_error_name_too_long">Le nom est trop long.</string>
+    <string name="share_get_app">Pas encore Sinag ? Téléchargez-la gratuitement sur l\'App Store ou Google Play.</string>
+    <string name="share_link">Partager le lien</string>
+    <string name="share_message">Ajoutez ma Parol « %1$s » dans l\'app Sinag (sur le même WiFi) : %2$s</string>
 </resources>

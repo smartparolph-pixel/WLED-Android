@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sinag — Add a Parol lantern</title>
+<meta name="description" content="Get the Sinag app to control your PAROL lantern.">
+<style>
+  :root {
+    --navy: #0E1B3D;
+    --navy-2: #16295A;
+    --gold: #E2A72E;
+    --text: #F5F7FB;
+    --muted: #B8C2D9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at 50% 0%, var(--navy-2), var(--navy) 70%);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  main { width: 100%; max-width: 440px; text-align: center; }
+  .logo { font-size: 44px; font-weight: 700; letter-spacing: 0.5px; margin: 0; }
+  .logo span { color: var(--gold); }
+  .by { font-size: 11px; letter-spacing: 2px; color: var(--muted); margin: 4px 0 28px; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { color: var(--muted); line-height: 1.5; margin: 0 0 20px; }
+  .card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 24px 20px;
+  }
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    margin: 10px 0;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .primary { background: var(--gold); color: var(--navy); }
+  .secondary { background: transparent; color: var(--text); border: 1px solid rgba(255, 255, 255, 0.3); }
+  .hidden { display: none; }
+  ol { text-align: left; color: var(--muted); line-height: 1.6; padding-left: 20px; margin: 16px 0 0; }
+  footer { margin-top: 24px; font-size: 12px; color: var(--muted); }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <p class="logo">sin<span>a</span>g</p>
+  <p class="by">BY SINAGTECH LABS INC.</p>
+
+  <div class="card">
+    <h1 id="title">Get Sinag for your Parol</h1>
+    <p id="lead">Sinag lets you control your PAROL lantern: playlists, schedules and brightness.</p>
+
+    <!-- Shown when someone shared a lantern (the link has ?a=address). -->
+    <a id="open-app" class="btn primary hidden" href="#">Open in Sinag</a>
+
+    <a id="app-store" class="btn primary" href="#">Download on the App Store</a>
+    <a id="google-play" class="btn primary" href="#">Get it on Google Play</a>
+
+    <ol id="steps" class="hidden">
+      <li>Install Sinag (free).</li>
+      <li>Connect this phone to the same WiFi as the lantern.</li>
+      <li>Scan the QR code again, or tap <strong>Open in Sinag</strong> above.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <a href="https://sinagtechlabs.com/">sinagtechlabs.com</a>
+  </footer>
+</main>
+
+<script>
+  // ---- Fill in once the apps are published -------------------------------------------------
+  // The App Store link (https://apps.apple.com/app/id<number>) and the Android package name.
+  var APP_STORE_URL = "https://apps.apple.com/app/idXXXXXXXXXX";      // TODO: Sinag App Store id
+  var ANDROID_PACKAGE = "com.sinagtechlabs.sinag";                     // TODO: Sinag package name
+  // -------------------------------------------------------------------------------------------
+  var PLAY_URL = "https://play.google.com/store/apps/details?id=" + ANDROID_PACKAGE;
+
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+
+  var appStore = document.getElementById("app-store");
+  var googlePlay = document.getElementById("google-play");
+  appStore.href = APP_STORE_URL;
+  googlePlay.href = PLAY_URL;
+  // On a phone, show only its own store; on a computer, show both.
+  if (isIOS) googlePlay.classList.add("hidden");
+  if (isAndroid) appStore.classList.add("hidden");
+
+  // A shared lantern: ?a=<address on the home WiFi>. Only plain host names and IP addresses are accepted.
+  var address = new URLSearchParams(location.search).get("a");
+  if (address && /^[A-Za-z0-9.\-]{1,253}$/.test(address)) {
+    document.getElementById("title").textContent = "Someone shared a Parol with you";
+    document.getElementById("lead").textContent =
+      "Open it in Sinag to control the lantern. Don't have Sinag yet? Install it first, it's free.";
+    var open = document.getElementById("open-app");
+    open.href = "wled://" + address;
+    open.classList.remove("hidden");
+    appStore.classList.replace("primary", "secondary");
+    googlePlay.classList.replace("primary", "secondary");
+    document.getElementById("steps").classList.remove("hidden");
+  }
+</script>
+</body>
+</html>

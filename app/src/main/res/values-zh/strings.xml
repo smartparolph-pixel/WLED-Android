@@ -314,4 +314,7 @@
     <string name="provision_device_name_hint">会显示在所有使用此灯笼的手机上。</string>
     <string name="provision_error_name_required">请输入灯笼名称。</string>
     <string name="provision_error_name_too_long">名称太长。</string>
+    <string name="share_get_app">还没有 Sinag？可在 App Store 或 Google Play 免费下载。</string>
+    <string name="share_link">分享链接</string>
+    <string name="share_message">在 Sinag 应用中添加我的 Parol“%1$s”（需连接同一 WiFi）：%2$s</string>
 </resources>

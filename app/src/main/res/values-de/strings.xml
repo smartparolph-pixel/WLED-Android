@@ -317,4 +317,7 @@
     <string name="provision_device_name_hint">Wird auf jedem Telefon angezeigt, das diese Laterne nutzt.</string>
     <string name="provision_error_name_required">Gib einen Namen für die Laterne ein.</string>
     <string name="provision_error_name_too_long">Der Name ist zu lang.</string>
+    <string name="share_get_app">Noch kein Sinag? Kostenlos im App Store oder bei Google Play laden.</string>
+    <string name="share_link">Link teilen</string>
+    <string name="share_message">Füge meine Parol „%1$s“ in der Sinag-App hinzu (im selben WLAN): %2$s</string>
 </resources>

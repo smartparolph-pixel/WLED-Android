@@ -41,6 +41,16 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="wled" />
             </intent-filter>
+            <!-- Share Parol web link: opens Sinag once sinagtechlabs.com serves assetlinks.json -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="sinagtechlabs.com" />
+                <data android:host="www.sinagtechlabs.com" />
+                <data android:path="/smartparol.html" />
+            </intent-filter>
             <!-- Deep link: http://4.3.2.1 AP mode handler -->
             <intent-filter android:autoVerify="false">
                 <action android:name="android.intent.action.VIEW" />

@@ -1,6 +1,7 @@
 package ca.cgagnier.wlednativeandroid.ui.homeScreen.share
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -21,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,9 +31,11 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.set
 import androidx.core.net.toUri
 import ca.cgagnier.wlednativeandroid.R
+import ca.cgagnier.wlednativeandroid.domain.DeepLink
 import ca.cgagnier.wlednativeandroid.domain.DeepLinkHandler
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.util.openUriSafely
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
@@ -44,13 +49,21 @@ private const val QR_MARGIN_MODULES = 1
 
 /**
  * "Share Parol": a QR code another phone on the same WiFi scans (Sinag → menu → Scan Parol QR code, or the
- * phone's camera) to add this lantern. It holds the lantern's address as a `wled://` link; no password or
- * account is involved, since anyone on the home WiFi can already reach the lantern.
+ * phone's camera) to add this lantern, and a Share link button that sends the web link through any app.
+ * The links hold only the lantern's home-network address; no password or account is involved, since
+ * anyone on the home WiFi can already reach the lantern.
  */
 @Composable
 fun ShareDeviceDialog(device: Device, onDismiss: () -> Unit) {
-    val link = DeepLinkHandler.shareLink(device.address)
+    val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
+    val link = DeepLinkHandler.qrLink(device.address)
     val qr = remember(link) { qrBitmap(link) }
+    val message = stringResource(
+        R.string.share_message,
+        deviceName(device),
+        DeepLinkHandler.webShareLink(device.address),
+    )
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.share_title, deviceName(device))) },
@@ -77,10 +90,29 @@ fun ShareDeviceDialog(device: Device, onDismiss: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp),
                 )
+                TextButton(
+                    onClick = { uriHandler.openUriSafely(DeepLinkHandler.DOWNLOAD_PAGE) },
+                    modifier = Modifier.padding(top = 8.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.share_get_app),
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.done)) } },
+        confirmButton = {
+            TextButton(onClick = { shareText(context, message) }) { Text(stringResource(R.string.share_link)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.done)) } },
     )
+}
+
+/** Opens the system share sheet (Messages, WhatsApp, Viber, …) with [text]. */
+private fun shareText(context: Context, text: String) {
+    val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
+    context.startActivity(Intent.createChooser(send, null))
 }
 
 /** Black-on-white QR code for [text]; the white background comes from the surrounding Modifier. */
@@ -109,9 +141,9 @@ fun scanShareCode(context: Context) {
     val options = GmsBarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
     GmsBarcodeScanning.getClient(context, options).startScan()
         .addOnSuccessListener { barcode ->
-            val raw = barcode.rawValue.orEmpty()
-            if (raw.startsWith("wled://", ignoreCase = true)) {
-                context.startActivity(DeepLinkHandler.createViewIntent(context, raw.toUri()))
+            val uri = barcode.rawValue.orEmpty().toUri()
+            if (DeepLinkHandler().parseUri(uri) is DeepLink.Address) {
+                context.startActivity(DeepLinkHandler.createViewIntent(context, uri))
             } else {
                 Toast.makeText(context, R.string.share_scan_not_parol, Toast.LENGTH_LONG).show()
             }
