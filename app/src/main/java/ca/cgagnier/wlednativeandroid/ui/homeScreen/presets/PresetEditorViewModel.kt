@@ -190,6 +190,12 @@ class PresetEditorViewModel @Inject constructor(private val service: PresetEdito
         }
     }
 
+    /** Makes the lantern start [playlist] when power comes back (plugged in, after a power cut). */
+    fun setPowerOn(playlist: SavedPlaylist) {
+        val device = device ?: return
+        perform { service.setPowerOn(device, playlist.id) }
+    }
+
     fun deletePlaylist() {
         val id = (screen as? PresetEditorScreen.Playlist)?.draft?.id ?: return
         send(PresetEditorPayloads.deleteJson(id))

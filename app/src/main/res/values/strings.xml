@@ -327,4 +327,7 @@
     <string name="app_lock_mode_whole_hint">Opening Sinag needs this phone\'s fingerprint, face or screen lock.</string>
     <string name="app_lock_ask_again">Ask again after:</string>
     <string name="app_lock_settings_prompt_title">Unlock to change settings</string>
+    <string name="preset_editor_power_on">Plays when powered on</string>
+    <string name="preset_editor_power_on_none">None (static light)</string>
+    <string name="preset_editor_power_on_hint">Starts at full brightness when the lantern is plugged in or the power comes back. Tap to change.</string>
 </resources>

@@ -19,6 +19,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +31,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -132,6 +138,8 @@ private fun Problem(text: Int, onRetry: () -> Unit) {
 @Composable
 private fun EditorLists(viewModel: PresetEditorViewModel, data: PresetEditorData) {
     val playlists = data.presets.playlists
+    EditorError(viewModel)
+    PowerOnSection(viewModel, data)
     EditorSectionLabel(R.string.preset_editor_playlists)
     EditorSectionCard {
         playlists.forEachIndexed { index, playlist ->
@@ -155,6 +163,35 @@ private fun EditorLists(viewModel: PresetEditorViewModel, data: PresetEditorData
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(vertical = 16.dp, horizontal = 4.dp),
     )
+}
+
+/** "Plays when powered on": the playlist the lantern starts when it is plugged in or power comes back. */
+@Composable
+private fun PowerOnSection(viewModel: PresetEditorViewModel, data: PresetEditorData) {
+    var open by remember { mutableStateOf(false) }
+    val current = data.presets.playlists.firstOrNull { it.id == data.powerOnId }
+    EditorSectionLabel(R.string.preset_editor_power_on)
+    EditorSectionCard {
+        Box {
+            ListRow(
+                title = current?.name ?: stringResource(R.string.preset_editor_power_on_none),
+                summary = stringResource(R.string.preset_editor_power_on_hint),
+                locked = false,
+                onClick = { if (!viewModel.saving) open = true },
+            )
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                data.presets.playlists.forEach { playlist ->
+                    DropdownMenuItem(
+                        text = { Text(playlist.name) },
+                        onClick = {
+                            open = false
+                            if (playlist.id != data.powerOnId) viewModel.setPowerOn(playlist)
+                        },
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable

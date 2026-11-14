@@ -325,4 +325,7 @@
     <string name="app_lock_mode_whole_hint">Zum Öffnen von Sinag sind Fingerabdruck, Gesicht oder Displaysperre dieses Telefons nötig.</string>
     <string name="app_lock_ask_again">Erneut fragen nach:</string>
     <string name="app_lock_settings_prompt_title">Entsperren, um Einstellungen zu ändern</string>
+    <string name="preset_editor_power_on">Beim Einschalten abspielen</string>
+    <string name="preset_editor_power_on_none">Keine (statisches Licht)</string>
+    <string name="preset_editor_power_on_hint">Startet mit voller Helligkeit, wenn die Laterne eingesteckt wird oder der Strom zurückkommt. Tippen zum Ändern.</string>
 </resources>

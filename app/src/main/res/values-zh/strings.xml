@@ -322,4 +322,7 @@
     <string name="app_lock_mode_whole_hint">打开 Sinag 时需要本机的指纹、面容或屏幕锁。</string>
     <string name="app_lock_ask_again">多久后再次要求：</string>
     <string name="app_lock_settings_prompt_title">解锁以更改设置</string>
+    <string name="preset_editor_power_on">通电时播放</string>
+    <string name="preset_editor_power_on_none">无（静态灯光）</string>
+    <string name="preset_editor_power_on_hint">灯笼插电或恢复供电时以全亮度开始播放。点按可更改。</string>
 </resources>

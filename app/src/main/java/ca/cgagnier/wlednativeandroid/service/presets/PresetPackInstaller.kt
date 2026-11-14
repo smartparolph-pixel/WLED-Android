@@ -118,8 +118,34 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
                 PackSetupResult.PresetsUnreadable(it.kept, it.dropped, it.problem.orEmpty())
             }
 
-            else -> install(api, PresetPackPlanner.planAll(packs, presets, effects), presets)
+            else -> install(api, PresetPackPlanner.planAll(packs, presets, effects), presets).also {
+                // Best effort: a failure here must not hide that the playlists are ready.
+                if (it is PackSetupResult.Ready) {
+                    runCatching { ensurePowerOn(api, it, presets) }
+                        .onFailure { e -> Log.w(TAG, "Could not check the power-on playlist", e) }
+                }
+            }
         }
+    }
+
+    /**
+     * Makes the lantern start 🎆 Sky Full of Sparks at 100% when power comes back, unless another power-on
+     * playlist is already set and still exists. A settings PIN on the lantern makes this a no-op.
+     */
+    private suspend fun ensurePowerOn(api: DeviceApi, ready: PackSetupResult.Ready, presets: Map<*, *>) {
+        val cfg =
+            api.getConfig().body()?.string()?.let {
+                runCatching { moshi.adapter(Map::class.java).fromJson(it) }.getOrNull()
+            }
+                ?: return
+        val existing = presets.keys.mapNotNull { it.toString().toIntOrNull() }.toSet() + ready.playlistIds.values
+        val target = PowerOn.presetToSet(
+            PowerOn.bootPreset(cfg),
+            existing,
+            ready.playlistIds[PresetPacks.PLAYS_AFTER_SETUP],
+        ) ?: return
+        val response = api.postConfig(PowerOn.configJson(target, PowerOn.FULL_BRIGHTNESS).toRequestBody(JSON))
+        if (!response.isSuccessful) Log.w(TAG, "Could not set the power-on playlist: HTTP ${response.code()}")
     }
 
     /**

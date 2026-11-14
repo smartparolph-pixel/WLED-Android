@@ -324,4 +324,7 @@
     <string name="app_lock_mode_whole_hint">Ouvrir Sinag demande l\'empreinte, le visage ou le verrouillage d\'écran de ce téléphone.</string>
     <string name="app_lock_ask_again">Redemander après :</string>
     <string name="app_lock_settings_prompt_title">Déverrouiller pour modifier les réglages</string>
+    <string name="preset_editor_power_on">Lecture à la mise sous tension</string>
+    <string name="preset_editor_power_on_none">Aucune (lumière fixe)</string>
+    <string name="preset_editor_power_on_hint">Démarre à pleine luminosité quand la lanterne est branchée ou que le courant revient. Touchez pour changer.</string>
 </resources>
