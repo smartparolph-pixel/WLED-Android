@@ -2,9 +2,12 @@
 <manifest xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Only used when the user taps "Use phone location" for sunrise/sunset schedules. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,10 +16,10 @@
         android:allowBackup="true"
         android:enableOnBackInvokedCallback="true"
         android:fullBackupOnly="true"
-        android:icon="@mipmap/ic_launcher_rgb"
+        android:icon="@mipmap/ic_launcher_sinag"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
-        android:roundIcon="@mipmap/ic_launcher_rgb_round"
+        android:roundIcon="@mipmap/ic_launcher_sinag_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         android:usesCleartextTraffic="true">
@@ -38,6 +41,16 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="wled" />
             </intent-filter>
+            <!-- Share Parol web link: opens Sinag once sinagtechlabs.com serves assetlinks.json -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="sinagtechlabs.com" />
+                <data android:host="www.sinagtechlabs.com" />
+                <data android:path="/sinaginstall.html" />
+            </intent-filter>
             <!-- Deep link: http://4.3.2.1 AP mode handler -->
             <intent-filter android:autoVerify="false">
                 <action android:name="android.intent.action.VIEW" />
@@ -46,6 +59,11 @@
                 <data android:scheme="http" android:host="4.3.2.1" />
             </intent-filter>
         </activity>
+
+        <!-- Google's code scanner (Play services) downloads its scanning module ahead of first use. -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
 
         <receiver
             android:name=".widget.WledWidgetReceiver"

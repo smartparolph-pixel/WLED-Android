@@ -1,7 +1,6 @@
 package ca.cgagnier.wlednativeandroid.ui.homeScreen.list
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,7 +40,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -49,7 +47,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceInfoTwoRows
+import ca.cgagnier.wlednativeandroid.ui.components.SinagLockup
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.shortcuts.DeviceShortcutBar
 import ca.cgagnier.wlednativeandroid.ui.theme.DeviceTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -141,6 +142,7 @@ fun DeviceList(
                 onAddDevice = onAddDevice,
             )
         },
+        bottomBar = { DeviceShortcutBar(devices = visibleDevices) },
     ) { innerPadding ->
         PullToRefreshBox(
             modifier = Modifier.padding(innerPadding),
@@ -314,6 +316,7 @@ fun LazyItemScope.DeviceRow(
     viewModel: DeviceWebsocketListViewModel,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val settingsGuard = rememberSettingsGuard()
     var isConfirmingDelete by remember { mutableStateOf(false) }
     val swipeDismissState = rememberSwipeToDismissBoxState(
         positionalThreshold = { distance -> distance * 0.3f },
@@ -327,7 +330,9 @@ fun LazyItemScope.DeviceRow(
         swipeToDismissBoxState = swipeDismissState,
         onDismiss = { direction ->
             if (direction == SwipeToDismissBoxValue.EndToStart) {
-                isConfirmingDelete = true
+                // Removing a lantern is a settings change: with App lock "Settings only" it asks first.
+                coroutineScope.launch { swipeDismissState.reset() }
+                settingsGuard { isConfirmingDelete = true }
             } else if (direction == SwipeToDismissBoxValue.StartToEnd) {
                 coroutineScope.launch {
                     swipeDismissState.reset()
@@ -365,10 +370,7 @@ fun LazyItemScope.DeviceRow(
 @Composable
 fun DeviceListAppBar(modifier: Modifier = Modifier, onOpenDrawer: () -> Unit, onAddDevice: () -> Unit) {
     CenterAlignedTopAppBar(modifier = modifier, title = {
-        Image(
-            painter = painterResource(id = R.drawable.wled_logo_akemi),
-            contentDescription = stringResource(R.string.app_logo),
-        )
+        SinagLockup(modifier = Modifier.height(56.dp))
     }, navigationIcon = {
         IconButton(onClick = onOpenDrawer) {
             Icon(

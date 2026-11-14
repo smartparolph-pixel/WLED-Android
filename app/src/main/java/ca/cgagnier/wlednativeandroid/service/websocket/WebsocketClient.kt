@@ -66,6 +66,7 @@ class WebsocketClient(
 
     private val webSocketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
+            if (isStale(webSocket)) return
             Log.d(TAG, "WebSocket connected for ${deviceState.device.address}")
             deviceState.websocketStatus.value = WebsocketStatus.CONNECTED
             retryCount = 0
@@ -99,10 +100,20 @@ class WebsocketClient(
                 TAG,
                 "WebSocket closing for ${deviceState.device.address}. Code: $code, Reason: $reason",
             )
+            // Finish the close handshake either way.
+            webSocket.close(NORMAL_CLOSURE_STATUS, null)
+            if (isStale(webSocket)) return
+            // The device closed the connection: WLED drops its oldest clients when too many are open
+            // (the list, the device page, a browser...) and all of them when it is short of memory.
+            // Forget this socket and reconnect, or the device would stay "offline" until the next tap.
+            this@WebsocketClient.webSocket = null
             deviceState.websocketStatus.value = WebsocketStatus.DISCONNECTED
+            isConnecting = false
+            reconnect()
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            if (isStale(webSocket)) return
             Log.w(
                 TAG,
                 "WebSocket failure for ${deviceState.device.address}: ${t.message}; Response: $response",
@@ -114,6 +125,12 @@ class WebsocketClient(
             reconnect()
         }
     }
+
+    /**
+     * A callback from a socket that is no longer the current one, e.g. the previous connection failing
+     * after a reconnect. Acting on it would mark the new, working connection as offline.
+     */
+    private fun isStale(socket: WebSocket): Boolean = webSocket != null && socket !== webSocket
 
     /**
      * Saves the device information to the database if it has changed.

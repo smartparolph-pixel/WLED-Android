@@ -6,6 +6,7 @@ import ca.cgagnier.wlednativeandroid.model.wledapi.JsonPost
 import ca.cgagnier.wlednativeandroid.model.wledapi.State
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -23,6 +24,41 @@ interface DeviceApi {
 
     @POST("json/state")
     suspend fun postJson(@Body state: JsonPost): Response<State>
+
+    /** Full device configuration (cfg.json). */
+    @GET("json/cfg")
+    suspend fun getConfig(): Response<ResponseBody>
+
+    @GET("presets.json")
+    suspend fun getPresets(): Response<ResponseBody>
+
+    /** Effect names, in effect id order. */
+    @GET("json/eff")
+    suspend fun getEffects(): Response<List<String>>
+
+    /** Effect metadata (sliders, defaults), in effect id order; "" for an effect without any. */
+    @GET("json/fxdata")
+    suspend fun getEffectData(): Response<List<String>>
+
+    /** Palette names, in palette id order. */
+    @GET("json/pal")
+    suspend fun getPalettes(): Response<List<String>>
+
+    @GET("json/state")
+    suspend fun getState(): Response<State>
+
+    /** Raw state call, e.g. to save a preset. */
+    @POST("json/state")
+    suspend fun postState(@Body state: RequestBody): Response<ResponseBody>
+
+    /** Partial config update. Fields absent from the body are left untouched by the device. */
+    @POST("json/cfg")
+    suspend fun postConfig(@Body config: RequestBody): Response<ResponseBody>
+
+    /** Writes a file on the device, as WLED's backup restore does (e.g. presets.json). */
+    @Multipart
+    @POST("upload")
+    suspend fun uploadFile(@Part file: MultipartBody.Part): Response<ResponseBody>
 
     @Multipart
     @POST("update")
