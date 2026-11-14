@@ -49,4 +49,7 @@ message UserPreferences {
   bool app_lock_enabled = 13;
 
   AppLockTimeout app_lock_timeout = 14;
+
+  // With app_lock_enabled: only changing settings needs the unlock, not opening the app.
+  bool app_lock_settings_only = 15;
 }

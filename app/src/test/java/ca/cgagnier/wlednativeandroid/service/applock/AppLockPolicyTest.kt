@@ -27,4 +27,12 @@ class AppLockPolicyTest {
         assertFalse(AppLockPolicy.shouldLockOnReturn(false, 0, 10 * minute, AppLockTimeout.IMMEDIATELY))
         assertFalse(AppLockPolicy.shouldLockOnReturn(true, null, 10 * minute, AppLockTimeout.IMMEDIATELY))
     }
+
+    @Test
+    fun settingsStayUnlockedForTheChosenTime() {
+        assertTrue(AppLockPolicy.stillUnlocked(0, 2 * minute - 1, AppLockTimeout.TWO_MINUTES))
+        assertFalse(AppLockPolicy.stillUnlocked(0, 2 * minute, AppLockTimeout.TWO_MINUTES))
+        assertFalse(AppLockPolicy.stillUnlocked(0, 0, AppLockTimeout.IMMEDIATELY))
+        assertTrue(AppLockPolicy.stillUnlocked(0, 4 * minute, AppLockTimeout.FIVE_MINUTES))
+    }
 }

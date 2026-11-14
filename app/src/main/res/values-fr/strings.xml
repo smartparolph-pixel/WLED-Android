@@ -290,10 +290,8 @@
 
     <!-- App lock -->
     <string name="app_lock">Verrouillage de l\'app</string>
-    <string name="app_lock_switch">Déverrouiller pour ouvrir Sinag</string>
     <string name="app_lock_hint">Utilise l\'empreinte, le visage ou le verrouillage d\'écran de ce téléphone. Sinag n\'enregistre rien. Le widget de l\'écran d\'accueil continue de fonctionner.</string>
     <string name="app_lock_needs_screen_lock">Configurez un verrouillage d\'écran (code, schéma, mot de passe, empreinte ou visage) sur ce téléphone pour utiliser le verrouillage de l\'app.</string>
-    <string name="app_lock_relock">Redemander après que Sinag est resté en arrière-plan :</string>
     <string name="app_lock_relock_immediately">Immédiatement</string>
     <string name="app_lock_relock_two_minutes">Après 2 minutes</string>
     <string name="app_lock_relock_five_minutes">Après 5 minutes</string>
@@ -319,4 +317,11 @@
     <string name="share_get_app">Pas encore Sinag ? Téléchargez-la gratuitement sur l\'App Store ou Google Play.</string>
     <string name="share_link">Partager le lien</string>
     <string name="share_message">Ajoutez ma Parol « %1$s » dans l\'app Sinag (sur le même WiFi) : %2$s</string>
+    <string name="app_lock_mode_off">Désactivé</string>
+    <string name="app_lock_mode_settings">Réglages uniquement</string>
+    <string name="app_lock_mode_settings_hint">Les lumières restent utilisables. Ouvrir les réglages, configurer ou modifier des lanternes, les programmations et la modification des playlists demandent le déverrouillage de ce téléphone.</string>
+    <string name="app_lock_mode_whole">Toute l\'app</string>
+    <string name="app_lock_mode_whole_hint">Ouvrir Sinag demande l\'empreinte, le visage ou le verrouillage d\'écran de ce téléphone.</string>
+    <string name="app_lock_ask_again">Redemander après :</string>
+    <string name="app_lock_settings_prompt_title">Déverrouiller pour modifier les réglages</string>
 </resources>

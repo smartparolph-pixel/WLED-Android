@@ -22,4 +22,8 @@ object AppLockPolicy {
      */
     fun shouldLockOnReturn(enabled: Boolean, backgroundedAt: Long?, now: Long, timeout: AppLockTimeout): Boolean =
         enabled && backgroundedAt != null && now - backgroundedAt >= timeoutMillis(timeout)
+
+    /** Settings unlocked at [unlockedAt] stay unlocked until the chosen time has passed ("Immediately": never). */
+    fun stillUnlocked(unlockedAt: Long, now: Long, timeout: AppLockTimeout): Boolean =
+        timeout != AppLockTimeout.IMMEDIATELY && now - unlockedAt < timeoutMillis(timeout)
 }

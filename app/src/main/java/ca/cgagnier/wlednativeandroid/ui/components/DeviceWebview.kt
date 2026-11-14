@@ -88,6 +88,8 @@ import ca.cgagnier.wlednativeandroid.FileUploadContract
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.ui.MainActivity
+import ca.cgagnier.wlednativeandroid.ui.applock.LocalAppLockManager
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.components.LoadingState.Finished
 import ca.cgagnier.wlednativeandroid.ui.components.LoadingState.Loading
 import kotlinx.coroutines.CoroutineScope
@@ -104,6 +106,9 @@ import java.util.Locale
 private const val LOCKUP_WIDTH_FRACTION = 0.7f
 
 private const val TAG = "ui.components.DeviceWebView"
+
+/** WLED's settings, file editor and firmware update pages. */
+private val SETTINGS_PATHS = listOf("/settings", "/edit", "/update")
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -124,6 +129,10 @@ fun DeviceWebView(
     val webView = webViewViewModel.webView().collectAsState().value
     navigator.backQueue = webViewViewModel.backQueue
     var showDownloadCompleteToast by remember { mutableStateOf(false) }
+    // The lantern's own Config pages are settings too: with App lock "Settings only" they ask first.
+    val appLock = LocalAppLockManager.current
+    client.needsSettingsUnlock = { appLock?.settingsNeedUnlock() == true }
+    client.settingsGuard = rememberSettingsGuard()
 
     // Add this DisposableEffect to prevent memory leaks and crashes on configuration changes.
     DisposableEffect(webView) {
@@ -309,6 +318,21 @@ class CustomWebViewClient : WebViewClient() {
         internal set
     lateinit var navigator: WebViewNavigator
         internal set
+
+    /** True when opening the device's settings pages must ask for the phone's unlock first. */
+    var needsSettingsUnlock: () -> Boolean = { false }
+
+    /** Asks for the phone's unlock, then runs the action. */
+    var settingsGuard: (action: () -> Unit) -> Unit = { it() }
+
+    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        val path = request.url.path.orEmpty()
+        val settingsPage = SETTINGS_PATHS.any { path == it || path.startsWith("$it/") }
+        if (!request.isForMainFrame || !settingsPage || !needsSettingsUnlock()) return false
+        val url = request.url.toString()
+        settingsGuard { view.loadUrl(url) }
+        return true
+    }
 
     override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)

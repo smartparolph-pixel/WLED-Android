@@ -7,6 +7,7 @@ import ca.cgagnier.wlednativeandroid.repository.AppLockTimeout
 import ca.cgagnier.wlednativeandroid.repository.ThemeSettings
 import ca.cgagnier.wlednativeandroid.repository.UserPreferencesRepository
 import ca.cgagnier.wlednativeandroid.service.applock.AppLockManager
+import ca.cgagnier.wlednativeandroid.service.applock.AppLockMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
@@ -43,17 +44,21 @@ class SettingsViewModel @Inject constructor(
     val settingsState = combine(
         listing,
         preferencesRepository.appLockEnabled,
+        preferencesRepository.appLockSettingsOnly,
         preferencesRepository.appLockTimeout,
-    ) { state, lockEnabled, lockTimeout ->
-        state.copy(appLockEnabled = lockEnabled, appLockTimeout = lockTimeout)
+    ) { state, lockEnabled, settingsOnly, lockTimeout ->
+        state.copy(appLockMode = AppLockMode.of(lockEnabled, settingsOnly), appLockTimeout = lockTimeout)
     }.stateIn(viewModelScope, WhileSubscribed(5000), SettingsState())
 
     /** The phone has a screen lock (PIN, pattern, password, fingerprint or face), so App lock can be used. */
     fun isAppLockAvailable(): Boolean = appLock.isAvailable()
 
     /** Call only after the user confirmed with the phone's unlock prompt. */
-    fun setAppLockEnabled(enabled: Boolean) = viewModelScope.launch(Dispatchers.IO) {
-        preferencesRepository.updateAppLockEnabled(enabled)
+    fun setAppLockMode(mode: AppLockMode) = viewModelScope.launch(Dispatchers.IO) {
+        preferencesRepository.updateAppLockMode(
+            enabled = mode != AppLockMode.Off,
+            settingsOnly = mode == AppLockMode.SettingsOnly,
+        )
     }
 
     fun setAppLockTimeout(timeout: AppLockTimeout) = viewModelScope.launch(Dispatchers.IO) {
@@ -85,6 +90,6 @@ data class SettingsState(
     val showOfflineLast: Boolean = true,
     val showHiddenDevices: Boolean = false,
     val theme: ThemeSettings = ThemeSettings.Auto,
-    val appLockEnabled: Boolean = false,
+    val appLockMode: AppLockMode = AppLockMode.Off,
     val appLockTimeout: AppLockTimeout = AppLockTimeout.TWO_MINUTES,
 )

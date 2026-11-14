@@ -293,10 +293,8 @@
 
     <!-- App lock -->
     <string name="app_lock">App lock</string>
-    <string name="app_lock_switch">Require unlock to open Sinag</string>
     <string name="app_lock_hint">Uses this phone\'s fingerprint, face or screen lock. Nothing is stored by Sinag. The home-screen widget keeps working.</string>
     <string name="app_lock_needs_screen_lock">Set up a screen lock (PIN, pattern, password, fingerprint or face) on this phone to use App lock.</string>
-    <string name="app_lock_relock">Ask again after Sinag has been in the background:</string>
     <string name="app_lock_relock_immediately">Immediately</string>
     <string name="app_lock_relock_two_minutes">After 2 minutes</string>
     <string name="app_lock_relock_five_minutes">After 5 minutes</string>
@@ -322,4 +320,11 @@
     <string name="share_get_app">Don\'t have Sinag? Get it free from the App Store or Google Play.</string>
     <string name="share_link">Share link</string>
     <string name="share_message">Add my Parol “%1$s” in the Sinag app (on the same WiFi): %2$s</string>
+    <string name="app_lock_mode_off">Off</string>
+    <string name="app_lock_mode_settings">Settings only</string>
+    <string name="app_lock_mode_settings_hint">Lights stay free to use. Opening settings, setting up or editing lanterns, schedules and playlist edits need this phone\'s unlock.</string>
+    <string name="app_lock_mode_whole">Whole app</string>
+    <string name="app_lock_mode_whole_hint">Opening Sinag needs this phone\'s fingerprint, face or screen lock.</string>
+    <string name="app_lock_ask_again">Ask again after:</string>
+    <string name="app_lock_settings_prompt_title">Unlock to change settings</string>
 </resources>

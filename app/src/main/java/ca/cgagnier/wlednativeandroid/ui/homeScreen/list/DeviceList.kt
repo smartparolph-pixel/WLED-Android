@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceInfoTwoRows
 import ca.cgagnier.wlednativeandroid.ui.components.SinagLockup
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.shortcuts.DeviceShortcutBar
@@ -315,6 +316,7 @@ fun LazyItemScope.DeviceRow(
     viewModel: DeviceWebsocketListViewModel,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val settingsGuard = rememberSettingsGuard()
     var isConfirmingDelete by remember { mutableStateOf(false) }
     val swipeDismissState = rememberSwipeToDismissBoxState(
         positionalThreshold = { distance -> distance * 0.3f },
@@ -328,7 +330,9 @@ fun LazyItemScope.DeviceRow(
         swipeToDismissBoxState = swipeDismissState,
         onDismiss = { direction ->
             if (direction == SwipeToDismissBoxValue.EndToStart) {
-                isConfirmingDelete = true
+                // Removing a lantern is a settings change: with App lock "Settings only" it asks first.
+                coroutineScope.launch { swipeDismissState.reset() }
+                settingsGuard { isConfirmingDelete = true }
             } else if (direction == SwipeToDismissBoxValue.StartToEnd) {
                 coroutineScope.launch {
                     swipeDismissState.reset()

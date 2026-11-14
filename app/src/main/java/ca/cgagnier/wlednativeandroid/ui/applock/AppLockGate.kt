@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,7 +50,7 @@ fun AppLockGate(manager: AppLockManager, content: @Composable () -> Unit) {
         Box(
             modifier = if (state == AppLockState.Unlocked) Modifier else Modifier.clearAndSetSemantics { },
         ) {
-            content()
+            CompositionLocalProvider(LocalAppLockManager provides manager) { content() }
         }
         if (state != AppLockState.Unlocked) LockScreen(manager, showUnlock = state == AppLockState.Locked)
     }

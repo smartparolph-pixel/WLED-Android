@@ -13,11 +13,14 @@ class UserPreferencesRepository(private val dataStore: DataStore<UserPreferences
     val lastUpdateCheckDate get() = dataStore.data.map { it.lastUpdateCheckDate }
     val appLockEnabled get() = dataStore.data.map { it.appLockEnabled }
     val appLockTimeout get() = dataStore.data.map { it.appLockTimeout }
+    val appLockSettingsOnly get() = dataStore.data.map { it.appLockSettingsOnly }
 
-    suspend fun updateAppLockEnabled(enabled: Boolean) {
+    /** Off, settings only, or the whole app (see [ca.cgagnier.wlednativeandroid.service.applock.AppLockMode]). */
+    suspend fun updateAppLockMode(enabled: Boolean, settingsOnly: Boolean) {
         dataStore.updateData {
             it.toBuilder()
                 .setAppLockEnabled(enabled)
+                .setAppLockSettingsOnly(settingsOnly)
                 .setDateLastWritten(System.currentTimeMillis())
                 .build()
         }

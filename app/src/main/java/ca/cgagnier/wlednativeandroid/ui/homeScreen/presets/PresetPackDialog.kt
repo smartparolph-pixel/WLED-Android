@@ -41,6 +41,7 @@ import ca.cgagnier.wlednativeandroid.service.presets.PackSetupResult
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
 import ca.cgagnier.wlednativeandroid.service.presets.RepairResult
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 
 private val PLAYLIST_LIST_MAX_HEIGHT = 420.dp
 
@@ -53,6 +54,7 @@ private val PLAYLIST_LIST_MAX_HEIGHT = 420.dp
 fun PresetPackDialog(device: DeviceWithState, onDismiss: () -> Unit, viewModel: PresetPackViewModel = hiltViewModel()) {
     LaunchedEffect(device.device.macAddress) { viewModel.prepare(device.device) }
     var editing by rememberSaveable { mutableStateOf(false) }
+    val settingsGuard = rememberSettingsGuard()
     if (editing) {
         PresetEditorDialog(
             device = device,
@@ -100,7 +102,7 @@ fun PresetPackDialog(device: DeviceWithState, onDismiss: () -> Unit, viewModel: 
                 if (viewModel.playFailed) Note(stringResource(R.string.preset_pack_unreachable))
                 BottomButtons(
                     canEdit = viewModel.setup is PackSetupResult.Ready,
-                    onEdit = { editing = true },
+                    onEdit = { settingsGuard { editing = true } },
                     onDone = onDismiss,
                 )
             }

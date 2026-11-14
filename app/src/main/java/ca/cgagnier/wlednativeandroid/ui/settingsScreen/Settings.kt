@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.repository.AppLockTimeout
 import ca.cgagnier.wlednativeandroid.repository.ThemeSettings
+import ca.cgagnier.wlednativeandroid.service.applock.AppLockMode
 import ca.cgagnier.wlednativeandroid.service.applock.AppLockPrompt
 import ca.cgagnier.wlednativeandroid.ui.applock.findFragmentActivity
 
@@ -226,8 +227,8 @@ fun OneOrTwoColumnLayout(
 }
 
 /**
- * App lock: on and off both need the phone's own unlock (fingerprint, face or screen lock), so nobody else can
- * change it. Not offered when the phone has no screen lock.
+ * App lock: Off, Settings only or Whole app. Every change needs the phone's own unlock (fingerprint, face or
+ * screen lock), so nobody else can change it. Not offered when the phone has no screen lock.
  */
 @Composable
 fun AppLockOptions(state: SettingsState, viewModel: SettingsViewModel) {
@@ -241,42 +242,60 @@ fun AppLockOptions(state: SettingsState, viewModel: SettingsViewModel) {
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
-            SwitchRow(
-                label = stringResource(R.string.app_lock_switch),
-                checked = state.appLockEnabled,
-                onCheckedChange = { enable ->
-                    if (activity != null && (available || !enable)) {
-                        viewModel.setAuthenticating(true)
-                        AppLockPrompt.show(activity, title) { ok ->
-                            viewModel.setAuthenticating(false)
-                            if (ok) viewModel.setAppLockEnabled(enable)
+            listOf(
+                AppLockMode.Off to R.string.app_lock_mode_off,
+                AppLockMode.SettingsOnly to R.string.app_lock_mode_settings,
+                AppLockMode.WholeApp to R.string.app_lock_mode_whole,
+            ).forEach { (mode, label) ->
+                RadioRow(
+                    label = stringResource(label),
+                    checked = state.appLockMode == mode,
+                    onSelected = {
+                        val allowed = available || mode == AppLockMode.Off
+                        if (activity != null && allowed && mode != state.appLockMode) {
+                            viewModel.setAuthenticating(true)
+                            AppLockPrompt.show(activity, title) { ok ->
+                                viewModel.setAuthenticating(false)
+                                if (ok) viewModel.setAppLockMode(mode)
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
             Text(
-                text = stringResource(if (available) R.string.app_lock_hint else R.string.app_lock_needs_screen_lock),
+                text = stringResource(
+                    when {
+                        !available -> R.string.app_lock_needs_screen_lock
+                        state.appLockMode == AppLockMode.SettingsOnly -> R.string.app_lock_mode_settings_hint
+                        state.appLockMode == AppLockMode.WholeApp -> R.string.app_lock_mode_whole_hint
+                        else -> R.string.app_lock_hint
+                    },
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (state.appLockEnabled) {
-                Text(
-                    stringResource(R.string.app_lock_relock),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 12.dp),
-                )
-                listOf(
-                    AppLockTimeout.IMMEDIATELY to R.string.app_lock_relock_immediately,
-                    AppLockTimeout.TWO_MINUTES to R.string.app_lock_relock_two_minutes,
-                    AppLockTimeout.FIVE_MINUTES to R.string.app_lock_relock_five_minutes,
-                ).forEach { (timeout, label) ->
-                    RadioRow(
-                        label = stringResource(label),
-                        checked = state.appLockTimeout == timeout,
-                        onSelected = { viewModel.setAppLockTimeout(timeout) },
-                    )
-                }
-            }
+            if (state.appLockMode != AppLockMode.Off) AppLockTimeoutOptions(state, viewModel)
         }
+    }
+}
+
+/** How long the unlock lasts: "Ask again after" Immediately, 2 or 5 minutes. */
+@Composable
+private fun AppLockTimeoutOptions(state: SettingsState, viewModel: SettingsViewModel) {
+    Text(
+        stringResource(R.string.app_lock_ask_again),
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.padding(top = 12.dp),
+    )
+    listOf(
+        AppLockTimeout.IMMEDIATELY to R.string.app_lock_relock_immediately,
+        AppLockTimeout.TWO_MINUTES to R.string.app_lock_relock_two_minutes,
+        AppLockTimeout.FIVE_MINUTES to R.string.app_lock_relock_five_minutes,
+    ).forEach { (timeout, label) ->
+        RadioRow(
+            label = stringResource(label),
+            checked = state.appLockTimeout == timeout,
+            onSelected = { viewModel.setAppLockTimeout(timeout) },
+        )
     }
 }

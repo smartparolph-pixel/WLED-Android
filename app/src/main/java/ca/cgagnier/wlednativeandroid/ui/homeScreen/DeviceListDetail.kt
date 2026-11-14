@@ -31,6 +31,7 @@ import ca.cgagnier.wlednativeandroid.model.AP_MODE_MAC_ADDRESS
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.NavigationEvent
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.detail.DeviceDetail
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceAdd.DeviceAdd
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceEdit.DeviceEdit
@@ -82,9 +83,12 @@ fun DeviceListDetail(
             navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, device.device.macAddress)
         }
     }
+    val settingsGuard = rememberSettingsGuard()
     val navigateToEdit: (DeviceWithState) -> Unit = { device ->
-        coroutineScope.launch {
-            navigator.navigateTo(ListDetailPaneScaffoldRole.Extra, device.device.macAddress)
+        settingsGuard {
+            coroutineScope.launch {
+                navigator.navigateTo(ListDetailPaneScaffoldRole.Extra, device.device.macAddress)
+            }
         }
     }
 
@@ -111,7 +115,7 @@ fun DeviceListDetail(
                             selectedDevice,
                             isWLEDCaptivePortal = isWLEDCaptivePortal,
                             onItemClick = navigateToDetail,
-                            onAddDevice = { viewModel.showAddDeviceDialog() },
+                            onAddDevice = { settingsGuard { viewModel.showAddDeviceDialog() } },
                             onShowHiddenDevices = { viewModel.toggleShowHiddenDevices() },
                             onRefresh = { viewModel.startDiscoveryServiceTimed() },
                             onItemEdit = {
@@ -182,19 +186,16 @@ private fun DrawerSheetContent(
     viewModel: DeviceListDetailViewModel,
     openSettings: () -> Unit,
 ) {
+    val settingsGuard = rememberSettingsGuard()
     DrawerContent(
         showHiddenDevices = showHiddenDevices,
         addDevice = {
-            coroutineScope.launch {
-                viewModel.showAddDeviceDialog()
-                drawerState.close()
-            }
+            coroutineScope.launch { drawerState.close() }
+            settingsGuard { viewModel.showAddDeviceDialog() }
         },
         provisionDevice = {
-            coroutineScope.launch {
-                viewModel.showProvisionDialog()
-                drawerState.close()
-            }
+            coroutineScope.launch { drawerState.close() }
+            settingsGuard { viewModel.showProvisionDialog() }
         },
         toggleShowHiddenDevices = {
             coroutineScope.launch {
@@ -203,10 +204,8 @@ private fun DrawerSheetContent(
             }
         },
         openSettings = {
-            coroutineScope.launch {
-                openSettings()
-                drawerState.close()
-            }
+            coroutineScope.launch { drawerState.close() }
+            settingsGuard { openSettings() }
         },
     )
 }

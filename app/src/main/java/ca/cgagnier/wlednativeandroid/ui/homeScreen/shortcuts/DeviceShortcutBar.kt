@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.PresetPackDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.schedule.ScheduleDialog
@@ -58,6 +59,11 @@ private enum class Shortcut(@param:StringRes val label: Int, @param:DrawableRes 
 fun DeviceShortcutBar(devices: List<DeviceWithState>) {
     var choosingFor by remember { mutableStateOf<Shortcut?>(null) }
     var open by remember { mutableStateOf<Pair<Shortcut, DeviceWithState>?>(null) }
+    val settingsGuard = rememberSettingsGuard()
+    // Schedule changes the lantern's settings: with App lock "Settings only" it asks first.
+    val openFor: (Shortcut, DeviceWithState) -> Unit = { shortcut, device ->
+        if (shortcut == Shortcut.SCHEDULE) settingsGuard { open = shortcut to device } else open = shortcut to device
+    }
 
     BottomAppBar {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -67,7 +73,7 @@ fun DeviceShortcutBar(devices: List<DeviceWithState>) {
                     enabled = devices.isNotEmpty(),
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        if (devices.size == 1) open = shortcut to devices.first() else choosingFor = shortcut
+                        if (devices.size == 1) openFor(shortcut, devices.first()) else choosingFor = shortcut
                     },
                 )
             }
@@ -78,8 +84,8 @@ fun DeviceShortcutBar(devices: List<DeviceWithState>) {
         DevicePicker(
             devices = devices,
             onPick = {
-                open = shortcut to it
                 choosingFor = null
+                openFor(shortcut, it)
             },
             onDismiss = { choosingFor = null },
         )

@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceInfoTwoRows
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceWebView
 import ca.cgagnier.wlednativeandroid.ui.components.LoadingState
@@ -59,6 +60,7 @@ fun DeviceDetail(
     val webViewState = rememberSaveableWebViewState()
     val navigator = rememberWebViewNavigator()
     var showSchedule by remember { mutableStateOf(false) }
+    val settingsGuard = rememberSettingsGuard()
     Scaffold(
         topBar = {
             DeviceDetailAppBar(
@@ -72,7 +74,7 @@ fun DeviceDetail(
                 refreshPage = {
                     navigator.reload()
                 },
-                openSchedule = { showSchedule = true },
+                openSchedule = { settingsGuard { showSchedule = true } },
             )
         },
     ) { innerPadding ->

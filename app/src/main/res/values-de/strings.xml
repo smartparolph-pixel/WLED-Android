@@ -291,10 +291,8 @@
 
     <!-- App lock -->
     <string name="app_lock">App-Sperre</string>
-    <string name="app_lock_switch">Zum Öffnen von Sinag entsperren</string>
     <string name="app_lock_hint">Verwendet Fingerabdruck, Gesicht oder Displaysperre dieses Telefons. Sinag speichert nichts davon. Das Startbildschirm-Widget funktioniert weiter.</string>
     <string name="app_lock_needs_screen_lock">Richte auf diesem Telefon eine Displaysperre ein (PIN, Muster, Passwort, Fingerabdruck oder Gesicht), um die App-Sperre zu nutzen.</string>
-    <string name="app_lock_relock">Erneut fragen, nachdem Sinag im Hintergrund war:</string>
     <string name="app_lock_relock_immediately">Sofort</string>
     <string name="app_lock_relock_two_minutes">Nach 2 Minuten</string>
     <string name="app_lock_relock_five_minutes">Nach 5 Minuten</string>
@@ -320,4 +318,11 @@
     <string name="share_get_app">Noch kein Sinag? Kostenlos im App Store oder bei Google Play laden.</string>
     <string name="share_link">Link teilen</string>
     <string name="share_message">Füge meine Parol „%1$s“ in der Sinag-App hinzu (im selben WLAN): %2$s</string>
+    <string name="app_lock_mode_off">Aus</string>
+    <string name="app_lock_mode_settings">Nur Einstellungen</string>
+    <string name="app_lock_mode_settings_hint">Die Lichter bleiben frei nutzbar. Einstellungen, das Einrichten oder Bearbeiten von Laternen, Zeitpläne und Playlist-Änderungen brauchen die Entsperrung dieses Telefons.</string>
+    <string name="app_lock_mode_whole">Ganze App</string>
+    <string name="app_lock_mode_whole_hint">Zum Öffnen von Sinag sind Fingerabdruck, Gesicht oder Displaysperre dieses Telefons nötig.</string>
+    <string name="app_lock_ask_again">Erneut fragen nach:</string>
+    <string name="app_lock_settings_prompt_title">Entsperren, um Einstellungen zu ändern</string>
 </resources>
