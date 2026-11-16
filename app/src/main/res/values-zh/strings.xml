@@ -325,4 +325,10 @@
     <string name="preset_editor_power_on">通电时播放</string>
     <string name="preset_editor_power_on_none">无（静态灯光）</string>
     <string name="preset_editor_power_on_hint">灯笼插电或恢复供电时以全亮度开始播放。点按可更改。</string>
+    <string name="direct_connection_badge">直接连接</string>
+    <string name="direct_connection_connect">直接连接 Parol</string>
+    <string name="direct_connection_leave">断开直接连接</string>
+    <string name="direct_connection_joined">已直接连接到您的 Parol。</string>
+    <string name="direct_connection_not_found">附近未找到 Parol 的 WiFi。请确认 Parol 已通电，并等待约 15 秒。</string>
+    <string name="direct_connection_not_saved">Sinag 中还没有这个 Parol。请先设置或添加它。</string>
 </resources>

@@ -184,7 +184,8 @@ fun DeviceList(
                         }
                     }
                 } else {
-                    if (isWLEDCaptivePortal) {
+                    // A saved lantern on its own WiFi shows as its usual card ("Direct connection") instead.
+                    if (isWLEDCaptivePortal && allDevices.none { it.isDirect }) {
                         item(key = "captive_portal") {
                             val device = getApModeDeviceWithState()
                             DeviceAPListItem(

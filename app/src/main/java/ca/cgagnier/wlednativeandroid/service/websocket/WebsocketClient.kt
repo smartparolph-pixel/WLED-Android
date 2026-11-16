@@ -9,6 +9,7 @@ import ca.cgagnier.wlednativeandroid.model.wledapi.State
 import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
 import ca.cgagnier.wlednativeandroid.repository.RepositoryDao
 import ca.cgagnier.wlednativeandroid.repository.getOrCreateRepositoryId
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnection
 import ca.cgagnier.wlednativeandroid.service.update.DeviceUpdateManager
 import ca.cgagnier.wlednativeandroid.service.update.getRepositoryFromInfo
 import ca.cgagnier.wlednativeandroid.widget.WledWidgetManager
@@ -62,6 +63,7 @@ class WebsocketClient(
         private const val RECONNECTION_DELAY = 2500L // 2.5 seconds
         private const val MAX_RECONNECTION_DELAY = 60000L // 60 seconds
         private const val NORMAL_CLOSURE_STATUS = 1000
+        private const val MILLIS_PER_SECOND = 1000L
     }
 
     private val webSocketListener = object : WebSocketListener() {
@@ -71,6 +73,10 @@ class WebsocketClient(
             deviceState.websocketStatus.value = WebsocketStatus.CONNECTED
             retryCount = 0
             isConnecting = false
+            if (deviceState.isDirect) {
+                // No internet on the lantern's own WiFi: give it the phone's time so its schedules run.
+                webSocket.send(DirectConnection.timeJson(System.currentTimeMillis() / MILLIS_PER_SECOND))
+            }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -159,9 +165,10 @@ class WebsocketClient(
         val shouldUpdateDevice = nameChanged || branchChanged || repositoryChanged ||
             timeSinceLastUpdate > LAST_SEEN_UPDATE_THRESHOLD
         if (shouldUpdateDevice) {
-            val newDevice = deviceState.device.copy(
+            // Saved as it is in the database: on a direct connection the address in use is only temporary.
+            val saved = deviceRepository.findDeviceByMacAddress(deviceState.device.macAddress) ?: return
+            val newDevice = saved.copy(
                 originalName = deviceStateInfo.info.name,
-                address = deviceState.device.address,
                 lastSeen = System.currentTimeMillis(),
                 branch = branch,
                 repositoryId = repoIdToSave,

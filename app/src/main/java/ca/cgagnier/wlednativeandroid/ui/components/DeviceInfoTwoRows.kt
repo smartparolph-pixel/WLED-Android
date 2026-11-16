@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -95,8 +96,9 @@ fun DeviceInfoTwoRows(
             //  `fill = false`, the unused space is not distributed to the other elements.
             WebsocketStatusIndicator(device.websocketStatus.value)
             Text(
-                device.device.address,
+                if (device.isDirect) stringResource(R.string.direct_connection_badge) else device.device.address,
                 style = MaterialTheme.typography.labelMedium,
+                color = if (device.isDirect) MaterialTheme.colorScheme.primary else Color.Unspecified,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),

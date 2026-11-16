@@ -1,5 +1,6 @@
 package ca.cgagnier.wlednativeandroid.ui.homeScreen
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
@@ -24,10 +25,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.AP_MODE_MAC_ADDRESS
+import ca.cgagnier.wlednativeandroid.service.direct.DirectJoin
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.NavigationEvent
@@ -77,6 +81,7 @@ fun DeviceListDetail(
     val isWLEDCaptivePortal by viewModel.isWLEDCaptivePortal.collectAsStateWithLifecycle()
     val isAddDeviceDialogVisible by viewModel.isAddDeviceDialogVisible.collectAsStateWithLifecycle()
     val isProvisionDialogVisible by viewModel.isProvisionDialogVisible.collectAsStateWithLifecycle()
+    DirectJoinMessages(viewModel)
 
     val navigateToDetail: (DeviceWithState) -> Unit = { device ->
         coroutineScope.launch {
@@ -207,5 +212,32 @@ private fun DrawerSheetContent(
             coroutineScope.launch { drawerState.close() }
             settingsGuard { openSettings() }
         },
+        directConnection = if (viewModel.canConnectDirectly) {
+            val join by viewModel.directJoin.collectAsStateWithLifecycle()
+            val joined = join == DirectJoin.Joined || join == DirectJoin.Joining
+            DirectDrawerAction(joined) {
+                coroutineScope.launch { drawerState.close() }
+                if (joined) viewModel.stopDirectConnection() else viewModel.connectDirectly()
+            }
+        } else {
+            null
+        },
     )
+}
+
+/** Tells the user how "Connect directly" went. */
+@Composable
+private fun DirectJoinMessages(viewModel: DeviceListDetailViewModel) {
+    val context = LocalContext.current
+    val join by viewModel.directJoin.collectAsStateWithLifecycle()
+    LaunchedEffect(join) {
+        val message = when (join) {
+            DirectJoin.Joined -> R.string.direct_connection_joined
+            DirectJoin.NotFound -> R.string.direct_connection_not_found
+            DirectJoin.NotSaved -> R.string.direct_connection_not_saved
+            DirectJoin.Idle, DirectJoin.Joining -> null
+        } ?: return@LaunchedEffect
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        viewModel.acknowledgeDirectJoin()
+    }
 }

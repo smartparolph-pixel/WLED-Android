@@ -34,6 +34,7 @@ import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.share.scanShareCode
 import ca.cgagnier.wlednativeandroid.util.openUriSafely
 
+@Suppress("LongParameterList") // One callback per drawer item.
 @Composable
 internal fun DrawerContent(
     showHiddenDevices: Boolean,
@@ -41,6 +42,7 @@ internal fun DrawerContent(
     provisionDevice: () -> Unit,
     toggleShowHiddenDevices: () -> Unit,
     openSettings: () -> Unit,
+    directConnection: DirectDrawerAction? = null,
 ) {
     val uriHandler = LocalUriHandler.current
     val scrollState = rememberScrollState()
@@ -50,11 +52,29 @@ internal fun DrawerContent(
     ) {
         DrawerHeader()
         DrawerMainActions(addDevice, provisionDevice, showHiddenDevices, toggleShowHiddenDevices, openSettings)
+        directConnection?.let { DirectConnectionItem(it) }
         HorizontalDivider(modifier = Modifier.padding(12.dp))
         DrawerExternalLinks(uriHandler)
         Spacer(Modifier.height(24.dp))
         DrawerVersionInfo()
     }
+}
+
+/** "Connect directly" to a lantern's own WiFi, or leave it when [joined]. */
+data class DirectDrawerAction(val joined: Boolean, val onClick: () -> Unit)
+
+@Composable
+private fun DirectConnectionItem(action: DirectDrawerAction) {
+    val label = stringResource(
+        if (action.joined) R.string.direct_connection_leave else R.string.direct_connection_connect,
+    )
+    NavigationDrawerItem(
+        label = { Text(text = label) },
+        icon = { Icon(painter = painterResource(R.drawable.ic_baseline_router_24), contentDescription = label) },
+        selected = false,
+        onClick = action.onClick,
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+    )
 }
 
 @Composable

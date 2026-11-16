@@ -11,6 +11,7 @@ import ca.cgagnier.wlednativeandroid.repository.UserPreferencesRepository
 import ca.cgagnier.wlednativeandroid.service.DeviceDiscovery
 import ca.cgagnier.wlednativeandroid.service.DeviceFirstContactService
 import ca.cgagnier.wlednativeandroid.service.NetworkConnectivityManager
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnectionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -30,9 +31,20 @@ class DeviceListDetailViewModel @Inject constructor(
     private val preferencesRepository: UserPreferencesRepository,
     networkManager: NetworkConnectivityManager,
     private val deviceFirstContactService: DeviceFirstContactService,
+    private val directConnection: DirectConnectionManager,
 ) : AndroidViewModel(application),
     DefaultLifecycleObserver {
     val isWLEDCaptivePortal = networkManager.isWLEDCaptivePortal
+
+    /** "Connect directly": joining the lantern's own WiFi from the app. */
+    val directJoin = directConnection.join
+    val canConnectDirectly = directConnection.canJoin
+
+    fun connectDirectly() = directConnection.connectDirectly()
+
+    fun stopDirectConnection() = directConnection.stopDirect()
+
+    fun acknowledgeDirectJoin() = directConnection.acknowledge()
 
     val showHiddenDevices = preferencesRepository.showHiddenDevices
         .stateIn(

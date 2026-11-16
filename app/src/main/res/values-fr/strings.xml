@@ -327,4 +327,10 @@
     <string name="preset_editor_power_on">Lecture à la mise sous tension</string>
     <string name="preset_editor_power_on_none">Aucune (lumière fixe)</string>
     <string name="preset_editor_power_on_hint">Démarre à pleine luminosité quand la lanterne est branchée ou que le courant revient. Touchez pour changer.</string>
+    <string name="direct_connection_badge">Connexion directe</string>
+    <string name="direct_connection_connect">Se connecter directement au Parol</string>
+    <string name="direct_connection_leave">Quitter la connexion directe</string>
+    <string name="direct_connection_joined">Connecté directement à votre Parol.</string>
+    <string name="direct_connection_not_found">Aucun WiFi de Parol à proximité. Vérifiez que le Parol est branché et patientez environ 15 secondes.</string>
+    <string name="direct_connection_not_saved">Ce Parol n\'est pas encore dans Sinag. Configurez-le ou ajoutez-le d\'abord.</string>
 </resources>
