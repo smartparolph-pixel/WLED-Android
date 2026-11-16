@@ -98,7 +98,7 @@ class WledProvisioningService @Inject constructor(
 
     /**
      * Whether the app can join the setup network itself (Android 10+). Checks for the API rather than
-     * trusting SDK_INT alone: ColorOS 14 has been seen reporting API 28 to the app on Android 14.
+     * trusting SDK_INT alone: some phone makers report an older API level to the app than the phone runs.
      */
     private val canJoinNetworks: Boolean =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ||
