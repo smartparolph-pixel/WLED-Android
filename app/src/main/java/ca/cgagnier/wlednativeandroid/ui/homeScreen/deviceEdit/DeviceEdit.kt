@@ -67,6 +67,7 @@ import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketStatus
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceVisibleSwitch
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.lanternwifi.LanternWifiDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.PresetPackDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.timezone.DeviceTimezoneDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateDetailsDialog
@@ -158,6 +159,7 @@ fun DeviceEditContent(
     )
     var showTimezoneDialog by remember { mutableStateOf(false) }
     var showPresetPackDialog by remember { mutableStateOf(false) }
+    var showLanternWifiDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -217,6 +219,14 @@ fun DeviceEditContent(
                     Text(stringResource(R.string.timezone_button))
                 }
                 OutlinedButton(
+                    onClick = { showLanternWifiDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                ) {
+                    Text(stringResource(R.string.lantern_wifi_title))
+                }
+                OutlinedButton(
                     onClick = { showPresetPackDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -239,6 +249,9 @@ fun DeviceEditContent(
     // Dialogs — shown conditionally based on uiState.
     if (showTimezoneDialog) {
         DeviceTimezoneDialog(device = device.device, onDismiss = { showTimezoneDialog = false })
+    }
+    if (showLanternWifiDialog) {
+        LanternWifiDialog(device = device.device, onDismiss = { showLanternWifiDialog = false })
     }
     if (showPresetPackDialog) {
         PresetPackDialog(device = device, onDismiss = { showPresetPackDialog = false })

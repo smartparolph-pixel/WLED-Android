@@ -12,6 +12,8 @@ import ca.cgagnier.wlednativeandroid.service.DeviceDiscovery
 import ca.cgagnier.wlednativeandroid.service.DeviceFirstContactService
 import ca.cgagnier.wlednativeandroid.service.NetworkConnectivityManager
 import ca.cgagnier.wlednativeandroid.service.direct.DirectConnectionManager
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -32,6 +34,7 @@ class DeviceListDetailViewModel @Inject constructor(
     networkManager: NetworkConnectivityManager,
     private val deviceFirstContactService: DeviceFirstContactService,
     private val directConnection: DirectConnectionManager,
+    lanternWifiStore: LanternWifiStore,
 ) : AndroidViewModel(application),
     DefaultLifecycleObserver {
     val isWLEDCaptivePortal = networkManager.isWLEDCaptivePortal
@@ -40,7 +43,10 @@ class DeviceListDetailViewModel @Inject constructor(
     val directJoin = directConnection.join
     val canConnectDirectly = directConnection.canJoin
 
-    fun connectDirectly() = directConnection.connectDirectly()
+    /** Lanterns' own WiFis saved on this phone, to choose from in "Connect directly". */
+    val lanternWifis = lanternWifiStore.all
+
+    fun connectDirectly(wifi: LanternWifiCredentials? = null) = directConnection.connectDirectly(wifi)
 
     fun stopDirectConnection() = directConnection.stopDirect()
 

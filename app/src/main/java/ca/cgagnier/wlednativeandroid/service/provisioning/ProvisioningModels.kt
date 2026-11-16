@@ -1,6 +1,7 @@
 package ca.cgagnier.wlednativeandroid.service.provisioning
 
 import ca.cgagnier.wlednativeandroid.model.Device
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
 import ca.cgagnier.wlednativeandroid.service.timezone.TimezonePayloads
 import ca.cgagnier.wlednativeandroid.service.timezone.WledTimezoneSetting
 import com.squareup.moshi.Moshi
@@ -53,6 +54,8 @@ data class ProvisioningRequest(
     val timezone: WledTimezoneSetting? = null,
     /** Saved on the device (`id.name`), so every phone shows the same name. Null leaves it unchanged. */
     val deviceName: String? = null,
+    /** Give the lantern its own WiFi name and random password (see LanternWifi) instead of WLED-AP / wled1234. */
+    val secureLanternWifi: Boolean = true,
 )
 
 /** Steps surfaced to the UI. */
@@ -62,7 +65,9 @@ sealed interface ProvisioningProgress {
     data object SendingCredentials : ProvisioningProgress
     data object RebootingDevice : ProvisioningProgress
     data object WaitingForDevice : ProvisioningProgress
-    data class Done(val device: Device) : ProvisioningProgress
+
+    /** [lanternWifi]: the lantern's own WiFi as set during setup, null if it was left as it was. */
+    data class Done(val device: Device, val lanternWifi: LanternWifiCredentials? = null) : ProvisioningProgress
 }
 
 sealed class ProvisioningException(message: String, cause: Throwable? = null) : Exception(message, cause) {
@@ -85,12 +90,14 @@ object ProvisioningPayloads {
      * the JSON untouched, so unlike posting the whole /settings/wifi HTML form this cannot reset
      * AP behaviour, static IP, mDNS name, etc. [timezone] adds `if.ntp`, which is equally partial.
      */
+    @Suppress("LongParameterList") // One optional section of the config each.
     fun wifiConfigJson(
         ssid: String,
         password: String,
         timezone: WledTimezoneSetting? = null,
         led: Map<String, Any>? = null,
         name: String? = null,
+        ap: Map<String, Any>? = null,
     ): String {
         val payload = mutableMapOf<String, Any>(
             "nw" to mapOf(
@@ -102,6 +109,7 @@ object ProvisioningPayloads {
         if (timezone != null) payload["if"] = mapOf("ntp" to TimezonePayloads.ntpConfig(timezone))
         if (led != null) payload["hw"] = mapOf("led" to led)
         if (!name.isNullOrBlank()) payload["id"] = mapOf("name" to name)
+        if (ap != null) payload["ap"] = ap
         return moshi.adapter(Any::class.java).toJson(payload)
     }
 

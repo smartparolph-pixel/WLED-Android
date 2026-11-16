@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi
 import ca.cgagnier.wlednativeandroid.model.DEFAULT_WLED_AP_IP
 import ca.cgagnier.wlednativeandroid.model.wledapi.Info
 import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -189,21 +190,22 @@ class DirectConnectionManager @Inject constructor(
     }
 
     /**
-     * "Connect directly": joins the lantern's own WiFi from the app. Android asks the user to confirm,
-     * and returns the phone to its usual WiFi when [stopDirect] is called.
+     * "Connect directly": joins a lantern's own WiFi from the app, [wifi] as saved for it (WLED's shared
+     * WLED-AP by default). Android asks the user to confirm, and returns the phone to its usual WiFi when
+     * [stopDirect] is called.
      */
     @SuppressLint("NewApi") // Guarded by canJoin, which checks the API itself.
-    fun connectDirectly() {
+    fun connectDirectly(wifi: LanternWifiCredentials? = null) {
         if (!canJoin || joinCallback != null) return
         _join.value = DirectJoin.Joining
-        joinLanternWifi()
+        joinLanternWifi(wifi ?: LanternWifiCredentials(DirectConnection.AP_SSID, DirectConnection.AP_PASSWORD))
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun joinLanternWifi() {
+    private fun joinLanternWifi(wifi: LanternWifiCredentials) {
         val specifier = WifiNetworkSpecifier.Builder()
-            .setSsid(DirectConnection.AP_SSID)
-            .setWpa2Passphrase(DirectConnection.AP_PASSWORD)
+            .setSsid(wifi.ssid)
+            .setWpa2Passphrase(wifi.password)
             .build()
         val request = NetworkRequest.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)

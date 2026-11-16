@@ -15,6 +15,9 @@ import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.model.wledapi.Info
 import ca.cgagnier.wlednativeandroid.service.DeviceDiscovery
 import ca.cgagnier.wlednativeandroid.service.DeviceFirstContactService
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifi
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiStore
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -58,6 +61,7 @@ class WledProvisioningService @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val moshi: Moshi,
     private val deviceFirstContactService: DeviceFirstContactService,
+    private val lanternWifiStore: LanternWifiStore,
 ) {
     private val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
 
@@ -67,6 +71,7 @@ class WledProvisioningService @Inject constructor(
 
         emit(ProvisioningProgress.JoiningSetupNetwork)
         val connection = if (manualJoin) manuallyJoinedNetwork() else joinSetupNetwork(request)
+        var lanternWifi: LanternWifiCredentials? = null
         val info = try {
             val http = httpClientFor(connection.network)
             val deviceInfo = try {
@@ -77,7 +82,8 @@ class WledProvisioningService @Inject constructor(
             }
 
             emit(ProvisioningProgress.SendingCredentials)
-            postCredentials(http, request, powerLimit(http))
+            lanternWifi = lanternWifiFor(request, deviceInfo)
+            postCredentials(http, request, powerLimit(http), lanternWifi)
 
             emit(ProvisioningProgress.RebootingDevice)
             delay(ProvisioningDefaults.CONFIG_WRITE_GRACE_MS)
@@ -91,7 +97,7 @@ class WledProvisioningService @Inject constructor(
         emit(ProvisioningProgress.WaitingForDevice)
         val device = waitForDeviceOnHomeNetwork(info.macAddress)
             ?: throw ProvisioningException.DeviceDidNotReappear()
-        emit(ProvisioningProgress.Done(device))
+        emit(ProvisioningProgress.Done(device, lanternWifi))
     }.flowOn(Dispatchers.IO)
 
     // region step 1: join AP
@@ -214,13 +220,31 @@ class WledProvisioningService @Inject constructor(
         null
     }
 
-    private fun postCredentials(http: OkHttpClient, request: ProvisioningRequest, led: Map<String, Any>?) {
+    /**
+     * The lantern's own WiFi to set: the one this phone already saved for it (setting it up again keeps
+     * the same password), else a new one. Saved before it is sent, so it can't be lost if the app is closed.
+     */
+    private fun lanternWifiFor(request: ProvisioningRequest, info: Info): LanternWifiCredentials? {
+        val mac = info.macAddress
+        if (!request.secureLanternWifi || mac.isNullOrEmpty()) return null
+        val credentials = lanternWifiStore.get(mac) ?: LanternWifi.newCredentials(mac)
+        lanternWifiStore.save(mac, credentials)
+        return credentials
+    }
+
+    private fun postCredentials(
+        http: OkHttpClient,
+        request: ProvisioningRequest,
+        led: Map<String, Any>?,
+        lanternWifi: LanternWifiCredentials?,
+    ) {
         val body = ProvisioningPayloads.wifiConfigJson(
             request.homeSsid,
             request.homePassword,
             request.timezone,
             led,
             request.deviceName,
+            lanternWifi?.let(LanternWifi::apConfig),
         )
         val call = Request.Builder()
             .url(apUrl("/json/cfg"))

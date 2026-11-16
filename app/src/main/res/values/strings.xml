@@ -336,4 +336,19 @@
     <string name="direct_connection_joined">Connected directly to your Parol.</string>
     <string name="direct_connection_not_found">No Parol WiFi found nearby. Make sure the Parol is plugged in and wait about 15 seconds.</string>
     <string name="direct_connection_not_saved">This Parol isn\'t in Sinag yet. Set it up or add it first.</string>
+    <string name="lantern_wifi_title">Parol WiFi</string>
+    <string name="lantern_wifi_name">Name: %1$s</string>
+    <string name="lantern_wifi_password">Password: %1$s</string>
+    <string name="lantern_wifi_copy">Copy password</string>
+    <string name="lantern_wifi_hint">Your Parol opens this WiFi when it can\'t reach your home WiFi, for example after you move it. Sinag uses it for Direct connection; you only need the password to join from another phone.</string>
+    <string name="lantern_wifi_setup_again">Setting up a Parol again? Use its own WiFi:</string>
+    <string name="lantern_wifi_unreachable">Couldn\'t reach the Parol. Check that it\'s online and try again.</string>
+    <string name="lantern_wifi_error_pin">This Parol has a settings PIN. Enter it and try again.</string>
+    <string name="lantern_wifi_error_generic">The Parol didn\'t accept the change. Try again.</string>
+    <string name="lantern_wifi_secure">Secure Parol WiFi</string>
+    <string name="lantern_wifi_new_password">New password</string>
+    <string name="lantern_wifi_status_shared">This Parol still uses the shared WiFi %1$s with the password wled1234, which anyone nearby can join. Give it its own name and password.</string>
+    <string name="lantern_wifi_status_changed">Done. The Parol uses its new WiFi the next time it opens it.</string>
+    <string name="lantern_wifi_status_not_saved">This Parol has its own WiFi (%1$s), but its password isn\'t saved on this phone. Set a new password to use Direct connection from this phone.</string>
+    <string name="direct_connection_new_parol">Parol not set up yet (WLED-AP)</string>
 </resources>

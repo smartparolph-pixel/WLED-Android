@@ -37,6 +37,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningProgress
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.lanternwifi.LanternWifiCard
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.presetPackSetupText
 
 @Composable
@@ -171,6 +172,7 @@ private fun SetupNetworkFields(
         style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.padding(bottom = 4.dp),
     )
+    SavedLanternWifis(viewModel)
     OutlinedTextField(
         value = state.apSsidPrefix,
         onValueChange = viewModel::setApSsidPrefix,
@@ -193,6 +195,20 @@ private fun SetupNetworkFields(
     )
 }
 
+/** Setting a lantern up again (e.g. a new router): its own WiFi, saved on this phone, is one tap away. */
+@Composable
+private fun SavedLanternWifis(viewModel: ProvisionViewModel) {
+    val saved = viewModel.savedLanternWifis
+    if (saved.isEmpty()) return
+    Text(
+        text = stringResource(R.string.lantern_wifi_setup_again),
+        style = MaterialTheme.typography.bodySmall,
+    )
+    saved.forEach { credentials ->
+        TextButton(onClick = { viewModel.useLanternWifi(credentials) }) { Text(credentials.ssid) }
+    }
+}
+
 @Composable
 private fun WorkingStep(progress: ProvisioningProgress) {
     CircularProgressIndicator(modifier = Modifier.padding(16.dp))
@@ -213,6 +229,7 @@ private fun SuccessStep(step: ProvisionStep.Success, onDismiss: () -> Unit) {
         modifier = Modifier.padding(bottom = 12.dp),
     )
     PresetPackStatus(step)
+    step.lanternWifi?.let { LanternWifiCard(it, modifier = Modifier.padding(bottom = 12.dp)) }
     Text(
         text = stringResource(R.string.provision_secure_tip),
         style = MaterialTheme.typography.bodySmall,

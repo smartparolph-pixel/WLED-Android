@@ -13,6 +13,7 @@ import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
 import ca.cgagnier.wlednativeandroid.repository.UserPreferencesRepository
 import ca.cgagnier.wlednativeandroid.service.direct.DirectConnection
 import ca.cgagnier.wlednativeandroid.service.direct.DirectConnectionManager
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiStore
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketClient
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketClientFactory
@@ -33,6 +34,7 @@ import javax.inject.Inject
 
 private const val TAG = "DeviceWebsocketListViewModel"
 
+@Suppress("LongParameterList") // Injected by Hilt.
 @HiltViewModel
 class DeviceWebsocketListViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository,
@@ -41,6 +43,7 @@ class DeviceWebsocketListViewModel @Inject constructor(
     private val widgetManager: WledWidgetManager,
     @ApplicationContext private val applicationContext: Context,
     directConnection: DirectConnectionManager,
+    private val lanternWifiStore: LanternWifiStore,
 ) : ViewModel(),
     DefaultLifecycleObserver {
     private val activeClients = MutableStateFlow<Map<String, WebsocketClient>>(emptyMap())
@@ -211,6 +214,7 @@ class DeviceWebsocketListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             Log.d(TAG, "Deleting device ${device.originalName} - ${device.address}")
             widgetManager.deleteWidgetsForDevice(applicationContext, device.macAddress)
+            lanternWifiStore.remove(device.macAddress)
             deviceRepository.delete(device)
         }
     }

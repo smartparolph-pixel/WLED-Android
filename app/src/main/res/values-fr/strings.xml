@@ -333,4 +333,19 @@
     <string name="direct_connection_joined">Connecté directement à votre Parol.</string>
     <string name="direct_connection_not_found">Aucun WiFi de Parol à proximité. Vérifiez que le Parol est branché et patientez environ 15 secondes.</string>
     <string name="direct_connection_not_saved">Ce Parol n\'est pas encore dans Sinag. Configurez-le ou ajoutez-le d\'abord.</string>
+    <string name="lantern_wifi_title">WiFi du Parol</string>
+    <string name="lantern_wifi_name">Nom : %1$s</string>
+    <string name="lantern_wifi_password">Mot de passe : %1$s</string>
+    <string name="lantern_wifi_copy">Copier le mot de passe</string>
+    <string name="lantern_wifi_hint">Votre Parol ouvre ce WiFi quand il ne peut pas joindre votre WiFi, par exemple après un déménagement. Sinag l\'utilise pour la connexion directe ; le mot de passe ne sert qu\'à se connecter depuis un autre téléphone.</string>
+    <string name="lantern_wifi_setup_again">Vous configurez à nouveau un Parol ? Utilisez son propre WiFi :</string>
+    <string name="lantern_wifi_unreachable">Impossible de joindre le Parol. Vérifiez qu\'il est en ligne et réessayez.</string>
+    <string name="lantern_wifi_error_pin">Ce Parol a un code PIN de réglages. Saisissez-le et réessayez.</string>
+    <string name="lantern_wifi_error_generic">Le Parol n\'a pas accepté la modification. Réessayez.</string>
+    <string name="lantern_wifi_secure">Sécuriser le WiFi du Parol</string>
+    <string name="lantern_wifi_new_password">Nouveau mot de passe</string>
+    <string name="lantern_wifi_status_shared">Ce Parol utilise encore le WiFi partagé %1$s avec le mot de passe wled1234, que tout le monde à proximité peut rejoindre. Donnez-lui son propre nom et mot de passe.</string>
+    <string name="lantern_wifi_status_changed">C\'est fait. Le Parol utilisera son nouveau WiFi la prochaine fois qu\'il l\'ouvrira.</string>
+    <string name="lantern_wifi_status_not_saved">Ce Parol a son propre WiFi (%1$s), mais son mot de passe n\'est pas enregistré sur ce téléphone. Définissez un nouveau mot de passe pour utiliser la connexion directe depuis ce téléphone.</string>
+    <string name="direct_connection_new_parol">Parol pas encore configuré (WLED-AP)</string>
 </resources>

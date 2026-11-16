@@ -77,4 +77,12 @@ class ProvisioningPayloadsTest {
         assertEquals("""{"nw":{"ins":[{"ssid":"Home","psk":"secret123"}]},"id":{"name":"Living Room Parol"}}""", json)
         assertFalse(ProvisioningPayloads.wifiConfigJson("Home", "secret123", name = " ").contains("\"id\""))
     }
+
+    @Test
+    fun lanternWifiIsSentWithTheCredentials() {
+        val ap = mapOf("ssid" to "Parol-E4F5", "psk" to "k7m2q9xd")
+        val cfg = parse(ProvisioningPayloads.wifiConfigJson("Home", "secret123", ap = ap))
+        assertEquals(ap, cfg["ap"])
+        assertFalse(ProvisioningPayloads.wifiConfigJson("Home", "secret123").contains("\"ap\""))
+    }
 }

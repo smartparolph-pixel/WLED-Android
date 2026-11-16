@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.Device
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiStore
 import ca.cgagnier.wlednativeandroid.service.presets.PackSetupResult
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPackInstaller
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPacks
@@ -48,8 +50,13 @@ sealed interface ProvisionStep {
      * @param addingPacks The playlists are still being added to the new device.
      * @param presets What adding the playlists did.
      */
-    data class Success(val device: Device, val addingPacks: Boolean = true, val presets: PackSetupResult? = null) :
-        ProvisionStep
+    data class Success(
+        val device: Device,
+        val addingPacks: Boolean = true,
+        val presets: PackSetupResult? = null,
+        /** The lantern's own WiFi as set during setup. */
+        val lanternWifi: LanternWifiCredentials? = null,
+    ) : ProvisionStep
 }
 
 data class ProvisionState(
@@ -68,7 +75,17 @@ data class ProvisionState(
 class ProvisionViewModel @Inject constructor(
     private val provisioningService: WledProvisioningService,
     private val presetPackInstaller: PresetPackInstaller,
+    lanternWifiStore: LanternWifiStore,
 ) : ViewModel() {
+    /** Lantern WiFis saved on this phone, offered as the setup network when setting a lantern up again. */
+    val savedLanternWifis: List<LanternWifiCredentials> = lanternWifiStore.all.value.values.sortedBy { it.ssid }
+
+    /** Sets the setup network to a lantern's own WiFi saved on this phone. */
+    fun useLanternWifi(credentials: LanternWifiCredentials) {
+        if (state.step is ProvisionStep.Form) {
+            state = state.copy(apSsidPrefix = credentials.ssid, apPassword = credentials.password)
+        }
+    }
 
     var state by mutableStateOf(ProvisionState())
         private set
@@ -123,7 +140,9 @@ class ProvisionViewModel @Inject constructor(
                 .collect { progress ->
                     state = state.copy(
                         step = when (progress) {
-                            is ProvisioningProgress.Done -> ProvisionStep.Success(progress.device)
+                            is ProvisioningProgress.Done ->
+                                ProvisionStep.Success(progress.device, lanternWifi = progress.lanternWifi)
+
                             else -> ProvisionStep.Working(progress)
                         },
                     )

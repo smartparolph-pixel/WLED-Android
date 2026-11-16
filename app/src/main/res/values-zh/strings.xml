@@ -331,4 +331,19 @@
     <string name="direct_connection_joined">已直接连接到您的 Parol。</string>
     <string name="direct_connection_not_found">附近未找到 Parol 的 WiFi。请确认 Parol 已通电，并等待约 15 秒。</string>
     <string name="direct_connection_not_saved">Sinag 中还没有这个 Parol。请先设置或添加它。</string>
+    <string name="lantern_wifi_title">Parol WiFi</string>
+    <string name="lantern_wifi_name">名称：%1$s</string>
+    <string name="lantern_wifi_password">密码：%1$s</string>
+    <string name="lantern_wifi_copy">复制密码</string>
+    <string name="lantern_wifi_hint">当 Parol 连不上您家中的 WiFi（例如搬到别处后）时，会开启这个 WiFi。Sinag 用它进行直接连接；只有从其他手机连接时才需要密码。</string>
+    <string name="lantern_wifi_setup_again">要重新设置 Parol？使用它自己的 WiFi：</string>
+    <string name="lantern_wifi_unreachable">无法连接到 Parol。请确认它在线后重试。</string>
+    <string name="lantern_wifi_error_pin">此 Parol 设有设置 PIN。请输入后重试。</string>
+    <string name="lantern_wifi_error_generic">Parol 未接受更改。请重试。</string>
+    <string name="lantern_wifi_secure">保护 Parol WiFi</string>
+    <string name="lantern_wifi_new_password">新密码</string>
+    <string name="lantern_wifi_status_shared">此 Parol 仍在使用共用的 WiFi %1$s，密码为 wled1234，附近任何人都能连接。请为它设置专属名称和密码。</string>
+    <string name="lantern_wifi_status_changed">完成。Parol 下次开启 WiFi 时会使用新的设置。</string>
+    <string name="lantern_wifi_status_not_saved">此 Parol 已有自己的 WiFi（%1$s），但密码未保存在这部手机上。设置新密码后即可在这部手机上使用直接连接。</string>
+    <string name="direct_connection_new_parol">尚未设置的 Parol（WLED-AP）</string>
 </resources>
