@@ -16,12 +16,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -29,7 +27,6 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.share.scanShareCode
 import ca.cgagnier.wlednativeandroid.util.openUriSafely
@@ -56,7 +53,6 @@ internal fun DrawerContent(
         HorizontalDivider(modifier = Modifier.padding(12.dp))
         DrawerExternalLinks(uriHandler)
         Spacer(Modifier.height(24.dp))
-        DrawerVersionInfo()
     }
 }
 
@@ -167,39 +163,6 @@ private fun DrawerExternalLinks(uriHandler: UriHandler) {
         onClick = { uriHandler.openUriSafely("https://kno.wled.ge/") },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
     )
-    NavigationDrawerItem(
-        label = { Text(text = stringResource(R.string.support_me)) },
-        icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_coffee_24),
-                contentDescription = stringResource(R.string.support_me),
-            )
-        },
-        selected = false,
-        onClick = { uriHandler.openUriSafely("https://github.com/sponsors/Moustachauve") },
-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-    )
-}
-
-@Composable
-private fun DrawerVersionInfo() {
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        val debugString =
-            if (BuildConfig.BUILD_TYPE != "release") " - ${BuildConfig.BUILD_TYPE}" else ""
-        Text(
-            "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})$debugString",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Text(
-            BuildConfig.APPLICATION_ID,
-            style = MaterialTheme.typography.bodySmall,
-        )
-    }
 }
 
 @Composable

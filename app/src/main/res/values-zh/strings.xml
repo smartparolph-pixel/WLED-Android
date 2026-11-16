@@ -91,7 +91,6 @@
     <string name="select_a_device_from_the_list">从列表中选择一个设备</string>
     <string name="downloading_file">正在下载 %1$s…</string>
     <string name="help">WLED 帮助</string>
-    <string name="support_me">支持 Moustachauve</string>
     <string name="offline_devices">离线设备</string>
     <string name="websocket_connected">已连接</string>
     <string name="websocket_connecting">正在连接…</string>

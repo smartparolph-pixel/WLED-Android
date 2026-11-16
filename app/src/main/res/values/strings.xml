@@ -94,7 +94,6 @@
     <string name="device_offline_update_message">The device must be online to verify its current version and check for available updates.</string>
     <string name="select_a_device_from_the_list">Select a device from the list</string>
     <string name="help">WLED Help</string>
-    <string name="support_me">Support Moustachauve</string>
     <string name="offline_devices">Offline Devices</string>
     <string name="websocket_connected">Connected</string>
     <string name="websocket_connecting">Connecting…</string>
