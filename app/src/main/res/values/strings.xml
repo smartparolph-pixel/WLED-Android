@@ -350,4 +350,5 @@
     <string name="lantern_wifi_status_changed">Done. The Parol uses its new WiFi the next time it opens it.</string>
     <string name="lantern_wifi_status_not_saved">This Parol has its own WiFi (%1$s), but its password isn\'t saved on this phone. Set a new password to use Direct connection from this phone.</string>
     <string name="direct_connection_new_parol">Parol not set up yet (WLED-AP)</string>
+    <string name="app_version">Sinag version %1$s</string>
 </resources>

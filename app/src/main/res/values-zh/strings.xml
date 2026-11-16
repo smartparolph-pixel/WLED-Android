@@ -345,4 +345,5 @@
     <string name="lantern_wifi_status_changed">完成。Parol 下次开启 WiFi 时会使用新的设置。</string>
     <string name="lantern_wifi_status_not_saved">此 Parol 已有自己的 WiFi（%1$s），但密码未保存在这部手机上。设置新密码后即可在这部手机上使用直接连接。</string>
     <string name="direct_connection_new_parol">尚未设置的 Parol（WLED-AP）</string>
+    <string name="app_version">Sinag 版本 %1$s</string>
 </resources>

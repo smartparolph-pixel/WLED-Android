@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.repository.AppLockTimeout
 import ca.cgagnier.wlednativeandroid.repository.ThemeSettings
@@ -85,7 +86,12 @@ fun Settings(navigateUp: () -> Unit, viewModel: SettingsViewModel = hiltViewMode
                     AppLockOptions(settingsState, viewModel)
                 },
             )
-            // }
+            Text(
+                text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 16.dp),
+            )
         }
     }
 }
