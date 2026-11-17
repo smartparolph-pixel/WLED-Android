@@ -76,6 +76,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -104,6 +105,7 @@ import java.util.Locale
 
 /** The muted Sinag lockup on the "device unreachable" screen takes this share of the width. */
 private const val LOCKUP_WIDTH_FRACTION = 0.7f
+private const val HALF_LUMINANCE = 0.5f
 
 private const val TAG = "ui.components.DeviceWebView"
 
@@ -133,6 +135,12 @@ fun DeviceWebView(
     val appLock = LocalAppLockManager.current
     client.needsSettingsUnlock = { appLock?.settingsNeedUnlock() == true }
     client.settingsGuard = rememberSettingsGuard()
+    // The lantern's page is light or dark with the app; also applied right away when the app's theme changes.
+    val lightTheme = MaterialTheme.colorScheme.background.luminance() > HALF_LUMINANCE
+    client.lightTheme = lightTheme
+    LaunchedEffect(webView, lightTheme) {
+        webView.evaluateJavascript(WledPageTheme.script(lightTheme), null)
+    }
 
     // Add this DisposableEffect to prevent memory leaks and crashes on configuration changes.
     DisposableEffect(webView) {
@@ -325,6 +333,9 @@ class CustomWebViewClient : WebViewClient() {
     /** Asks for the phone's unlock, then runs the action. */
     var settingsGuard: (action: () -> Unit) -> Unit = { it() }
 
+    /** The app is in its light theme: the lantern's page follows it (see [WledPageTheme]). */
+    var lightTheme: Boolean = false
+
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         val path = request.url.path.orEmpty()
         val settingsPage = SETTINGS_PATHS.any { path == it || path.startsWith("$it/") }
@@ -348,6 +359,7 @@ class CustomWebViewClient : WebViewClient() {
         Log.d(TAG, "onPageFinished $url")
         if (url != "about:blank") {
             state.loadingState = Finished
+            view.evaluateJavascript(WledPageTheme.script(lightTheme), null)
         }
     }
 
