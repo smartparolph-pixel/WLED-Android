@@ -155,6 +155,16 @@ object ProvisioningPayloads {
         else -> value
     }
 
+    /**
+     * Body for `POST /json/cfg` that renames the lantern (`id.name`, WLED's "Server description"), so every
+     * phone shows the same name. [pin] if the lantern has a settings PIN.
+     */
+    fun nameConfigJson(name: String, pin: String? = null): String {
+        val payload = mutableMapOf<String, Any>("id" to mapOf("name" to name))
+        if (!pin.isNullOrEmpty()) payload["pin"] = pin
+        return moshi.adapter(Any::class.java).toJson(payload)
+    }
+
     /** Body for `POST /json/state` that makes WLED reboot. */
     const val REBOOT_JSON = """{"rb":true}"""
 

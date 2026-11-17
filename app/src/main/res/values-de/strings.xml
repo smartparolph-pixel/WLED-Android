@@ -8,8 +8,6 @@
     <string name="deleting_device">Gerät löschen?</string>
     <string name="delete">Löschen</string>
     <string name="ip_address_or_url">IP-Adresse oder URL</string>
-    <string name="custom_name">Benutzerdefinierter Name</string>
-    <string name="leave_this_empty_to_use_the_device_name">Lasse dieses Feld leer, um den Gerätenamen zu verwenden</string>
     <string name="please_enter_value">Bitte gib einen Wert ein</string>
     <string name="please_enter_valid_value">Bitte gib einen gültigen Wert ein</string>
     <string name="cancel">Abbrechen</string>
@@ -349,4 +347,7 @@
     <string name="lantern_wifi_status_not_saved">Dieser Parol hat ein eigenes WLAN (%1$s), aber sein Passwort ist nicht auf diesem Handy gespeichert. Lege ein neues Passwort fest, um die Direktverbindung von diesem Handy aus zu nutzen.</string>
     <string name="direct_connection_new_parol">Noch nicht eingerichteter Parol (WLED-AP)</string>
     <string name="app_version">Sinag Version %1$s</string>
+    <string name="lantern_name_hint">Wird auf dem Parol gespeichert, damit jedes Handy diesen Namen zeigt.</string>
+    <string name="lantern_name_saved">Auf dem Parol gespeichert.</string>
+    <string name="lantern_name_phone_only">Parol nicht erreichbar, daher ist der Name nur auf diesem Handy gespeichert. Gib ihn erneut ein, wenn der Parol online ist.</string>
 </resources>

@@ -8,8 +8,6 @@
     <string name="deleting_device">删除设备？</string>
     <string name="delete">删除</string>
     <string name="ip_address_or_url">IP 地址或 URL</string>
-    <string name="custom_name">自定义名称</string>
-    <string name="leave_this_empty_to_use_the_device_name">留空则使用设备原名</string>
     <string name="please_enter_value">请输入值</string>
     <string name="please_enter_valid_value">请输入有效的值</string>
     <string name="cancel">取消</string>
@@ -346,4 +344,7 @@
     <string name="lantern_wifi_status_not_saved">此 Parol 已有自己的 WiFi（%1$s），但密码未保存在这部手机上。设置新密码后即可在这部手机上使用直接连接。</string>
     <string name="direct_connection_new_parol">尚未设置的 Parol（WLED-AP）</string>
     <string name="app_version">Sinag 版本 %1$s</string>
+    <string name="lantern_name_hint">保存在 Parol 上，所有手机都会显示这个名称。</string>
+    <string name="lantern_name_saved">已保存到 Parol。</string>
+    <string name="lantern_name_phone_only">无法连接到 Parol，此名称仅保存在这部手机上。Parol 在线时请重新输入。</string>
 </resources>

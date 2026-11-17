@@ -85,4 +85,13 @@ class ProvisioningPayloadsTest {
         assertEquals(ap, cfg["ap"])
         assertFalse(ProvisioningPayloads.wifiConfigJson("Home", "secret123").contains("\"ap\""))
     }
+
+    @Test
+    fun renameSetsOnlyTheLanternName() {
+        assertEquals(
+            """{"id":{"name":"Living Room Parol"}}""",
+            ProvisioningPayloads.nameConfigJson("Living Room Parol"),
+        )
+        assertEquals("1234", parse(ProvisioningPayloads.nameConfigJson("Parol", "1234"))["pin"])
+    }
 }

@@ -9,8 +9,6 @@
     <string name="deleting_device">Delete Device?</string>
     <string name="delete">Delete</string>
     <string name="ip_address_or_url">IP Address or URL</string>
-    <string name="custom_name">Custom Name</string>
-    <string name="leave_this_empty_to_use_the_device_name">Leave this field empty to use the device name</string>
     <string name="please_enter_value">Please enter a value</string>
     <string name="please_enter_valid_value">Please enter a valid value</string>
     <string name="cancel">Cancel</string>
@@ -351,4 +349,7 @@
     <string name="lantern_wifi_status_not_saved">This Parol has its own WiFi (%1$s), but its password isn\'t saved on this phone. Set a new password to use Direct connection from this phone.</string>
     <string name="direct_connection_new_parol">Parol not set up yet (WLED-AP)</string>
     <string name="app_version">Sinag version %1$s</string>
+    <string name="lantern_name_hint">Saved on the Parol, so every phone shows this name.</string>
+    <string name="lantern_name_saved">Saved on the Parol.</string>
+    <string name="lantern_name_phone_only">Couldn\'t reach the Parol, so this name is saved on this phone only. Type it again when the Parol is online.</string>
 </resources>

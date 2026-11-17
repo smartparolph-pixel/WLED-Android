@@ -9,8 +9,6 @@
     <string name="deleting_device">Supprimer l\'appareil?</string>
     <string name="delete">Supprimer</string>
     <string name="ip_address_or_url">Adresse IP ou URL</string>
-    <string name="custom_name">Nom personnalisé</string>
-    <string name="leave_this_empty_to_use_the_device_name">Laisser ce champ vide pour utiliser le nom de l\'appareil</string>
     <string name="please_enter_value">Veuillez entrer une valeur</string>
     <string name="please_enter_valid_value">Veuillez entrer une valeur valide</string>
     <string name="cancel">Annuler</string>
@@ -348,4 +346,7 @@
     <string name="lantern_wifi_status_not_saved">Ce Parol a son propre WiFi (%1$s), mais son mot de passe n\'est pas enregistré sur ce téléphone. Définissez un nouveau mot de passe pour utiliser la connexion directe depuis ce téléphone.</string>
     <string name="direct_connection_new_parol">Parol pas encore configuré (WLED-AP)</string>
     <string name="app_version">Sinag version %1$s</string>
+    <string name="lantern_name_hint">Enregistré sur le Parol, pour que chaque téléphone affiche ce nom.</string>
+    <string name="lantern_name_saved">Enregistré sur le Parol.</string>
+    <string name="lantern_name_phone_only">Parol injoignable : ce nom est enregistré sur ce téléphone uniquement. Saisissez-le à nouveau quand le Parol est en ligne.</string>
 </resources>

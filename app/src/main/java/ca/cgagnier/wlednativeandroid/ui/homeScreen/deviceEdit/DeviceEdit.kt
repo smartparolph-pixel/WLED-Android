@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -97,10 +98,11 @@ fun DeviceEdit(
     }
 
     // Merge the device-owned updateTag into the VM state.
-    val uiState = vmState.copy(updateTag = updateTag)
+    val renameStatus by viewModel.renameStatus.collectAsState()
+    val uiState = vmState.copy(updateTag = updateTag, renameStatus = renameStatus)
 
     val actions = DeviceEditActions(
-        onCustomNameChange = { viewModel.updateCustomName(device.device, it) },
+        onCustomNameChange = { viewModel.renameLantern(device.device, it) },
         onDeviceHiddenChange = { viewModel.updateDeviceHidden(device.device, it) },
         onBranchChange = { viewModel.updateDeviceBranch(device.device, it) },
         onCheckForUpdates = { viewModel.checkForUpdates(device.device) },
@@ -193,7 +195,7 @@ fun DeviceEditContent(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                CustomNameTextField(device.device, actions.onCustomNameChange)
+                LanternNameTextField(device.device, uiState.renameStatus, actions.onCustomNameChange)
                 DeviceVisibleSwitch(
                     modifier = Modifier.padding(top = 4.dp),
                     isHidden = device.device.isHidden,
@@ -445,29 +447,34 @@ private fun DeviceOfflineStatus() {
 }
 
 /**
- * Editable custom name field with debounced saves.
- *
- * Only persists changes after typing stops for 800 ms.
+ * The lantern's name, saved on the lantern itself so every phone shows it (or on this phone only when the
+ * lantern can't be reached). Saved after typing stops for 800 ms.
  */
 @Composable
-private fun CustomNameTextField(device: Device, onValueChange: (String) -> Unit) {
-    val deviceName = device.customName
-    var inputText by remember { mutableStateOf(TextFieldValue(deviceName)) }
+private fun LanternNameTextField(device: Device, status: RenameStatus, onValueChange: (String) -> Unit) {
+    val currentName = deviceName(device)
+    var inputText by remember { mutableStateOf(TextFieldValue(currentName)) }
+    val hint = when (status) {
+        RenameStatus.Idle, RenameStatus.Saving -> R.string.lantern_name_hint
+        RenameStatus.SavedOnLantern -> R.string.lantern_name_saved
+        RenameStatus.SavedOnPhone -> R.string.lantern_name_phone_only
+        RenameStatus.Empty -> R.string.provision_error_name_required
+        RenameStatus.TooLong -> R.string.provision_error_name_too_long
+    }
     OutlinedTextField(
         value = inputText,
         onValueChange = { inputText = it },
-        label = { Text(stringResource(R.string.custom_name)) },
-        supportingText = {
-            Text(stringResource(R.string.leave_this_empty_to_use_the_device_name))
-        },
+        label = { Text(stringResource(R.string.provision_device_name)) },
+        isError = status == RenameStatus.Empty || status == RenameStatus.TooLong,
+        supportingText = { Text(stringResource(hint)) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, capitalization = KeyboardCapitalization.Words),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
     )
     LaunchedEffect(key1 = inputText.text) {
-        if (deviceName == inputText.text) return@LaunchedEffect
+        if (currentName == inputText.text.trim()) return@LaunchedEffect
         delay(800)
         onValueChange(inputText.text)
     }

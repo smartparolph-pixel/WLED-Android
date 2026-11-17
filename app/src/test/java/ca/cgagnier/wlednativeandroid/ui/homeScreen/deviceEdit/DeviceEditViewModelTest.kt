@@ -46,6 +46,7 @@ class DeviceEditViewModelTest {
             releaseService = mockk(relaxed = true),
             widgetManager = mockk(relaxed = true),
             applicationContext = mockk<Context>(relaxed = true),
+            deviceApiFactory = mockk(relaxed = true),
         )
     }
 
