@@ -356,8 +356,10 @@
     <string name="provision_wifi_manual">手动输入网络名称</string>
     <string name="provision_wifi_5ghz">仅 5 GHz：Parol 需要 2.4 GHz 网络</string>
     <string name="provision_wifi_secured">需要密码</string>
-    <string name="provision_wifi_permission">要列出附近的 WiFi 网络，请允许 Sinag 查找附近设备（旧版 Android 为位置信息）。或手动输入名称。</string>
+    <string name="provision_wifi_permission">要列出附近的 WiFi 网络，Android 要求 Sinag 拥有精确位置权限（Sinag 不会使用您的位置）。请在设置中允许，或手动输入名称。</string>
     <string name="provision_wifi_off">WiFi 已关闭。请打开后重新搜索。</string>
-    <string name="provision_wifi_none_found">未找到 WiFi 网络。旧版 Android 请打开位置信息后重新搜索。或手动输入名称。</string>
+    <string name="provision_wifi_none_found">未找到 WiFi 网络。请重新搜索，或手动输入名称。</string>
     <string name="provision_error_choose_wifi">请选择您的家庭 WiFi。</string>
+    <string name="provision_wifi_location_off">请打开位置信息以列出附近的 WiFi 网络（Android 搜索 WiFi 时需要；Sinag 不会使用您的位置）。或手动输入名称。</string>
+    <string name="provision_wifi_open_settings">打开设置</string>
 </resources>

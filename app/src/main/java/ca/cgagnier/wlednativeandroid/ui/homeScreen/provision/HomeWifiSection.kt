@@ -1,5 +1,8 @@
 package ca.cgagnier.wlednativeandroid.ui.homeScreen.provision
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -25,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -47,11 +51,12 @@ private val SIGNAL_ICONS = listOf(
 @Composable
 internal fun HomeWifiSection(state: ProvisionState, step: ProvisionStep.Form, viewModel: ProvisionViewModel) {
     val wifi = state.homeWifi
-    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-        viewModel.onWifiPermissionResult(it)
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        // Only precise location lets Android return scan results.
+        viewModel.onWifiPermissionResult(viewModel.canScanWifi())
     }
     val scan = {
-        if (viewModel.canScanWifi()) viewModel.scanWifi() else permission.launch(viewModel.wifiScanPermission)
+        if (viewModel.canScanWifi()) viewModel.scanWifi() else permission.launch(viewModel.wifiScanPermissions)
     }
     // Scan as soon as the form opens.
     LaunchedEffect(Unit) {
@@ -142,6 +147,7 @@ private fun WifiList(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(12.dp),
                 )
+                SettingsShortcut(it)
             }
             wifi.networks.forEach { choice ->
                 WifiRowContent(
@@ -170,6 +176,31 @@ private fun WifiList(
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(top = 4.dp),
         )
+    }
+}
+
+/** Opens the phone setting that the problem asks for (Location, WiFi, or Sinag's permissions). */
+@Composable
+private fun SettingsShortcut(problem: Int) {
+    val context = LocalContext.current
+    val action = when (problem) {
+        R.string.provision_wifi_location_off -> Settings.ACTION_LOCATION_SOURCE_SETTINGS
+        R.string.provision_wifi_off -> Settings.ACTION_WIFI_SETTINGS
+        R.string.provision_wifi_permission -> Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        else -> return
+    }
+    TextButton(
+        onClick = {
+            val intent = Intent(action).apply {
+                if (action == Settings.ACTION_APPLICATION_DETAILS_SETTINGS) {
+                    data = Uri.fromParts("package", context.packageName, null)
+                }
+            }
+            runCatching { context.startActivity(intent) }
+        },
+        modifier = Modifier.padding(start = 4.dp),
+    ) {
+        Text(stringResource(R.string.provision_wifi_open_settings))
     }
 }
 

@@ -95,16 +95,22 @@ class ProvisionViewModel @Inject constructor(
     lanternWifiStore: LanternWifiStore,
     private val wifiScanner: WifiScanner,
 ) : ViewModel() {
-    /** The permission to ask for before scanning for WiFi networks. */
-    val wifiScanPermission: String get() = wifiScanner.permission
+    /** The permissions to ask for before scanning for WiFi networks. */
+    val wifiScanPermissions: Array<String> get() = wifiScanner.permissions
 
     fun canScanWifi(): Boolean = wifiScanner.hasPermission()
 
     /** Lists the WiFi networks around the phone. */
     fun scanWifi() {
         if (state.step !is ProvisionStep.Form || state.homeWifi.scanning) return
-        if (!wifiScanner.hasPermission()) {
-            updateWifi { it.copy(problem = R.string.provision_wifi_permission) }
+        val blocked = when {
+            !wifiScanner.hasPermission() -> R.string.provision_wifi_permission
+            !wifiScanner.isWifiOn -> R.string.provision_wifi_off
+            !wifiScanner.isLocationOn -> R.string.provision_wifi_location_off
+            else -> null
+        }
+        if (blocked != null) {
+            updateWifi { it.copy(problem = blocked, scanned = true, networks = emptyList()) }
             return
         }
         updateWifi { it.copy(scanning = true, problem = null) }
@@ -118,7 +124,6 @@ class ProvisionViewModel @Inject constructor(
             val problem = when {
                 networks == null -> R.string.provision_wifi_permission
                 networks.isNotEmpty() -> null
-                !wifiScanner.isWifiOn -> R.string.provision_wifi_off
                 else -> R.string.provision_wifi_none_found
             }
             updateWifi {

@@ -361,8 +361,10 @@
     <string name="provision_wifi_manual">Enter network name manually</string>
     <string name="provision_wifi_5ghz">5 GHz only: the Parol needs a 2.4 GHz network</string>
     <string name="provision_wifi_secured">Needs a password</string>
-    <string name="provision_wifi_permission">To list nearby WiFi networks, allow Sinag to find nearby devices (Location on older Android). Or enter the name manually.</string>
+    <string name="provision_wifi_permission">To list nearby WiFi networks, Android needs Sinag to have precise Location permission (Sinag doesn\'t use your location). Allow it in Settings, or enter the name manually.</string>
     <string name="provision_wifi_off">WiFi is off. Turn it on, then scan again.</string>
-    <string name="provision_wifi_none_found">No WiFi networks found. On older Android, turn on Location, then scan again. Or enter the name manually.</string>
+    <string name="provision_wifi_none_found">No WiFi networks found. Scan again, or enter the name manually.</string>
     <string name="provision_error_choose_wifi">Choose your home WiFi.</string>
+    <string name="provision_wifi_location_off">Turn on Location to list nearby WiFi networks (Android needs it for WiFi scans; Sinag doesn\'t use your location). Or enter the name manually.</string>
+    <string name="provision_wifi_open_settings">Open settings</string>
 </resources>

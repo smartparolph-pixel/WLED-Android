@@ -358,8 +358,10 @@
     <string name="provision_wifi_manual">Saisir le nom du réseau</string>
     <string name="provision_wifi_5ghz">5 GHz uniquement : le Parol a besoin d\'un réseau 2,4 GHz</string>
     <string name="provision_wifi_secured">Mot de passe requis</string>
-    <string name="provision_wifi_permission">Pour lister les réseaux WiFi, autorisez Sinag à trouver les appareils à proximité (la localisation sur les anciens Android). Ou saisissez le nom.</string>
+    <string name="provision_wifi_permission">Pour lister les réseaux WiFi à proximité, Android exige que Sinag ait l\'autorisation de localisation précise (Sinag n\'utilise pas votre position). Autorisez-la dans les paramètres, ou saisissez le nom.</string>
     <string name="provision_wifi_off">Le WiFi est désactivé. Activez-le, puis recherchez à nouveau.</string>
-    <string name="provision_wifi_none_found">Aucun réseau WiFi trouvé. Sur les anciens Android, activez la localisation, puis recherchez à nouveau. Ou saisissez le nom.</string>
+    <string name="provision_wifi_none_found">Aucun réseau WiFi trouvé. Recherchez à nouveau, ou saisissez le nom.</string>
     <string name="provision_error_choose_wifi">Choisissez votre WiFi.</string>
+    <string name="provision_wifi_location_off">Activez la localisation pour lister les réseaux WiFi à proximité (Android l\'exige pour la recherche WiFi ; Sinag n\'utilise pas votre position). Ou saisissez le nom.</string>
+    <string name="provision_wifi_open_settings">Ouvrir les paramètres</string>
 </resources>
