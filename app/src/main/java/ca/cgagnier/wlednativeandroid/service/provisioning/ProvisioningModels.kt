@@ -35,6 +35,12 @@ object ProvisioningDefaults {
      */
     const val POWER_LIMIT_MA = 2000
 
+    /**
+     * LEDs in a lantern, set during setup on its LED output (WLED's factory default is 30, so only part of
+     * the lantern lit up). Lanterns with several outputs keep their own lengths.
+     */
+    const val LED_COUNT = 165
+
     /** Suggested name for a new lantern; the user can change it before setup starts. */
     const val DEVICE_NAME = "Living Room Parol"
 
@@ -114,8 +120,8 @@ object ProvisioningPayloads {
     }
 
     /**
-     * `hw.led` for `POST /json/cfg` that sets the brightness limiter to [limitMa], built from the
-     * device's current `/json/cfg`.
+     * `hw.led` for `POST /json/cfg` that sets the brightness limiter to [limitMa] and, on a lantern with one
+     * LED output, its length to [ledCount] (null keeps it), built from the device's current `/json/cfg`.
      *
      * WLED 0.15 enforces the limit per LED output (`hw.led.ins[].maxpwr`); `hw.led.maxpwr` is only the
      * total shown on the settings page. Its settings page splits the total across outputs by LED count,
@@ -125,17 +131,24 @@ object ProvisioningPayloads {
      *
      * @return null if the config has no LED outputs, so nothing is changed.
      */
-    fun powerLimitConfig(cfg: Map<*, *>, limitMa: Int = ProvisioningDefaults.POWER_LIMIT_MA): Map<String, Any>? {
+    fun powerLimitConfig(
+        cfg: Map<*, *>,
+        limitMa: Int = ProvisioningDefaults.POWER_LIMIT_MA,
+        ledCount: Int? = ProvisioningDefaults.LED_COUNT,
+    ): Map<String, Any>? {
         val led = (cfg["hw"] as? Map<*, *>)?.get("led") as? Map<*, *>
         val outputs = (led?.get("ins") as? List<*>).orEmpty().filterIsInstance<Map<*, *>>()
-        val lengths = outputs.map { (it["len"] as? Number)?.toInt() ?: 0 }
+        val newLength = ledCount?.takeIf { it > 0 && outputs.size == 1 }
+        val setLength = newLength != null
+        val lengths = if (newLength != null) listOf(newLength) else outputs.map { (it["len"] as? Number)?.toInt() ?: 0 }
         val total = lengths.sum()
         if (outputs.isEmpty() || total <= 0) return null
         var left = limitMa
         val ins = outputs.mapIndexed { index, output ->
             val share = if (index == outputs.lastIndex) left else (limitMa.toLong() * lengths[index] / total).toInt()
             left -= share
-            wholeNumbers(output) as Map<*, *> + ("maxpwr" to share)
+            val whole = wholeNumbers(output) as Map<*, *> + ("maxpwr" to share)
+            if (setLength) whole + ("len" to lengths[index]) else whole
         }
         return mapOf("maxpwr" to limitMa, "ins" to ins)
     }

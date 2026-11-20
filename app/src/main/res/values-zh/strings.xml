@@ -1,6 +1,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="sinag_logo">Sinag 标志</string>
-    <string name="add_a_device">添加新设备</string>
+    <string name="add_a_device">通过 IP 地址添加 Parol</string>
     <string name="add">添加</string>
     <string name="add_adding_device">正在添加 <xliff:g example="192.168.1.1" id="strength">%1$s</xliff:g></string>
     <string name="add_device_added"><xliff:g example="Device123" id="strength">%1$s</xliff:g> 已添加</string>
@@ -127,8 +127,8 @@
     <string name="no_release_notes_provided">未提供发行说明</string>
 
     <!-- Device setup over its own WiFi (provisioning) -->
-    <string name="provision_menu_item">设置新设备</string>
-    <string name="provision_title">设置新设备</string>
+    <string name="provision_menu_item">设置新的 Parol</string>
+    <string name="provision_title">设置新的 Parol</string>
     <string name="provision_instructions">请打开设备电源，然后输入设备要连接的 WiFi 网络。手机会请求允许连接到设备的设置网络。</string>
     <string name="provision_home_wifi_name">家庭 WiFi 名称</string>
     <string name="provision_home_wifi_password">家庭 WiFi 密码</string>
@@ -347,4 +347,17 @@
     <string name="lantern_name_hint">保存在 Parol 上，所有手机都会显示这个名称。</string>
     <string name="lantern_name_saved">已保存到 Parol。</string>
     <string name="lantern_name_phone_only">无法连接到 Parol，此名称仅保存在这部手机上。Parol 在线时请重新输入。</string>
+    <string name="provision_home_wifi">家庭 WiFi</string>
+    <string name="provision_wifi_scan">搜索网络</string>
+    <string name="provision_wifi_change">更改</string>
+    <string name="provision_wifi_open">开放网络：无需密码。</string>
+    <string name="provision_wifi_scanning">正在搜索 WiFi 网络…</string>
+    <string name="provision_wifi_scan_again">重新搜索</string>
+    <string name="provision_wifi_manual">手动输入网络名称</string>
+    <string name="provision_wifi_5ghz">仅 5 GHz：Parol 需要 2.4 GHz 网络</string>
+    <string name="provision_wifi_secured">需要密码</string>
+    <string name="provision_wifi_permission">要列出附近的 WiFi 网络，请允许 Sinag 查找附近设备（旧版 Android 为位置信息）。或手动输入名称。</string>
+    <string name="provision_wifi_off">WiFi 已关闭。请打开后重新搜索。</string>
+    <string name="provision_wifi_none_found">未找到 WiFi 网络。旧版 Android 请打开位置信息后重新搜索。或手动输入名称。</string>
+    <string name="provision_error_choose_wifi">请选择您的家庭 WiFi。</string>
 </resources>

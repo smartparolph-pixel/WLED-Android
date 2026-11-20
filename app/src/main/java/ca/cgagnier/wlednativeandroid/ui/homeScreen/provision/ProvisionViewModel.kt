@@ -2,6 +2,7 @@ package ca.cgagnier.wlednativeandroid.ui.homeScreen.provision
 
 import android.os.Build
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,6 +20,8 @@ import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningDefaults
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningException
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningProgress
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningRequest
+import ca.cgagnier.wlednativeandroid.service.provisioning.WifiChoice
+import ca.cgagnier.wlednativeandroid.service.provisioning.WifiScanner
 import ca.cgagnier.wlednativeandroid.service.provisioning.WledProvisioningService
 import ca.cgagnier.wlednativeandroid.service.timezone.TimezoneCatalog
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -68,7 +71,21 @@ data class ProvisionState(
     val apSsidPrefix: String = ProvisioningDefaults.AP_SSID_PREFIX,
     /** Setup network password. Empty means the setup network is open. */
     val apPassword: String = ProvisioningDefaults.AP_PASSWORD,
+    val homeWifi: HomeWifiState = HomeWifiState(),
     val step: ProvisionStep = ProvisionStep.Form(),
+)
+
+/** Choosing the home WiFi: from a scan of nearby networks (default), or typed in. */
+data class HomeWifiState(
+    val manual: Boolean = false,
+    val scanning: Boolean = false,
+    /** A scan has finished at least once. */
+    val scanned: Boolean = false,
+    val networks: List<WifiChoice> = emptyList(),
+    /** The network picked from the list; null until one is picked, and when typing it in. */
+    val chosen: WifiChoice? = null,
+    /** Why the list is empty (no permission, WiFi off, nothing found). */
+    @StringRes val problem: Int? = null,
 )
 
 @HiltViewModel
@@ -76,7 +93,75 @@ class ProvisionViewModel @Inject constructor(
     private val provisioningService: WledProvisioningService,
     private val presetPackInstaller: PresetPackInstaller,
     lanternWifiStore: LanternWifiStore,
+    private val wifiScanner: WifiScanner,
 ) : ViewModel() {
+    /** The permission to ask for before scanning for WiFi networks. */
+    val wifiScanPermission: String get() = wifiScanner.permission
+
+    fun canScanWifi(): Boolean = wifiScanner.hasPermission()
+
+    /** Lists the WiFi networks around the phone. */
+    fun scanWifi() {
+        if (state.step !is ProvisionStep.Form || state.homeWifi.scanning) return
+        if (!wifiScanner.hasPermission()) {
+            updateWifi { it.copy(problem = R.string.provision_wifi_permission) }
+            return
+        }
+        updateWifi { it.copy(scanning = true, problem = null) }
+        viewModelScope.launch {
+            val networks = try {
+                wifiScanner.scan()
+            } catch (e: SecurityException) {
+                Log.w(TAG, "WiFi scan not allowed", e)
+                null
+            }
+            val problem = when {
+                networks == null -> R.string.provision_wifi_permission
+                networks.isNotEmpty() -> null
+                !wifiScanner.isWifiOn -> R.string.provision_wifi_off
+                else -> R.string.provision_wifi_none_found
+            }
+            updateWifi {
+                it.copy(scanning = false, scanned = true, networks = networks.orEmpty(), problem = problem)
+            }
+        }
+    }
+
+    /** The answer to the scan permission request. */
+    fun onWifiPermissionResult(granted: Boolean) {
+        if (granted) scanWifi() else updateWifi { it.copy(problem = R.string.provision_wifi_permission) }
+    }
+
+    fun chooseWifi(choice: WifiChoice) {
+        if (state.step !is ProvisionStep.Form || !choice.supported) return
+        state = state.copy(
+            homeSsid = choice.ssid,
+            homePassword = if (choice.secured) state.homePassword else "",
+            homeWifi = state.homeWifi.copy(chosen = choice),
+        )
+    }
+
+    /** Back to the list to pick another network. */
+    fun changeWifi() {
+        if (state.step !is ProvisionStep.Form) return
+        state = state.copy(homeSsid = "", homePassword = "", homeWifi = state.homeWifi.copy(chosen = null))
+    }
+
+    fun enterWifiManually() {
+        if (state.step !is ProvisionStep.Form) return
+        state = state.copy(homeWifi = state.homeWifi.copy(manual = true, chosen = null))
+    }
+
+    fun useWifiScan() {
+        if (state.step !is ProvisionStep.Form) return
+        state = state.copy(homeSsid = "", homeWifi = state.homeWifi.copy(manual = false, chosen = null))
+        scanWifi()
+    }
+
+    private fun updateWifi(change: (HomeWifiState) -> HomeWifiState) {
+        state = state.copy(homeWifi = change(state.homeWifi))
+    }
+
     /** Lantern WiFis saved on this phone, offered as the setup network when setting a lantern up again. */
     val savedLanternWifis: List<LanternWifiCredentials> = lanternWifiStore.all.value.values.sortedBy { it.ssid }
 
@@ -163,7 +248,11 @@ class ProvisionViewModel @Inject constructor(
 
                 else -> null
             },
-            ssidError = R.string.provision_error_ssid_required.takeIf { state.homeSsid.isBlank() },
+            ssidError = when {
+                state.homeSsid.isNotBlank() -> null
+                state.homeWifi.manual -> R.string.provision_error_ssid_required
+                else -> R.string.provision_error_choose_wifi
+            },
             apSsidError = R.string.provision_error_ap_name_required.takeIf { state.apSsidPrefix.isBlank() },
             apPasswordError = R.string.provision_error_ap_password_length.takeIf {
                 state.apPassword.isNotEmpty() && state.apPassword.length !in WPA2_MIN_LENGTH..WPA2_MAX_LENGTH

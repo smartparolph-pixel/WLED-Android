@@ -1,7 +1,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" translatable="false">Sinag</string>
     <string name="sinag_logo">Sinag logo</string>
-    <string name="add_a_device">Add a New Device</string>
+    <string name="add_a_device">Add a Parol by IP address</string>
     <string name="add">Add</string>
     <string name="add_adding_device">Adding <xliff:g example="192.168.1.1" id="strength">%1$s</xliff:g></string>
     <string name="add_device_added"><xliff:g example="Device123" id="strength">%1$s</xliff:g> was added</string>
@@ -132,8 +132,8 @@
 
 
     <!-- Device setup over its own WiFi (provisioning) -->
-    <string name="provision_menu_item">Set up a new device</string>
-    <string name="provision_title">Set up new device</string>
+    <string name="provision_menu_item">Set up a new Parol</string>
+    <string name="provision_title">Set up a new Parol</string>
     <string name="provision_instructions">Power on your device, then enter the WiFi network it should join. Your phone will ask permission to connect to the device\'s setup network.</string>
     <string name="provision_home_wifi_name">Home WiFi name</string>
     <string name="provision_home_wifi_password">Home WiFi password</string>
@@ -352,4 +352,17 @@
     <string name="lantern_name_hint">Saved on the Parol, so every phone shows this name.</string>
     <string name="lantern_name_saved">Saved on the Parol.</string>
     <string name="lantern_name_phone_only">Couldn\'t reach the Parol, so this name is saved on this phone only. Type it again when the Parol is online.</string>
+    <string name="provision_home_wifi">Home WiFi</string>
+    <string name="provision_wifi_scan">Scan for networks</string>
+    <string name="provision_wifi_change">Change</string>
+    <string name="provision_wifi_open">Open network: no password needed.</string>
+    <string name="provision_wifi_scanning">Looking for WiFi networks…</string>
+    <string name="provision_wifi_scan_again">Scan again</string>
+    <string name="provision_wifi_manual">Enter network name manually</string>
+    <string name="provision_wifi_5ghz">5 GHz only: the Parol needs a 2.4 GHz network</string>
+    <string name="provision_wifi_secured">Needs a password</string>
+    <string name="provision_wifi_permission">To list nearby WiFi networks, allow Sinag to find nearby devices (Location on older Android). Or enter the name manually.</string>
+    <string name="provision_wifi_off">WiFi is off. Turn it on, then scan again.</string>
+    <string name="provision_wifi_none_found">No WiFi networks found. On older Android, turn on Location, then scan again. Or enter the name manually.</string>
+    <string name="provision_error_choose_wifi">Choose your home WiFi.</string>
 </resources>

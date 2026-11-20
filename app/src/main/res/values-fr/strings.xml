@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="sinag_logo">Logo Sinag</string>
-    <string name="add_a_device">Ajouter un appareil</string>
+    <string name="add_a_device">Ajouter un Parol par adresse IP</string>
     <string name="add">Ajouter</string>
     <string name="add_adding_device">Ajout de <xliff:g example="192.168.1.1" id="strength">%1$s</xliff:g></string>
     <string name="add_device_added"><xliff:g example="Device123" id="strength">%1$s</xliff:g> was added</string>
@@ -129,8 +129,8 @@
     <string name="no_release_notes_provided">Aucune note de version fournie</string>
 
     <!-- Device setup over its own WiFi (provisioning) -->
-    <string name="provision_menu_item">Configurer un nouvel appareil</string>
-    <string name="provision_title">Configurer un nouvel appareil</string>
+    <string name="provision_menu_item">Configurer un nouveau Parol</string>
+    <string name="provision_title">Configurer un nouveau Parol</string>
     <string name="provision_instructions">Allumez votre appareil, puis entrez le réseau WiFi auquel il doit se connecter. Votre téléphone vous demandera l\'autorisation de se connecter au réseau de configuration de l\'appareil.</string>
     <string name="provision_home_wifi_name">Nom du WiFi domestique</string>
     <string name="provision_home_wifi_password">Mot de passe du WiFi domestique</string>
@@ -349,4 +349,17 @@
     <string name="lantern_name_hint">Enregistré sur le Parol, pour que chaque téléphone affiche ce nom.</string>
     <string name="lantern_name_saved">Enregistré sur le Parol.</string>
     <string name="lantern_name_phone_only">Parol injoignable : ce nom est enregistré sur ce téléphone uniquement. Saisissez-le à nouveau quand le Parol est en ligne.</string>
+    <string name="provision_home_wifi">WiFi de la maison</string>
+    <string name="provision_wifi_scan">Rechercher des réseaux</string>
+    <string name="provision_wifi_change">Modifier</string>
+    <string name="provision_wifi_open">Réseau ouvert : pas de mot de passe.</string>
+    <string name="provision_wifi_scanning">Recherche des réseaux WiFi…</string>
+    <string name="provision_wifi_scan_again">Rechercher à nouveau</string>
+    <string name="provision_wifi_manual">Saisir le nom du réseau</string>
+    <string name="provision_wifi_5ghz">5 GHz uniquement : le Parol a besoin d\'un réseau 2,4 GHz</string>
+    <string name="provision_wifi_secured">Mot de passe requis</string>
+    <string name="provision_wifi_permission">Pour lister les réseaux WiFi, autorisez Sinag à trouver les appareils à proximité (la localisation sur les anciens Android). Ou saisissez le nom.</string>
+    <string name="provision_wifi_off">Le WiFi est désactivé. Activez-le, puis recherchez à nouveau.</string>
+    <string name="provision_wifi_none_found">Aucun réseau WiFi trouvé. Sur les anciens Android, activez la localisation, puis recherchez à nouveau. Ou saisissez le nom.</string>
+    <string name="provision_error_choose_wifi">Choisissez votre WiFi.</string>
 </resources>

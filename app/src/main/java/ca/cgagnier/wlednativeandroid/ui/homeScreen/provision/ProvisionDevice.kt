@@ -19,12 +19,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -102,27 +105,17 @@ private fun FormStep(
         )
     }
     DeviceNameField(state, step, viewModel)
-    OutlinedTextField(
-        value = state.homeSsid,
-        onValueChange = viewModel::setSsid,
-        label = { Text(stringResource(R.string.provision_home_wifi_name)) },
-        isError = step.ssidError != null,
-        supportingText = { step.ssidError?.let { Text(stringResource(it)) } },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-        modifier = Modifier.fillMaxWidth(),
-    )
-    OutlinedTextField(
-        value = state.homePassword,
-        onValueChange = viewModel::setPassword,
-        label = { Text(stringResource(R.string.provision_home_wifi_password)) },
-        singleLine = true,
-        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
-        modifier = Modifier.fillMaxWidth(),
-    )
-    TextButton(onClick = { showPassword = !showPassword }) {
-        Text(stringResource(if (showPassword) R.string.provision_hide_password else R.string.provision_show_password))
+    HomeWifiSection(state, step, viewModel)
+    val wifi = state.homeWifi
+    if (wifi.manual || wifi.chosen?.secured == true) {
+        HomeWifiPassword(state, viewModel, showPassword, focus = wifi.chosen)
+        TextButton(onClick = { showPassword = !showPassword }) {
+            Text(
+                stringResource(
+                    if (showPassword) R.string.provision_hide_password else R.string.provision_show_password,
+                ),
+            )
+        }
     }
     SetupNetworkFields(state, step, viewModel, showPassword)
     Row(
@@ -132,6 +125,22 @@ private fun FormStep(
         TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         Button(onClick = viewModel::start) { Text(stringResource(R.string.provision_start)) }
     }
+}
+
+@Composable
+private fun HomeWifiPassword(state: ProvisionState, viewModel: ProvisionViewModel, showPassword: Boolean, focus: Any?) {
+    val focusRequester = remember { FocusRequester() }
+    OutlinedTextField(
+        value = state.homePassword,
+        onValueChange = viewModel::setPassword,
+        label = { Text(stringResource(R.string.provision_home_wifi_password)) },
+        singleLine = true,
+        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
+        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+    )
+    // Picking a network from the list goes straight to its password.
+    LaunchedEffect(focus) { if (focus != null) focusRequester.requestFocus() }
 }
 
 /** The lantern's name, pre-filled with a suggestion; saved on the lantern so every phone shows it. */
