@@ -14,8 +14,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
@@ -28,6 +30,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ca.cgagnier.wlednativeandroid.R
+import ca.cgagnier.wlednativeandroid.service.direct.DirectJoin
+import ca.cgagnier.wlednativeandroid.service.direct.inProgress
+import ca.cgagnier.wlednativeandroid.service.direct.ssid
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.share.scanShareCode
 import ca.cgagnier.wlednativeandroid.util.openUriSafely
 
@@ -56,18 +61,33 @@ internal fun DrawerContent(
     }
 }
 
-/** "Connect directly" to a lantern's own WiFi, or leave it when [joined]. */
-data class DirectDrawerAction(val joined: Boolean, val onClick: () -> Unit)
+/** "Connect directly" to a lantern's own WiFi; while connecting, cancels it, and once connected, leaves it. */
+data class DirectDrawerAction(val state: DirectJoin, val onClick: () -> Unit)
 
 @Composable
 private fun DirectConnectionItem(action: DirectDrawerAction) {
-    val label = stringResource(
-        if (action.joined) R.string.direct_connection_leave else R.string.direct_connection_connect,
-    )
+    val state = action.state
+    val ssid = state.ssid.orEmpty()
+    val (label, badge) = when {
+        state.inProgress -> stringResource(R.string.direct_connection_connecting_to, ssid) to R.string.cancel
+
+        state is DirectJoin.Connected -> stringResource(R.string.direct_status_connected_title, ssid) to
+            R.string.direct_status_leave
+
+        else -> stringResource(R.string.direct_connection_connect) to null
+    }
     NavigationDrawerItem(
         label = { Text(text = label) },
-        icon = { Icon(painter = painterResource(R.drawable.ic_baseline_router_24), contentDescription = label) },
-        selected = false,
+        icon = {
+            if (state.inProgress) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(painter = painterResource(R.drawable.ic_baseline_router_24), contentDescription = null)
+            }
+        },
+        badge = badge?.let { { Text(stringResource(it), style = MaterialTheme.typography.labelLarge) } },
+        // Highlighted while connecting or connected, so it's clear which state the phone is in.
+        selected = state.inProgress || state is DirectJoin.Connected,
         onClick = action.onClick,
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
     )

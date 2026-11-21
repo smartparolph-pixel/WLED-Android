@@ -1,17 +1,27 @@
 package ca.cgagnier.wlednativeandroid.ui.homeScreen
 
-import android.widget.Toast
+import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -30,7 +40,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -38,7 +50,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.AP_MODE_MAC_ADDRESS
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnection
 import ca.cgagnier.wlednativeandroid.service.direct.DirectJoin
+import ca.cgagnier.wlednativeandroid.service.direct.inProgress
+import ca.cgagnier.wlednativeandroid.service.direct.ssid
 import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.getApModeDeviceWithState
@@ -50,6 +65,8 @@ import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceEdit.DeviceEdit
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.lanternwifi.rememberSaveWifiToPhone
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceList
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceWebsocketListViewModel
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DirectBannerActions
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DirectConnectionBanner
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.provision.ProvisionDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -137,6 +154,7 @@ fun DeviceListDetail(
                                 navigateToEdit(it)
                             },
                             onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
+                            header = { DirectStatus(viewModel) },
                         )
                     }
                 },
@@ -204,8 +222,10 @@ private fun DrawerSheetContent(
     var showDirectChooser by remember { mutableStateOf(false) }
     if (showDirectChooser) {
         val wifis by viewModel.lanternWifis.collectAsStateWithLifecycle()
+        val join by viewModel.directJoin.collectAsStateWithLifecycle()
         DirectConnectChooser(
             wifis = wifis.values.sortedBy { it.ssid },
+            state = join,
             onChoose = { wifi ->
                 showDirectChooser = false
                 viewModel.connectDirectly(wifi)
@@ -235,13 +255,15 @@ private fun DrawerSheetContent(
         },
         directConnection = if (viewModel.canConnectDirectly) {
             val join by viewModel.directJoin.collectAsStateWithLifecycle()
-            val joined = join == DirectJoin.Joined || join == DirectJoin.Joining
             val wifis by viewModel.lanternWifis.collectAsStateWithLifecycle()
-            DirectDrawerAction(joined) {
+            DirectDrawerAction(join) {
                 coroutineScope.launch { drawerState.close() }
                 when {
-                    joined -> viewModel.stopDirectConnection()
+                    // In progress: cancel. Connected: leave.
+                    join.inProgress || join is DirectJoin.Connected -> viewModel.stopDirectConnection()
+
                     wifis.isEmpty() -> viewModel.connectDirectly()
+
                     else -> showDirectChooser = true
                 }
             }
@@ -251,10 +273,14 @@ private fun DrawerSheetContent(
     )
 }
 
-/** "Connect directly": which lantern WiFi to join, those saved on this phone and WLED's shared one. */
+/**
+ * "Connect directly": which lantern WiFi to join, those saved on this phone and WLED's shared one. The one in
+ * use (or being connected) is highlighted with its status.
+ */
 @Composable
 private fun DirectConnectChooser(
     wifis: List<LanternWifiCredentials>,
+    state: DirectJoin,
     onChoose: (LanternWifiCredentials?) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -263,10 +289,13 @@ private fun DirectConnectChooser(
         title = { Text(stringResource(R.string.direct_connection_connect)) },
         text = {
             Column {
-                wifis.forEach { wifi ->
-                    TextButton(onClick = { onChoose(wifi) }) { Text(wifi.ssid) }
-                }
-                TextButton(onClick = { onChoose(null) }) { Text(stringResource(R.string.direct_connection_new_parol)) }
+                wifis.forEach { wifi -> ChooserRow(wifi.ssid, state, onClick = { onChoose(wifi) }) }
+                ChooserRow(
+                    stringResource(R.string.direct_connection_new_parol),
+                    state,
+                    ssid = DirectConnection.AP_SSID,
+                    onClick = { onChoose(null) },
+                )
             }
         },
         confirmButton = {},
@@ -274,23 +303,62 @@ private fun DirectConnectChooser(
     )
 }
 
-/** Tells the user how "Connect directly" went. */
 @Composable
-private fun DirectJoinMessages(viewModel: DeviceListDetailViewModel) {
+private fun ChooserRow(label: String, state: DirectJoin, ssid: String = label, onClick: () -> Unit) {
+    val current = state.ssid == ssid && (state.inProgress || state is DirectJoin.Connected)
+    val status = when {
+        !current -> null
+        state is DirectJoin.Connected -> R.string.direct_chooser_connected
+        else -> R.string.direct_chooser_connecting
+    }
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        color = if (current) colors.secondaryContainer else Color.Transparent,
+        contentColor = if (current) colors.onSecondaryContainer else colors.primary,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.bodyLarge)
+                status?.let { Text(stringResource(it), style = MaterialTheme.typography.bodySmall) }
+            }
+            when {
+                state is DirectJoin.Connected && current -> Icon(Icons.Filled.CheckCircle, contentDescription = null)
+                current -> CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+            }
+        }
+    }
+}
+
+/** The "Connect directly" status banner above the lanterns, and the offer to save a Parol WiFi. */
+@Composable
+private fun DirectStatus(viewModel: DeviceListDetailViewModel) {
     val context = LocalContext.current
     val join by viewModel.directJoin.collectAsStateWithLifecycle()
+    DirectConnectionBanner(
+        state = join,
+        actions = DirectBannerActions(
+            onCancel = viewModel::stopDirectConnection,
+            onLeave = viewModel::stopDirectConnection,
+            onRetry = viewModel::retryDirectConnection,
+            onDismiss = viewModel::acknowledgeDirectJoin,
+            onWifiSettings = { runCatching { context.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS)) } },
+        ),
+    )
+}
+
+/** After the first "Connect directly" to a Parol WiFi, offers once to save it to the phone's WiFi. */
+@Composable
+private fun DirectJoinMessages(viewModel: DeviceListDetailViewModel) {
+    val join by viewModel.directJoin.collectAsStateWithLifecycle()
     var saveOffer by remember { mutableStateOf<LanternWifiCredentials?>(null) }
-    LaunchedEffect(join) {
-        val message = when (join) {
-            DirectJoin.Joined -> R.string.direct_connection_joined
-            DirectJoin.NotFound -> R.string.direct_connection_not_found
-            DirectJoin.NotSaved -> R.string.direct_connection_not_saved
-            DirectJoin.LeftAutomatically -> R.string.direct_connection_left_automatically
-            DirectJoin.Idle, DirectJoin.Joining -> null
-        } ?: return@LaunchedEffect
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-        if (join == DirectJoin.Joined) saveOffer = viewModel.takeSaveToPhoneOffer()
-        viewModel.acknowledgeDirectJoin()
+    LaunchedEffect(join is DirectJoin.Connected) {
+        if (join is DirectJoin.Connected) saveOffer = viewModel.takeSaveToPhoneOffer()
     }
     val saveToPhone = rememberSaveWifiToPhone()
     val offer = saveOffer

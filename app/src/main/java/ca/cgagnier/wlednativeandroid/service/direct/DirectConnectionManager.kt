@@ -7,6 +7,7 @@ import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.util.Log
@@ -37,34 +38,66 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "DirectConnection"
-private const val PROBE_ATTEMPTS = 5
-private const val PROBE_RETRY_MS = 2000L
+private const val PROBE_ATTEMPTS = 10
+private const val PROBE_RETRY_MS = 1000L
 private const val PROBE_TIMEOUT_SECONDS = 4L
 private const val JOIN_TIMEOUT_MS = 60_000
 
-/** "Connect directly" is left this long after Sinag goes to the background, so a quick app switch keeps it. */
-private const val BACKGROUND_GRACE_MS = 30_000L
+/**
+ * "Connect directly" is left this long after Sinag goes to the background, so locking the phone or a quick
+ * app switch keeps it.
+ */
+const val BACKGROUND_GRACE_MINUTES = 5
+private const val BACKGROUND_GRACE_MS = BACKGROUND_GRACE_MINUTES * 60_000L
 
 /** A saved lantern reached over its own WiFi. */
 data class DirectLantern(val macAddress: String, val network: Network)
 
-/** Progress of "Connect directly". */
+/** Progress of "Connect directly" to the lantern WiFi named [ssid]. */
 sealed interface DirectJoin {
     data object Idle : DirectJoin
 
-    data object Joining : DirectJoin
+    /** Waiting for Android to find the lantern's WiFi (and for the user to approve its prompt). */
+    data class Searching(val ssid: String) : DirectJoin
 
-    /** On the lantern's WiFi through the app; [DirectConnectionManager.stopDirect] leaves it. */
-    data object Joined : DirectJoin
+    /** On the lantern's WiFi; checking that it is a Parol saved in Sinag. */
+    data class Verifying(val ssid: String) : DirectJoin
 
-    /** No lantern WiFi was found, or the user declined Android's prompt. */
-    data object NotFound : DirectJoin
+    /** Connected; [DirectConnectionManager.stopDirect] leaves it. */
+    data class Connected(val ssid: String) : DirectJoin
 
-    /** A lantern answered but it isn't one saved in the app. */
-    data object NotSaved : DirectJoin
+    data class Failed(val ssid: String, val reason: DirectJoinFailure) : DirectJoin
 
-    /** Left on its own after Sinag was in the background; the phone went back to its usual WiFi. */
-    data object LeftAutomatically : DirectJoin
+    /** The connection ended without the user leaving: lost (out of range, unplugged) or after Sinag was closed. */
+    data class Ended(val ssid: String, val automatically: Boolean) : DirectJoin
+}
+
+/** In progress: Android searching, or the app checking the lantern. */
+val DirectJoin.inProgress: Boolean get() = this is DirectJoin.Searching || this is DirectJoin.Verifying
+
+/** The lantern WiFi this state is about, if any. */
+val DirectJoin.ssid: String?
+    get() = when (this) {
+        DirectJoin.Idle -> null
+        is DirectJoin.Searching -> ssid
+        is DirectJoin.Verifying -> ssid
+        is DirectJoin.Connected -> ssid
+        is DirectJoin.Failed -> ssid
+        is DirectJoin.Ended -> ssid
+    }
+
+enum class DirectJoinFailure {
+    /** WiFi is off on the phone. */
+    WifiOff,
+
+    /** Android didn't find the lantern's WiFi, or its prompt was declined. */
+    NotFound,
+
+    /** On the lantern's WiFi, but no Parol answered. */
+    NoAnswer,
+
+    /** A Parol answered but it isn't saved in Sinag. */
+    NotSaved,
 }
 
 /**
@@ -84,6 +117,7 @@ class DirectConnectionManager @Inject constructor(
     private val scope: CoroutineScope,
 ) {
     private val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
+    private val wifiManager = context.applicationContext.getSystemService(WifiManager::class.java)
     private val infoAdapter = moshi.adapter(Info::class.java)
 
     private val _lantern = MutableStateFlow<DirectLantern?>(null)
@@ -143,10 +177,11 @@ class DirectConnectionManager @Inject constructor(
             leaveJob?.cancel()
             leaveJob = scope.launch {
                 delay(BACKGROUND_GRACE_MS)
-                if (joinCallback != null) {
+                val ssid = _join.value.ssid
+                if (joinCallback != null && ssid != null) {
                     Log.i(TAG, "Sinag is in the background: leaving the lantern's WiFi")
                     stopDirect()
-                    _join.value = DirectJoin.LeftAutomatically
+                    _join.value = DirectJoin.Ended(ssid, automatically = true)
                 }
             }
         }
@@ -177,29 +212,31 @@ class DirectConnectionManager @Inject constructor(
             .build()
         repeat(PROBE_ATTEMPTS) { attempt ->
             val mac = fetchMac(http)
-            // Joined with "Connect directly" (rather than in Android's settings): report how it went.
-            val fromJoin = joinCallback != null
             if (mac != null) {
                 val saved = deviceRepository.findDeviceByMacAddress(mac)
                 if (saved == null) {
                     Log.i(TAG, "Lantern WiFi $network belongs to a lantern that isn't saved")
-                    if (fromJoin) {
-                        _join.value = DirectJoin.NotSaved
-                        stopDirect()
-                    }
+                    failJoin(DirectJoinFailure.NotSaved)
                 } else {
                     use(DirectLantern(saved.macAddress, network))
-                    if (fromJoin) _join.value = DirectJoin.Joined
+                    // Joined with "Connect directly" (rather than in Android's settings): report it.
+                    val ssid = _join.value.ssid
+                    if (joinCallback != null && ssid != null) _join.value = DirectJoin.Connected(ssid)
                 }
                 return
             }
             if (attempt < PROBE_ATTEMPTS - 1) delay(PROBE_RETRY_MS)
         }
         Log.w(TAG, "No WLED answered on $network")
-        if (joinCallback != null) {
-            _join.value = DirectJoin.NotFound
-            stopDirect()
-        }
+        failJoin(DirectJoinFailure.NoAnswer)
+    }
+
+    /** Ends a "Connect directly" in progress with [reason]; nothing to do for a WiFi joined in settings. */
+    private fun failJoin(reason: DirectJoinFailure) {
+        val ssid = _join.value.ssid ?: return
+        if (joinCallback == null) return
+        stopDirect()
+        _join.value = DirectJoin.Failed(ssid, reason)
     }
 
     private fun fetchMac(http: OkHttpClient): String? = try {
@@ -228,7 +265,6 @@ class DirectConnectionManager @Inject constructor(
         Log.i(TAG, "Left the lantern's WiFi $network")
         connectivityManager.bindProcessToNetwork(null)
         _lantern.value = null
-        if (_join.value == DirectJoin.Joined) _join.value = DirectJoin.Idle
     }
 
     /**
@@ -238,11 +274,21 @@ class DirectConnectionManager @Inject constructor(
      */
     @SuppressLint("NewApi") // Guarded by canJoin, which checks the API itself.
     fun connectDirectly(wifi: LanternWifiCredentials? = null) {
-        if (!canJoin || joinCallback != null) return
+        if (!canJoin) return
+        val target = wifi ?: LanternWifiCredentials(DirectConnection.AP_SSID, DirectConnection.AP_PASSWORD)
+        // A request still held (e.g. after the connection was lost) is released first, so a new one can start.
+        stopDirect()
         joiningWifi = wifi
-        _join.value = DirectJoin.Joining
-        joinLanternWifi(wifi ?: LanternWifiCredentials(DirectConnection.AP_SSID, DirectConnection.AP_PASSWORD))
+        if (wifiManager?.isWifiEnabled == false) {
+            _join.value = DirectJoin.Failed(target.ssid, DirectJoinFailure.WifiOff)
+            return
+        }
+        _join.value = DirectJoin.Searching(target.ssid)
+        joinLanternWifi(target)
     }
+
+    /** "Try again" after a failure or a lost connection: the same lantern WiFi as last time. */
+    fun retry() = connectDirectly(joiningWifi)
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun joinLanternWifi(wifi: LanternWifiCredentials) {
@@ -256,18 +302,28 @@ class DirectConnectionManager @Inject constructor(
             .setNetworkSpecifier(specifier)
             .build()
         val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                if (joinCallback === this) _join.value = DirectJoin.Verifying(wifi.ssid)
+            }
+
             override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
                 consider(network, linkProperties)
             }
 
             override fun onUnavailable() {
                 Log.w(TAG, "Lantern WiFi not found or declined")
+                if (joinCallback !== this) return
                 joinCallback = null
-                _join.value = DirectJoin.NotFound
+                _join.value = DirectJoin.Failed(wifi.ssid, DirectJoinFailure.NotFound)
             }
 
             override fun onLost(network: Network) {
                 forget(network)
+                if (joinCallback !== this) return
+                // Out of range, unplugged, or Android dropped it: release the request so a new one can start.
+                Log.i(TAG, "Lost the lantern's WiFi")
+                stopDirect()
+                _join.value = DirectJoin.Ended(wifi.ssid, automatically = false)
             }
         }
         joinCallback = callback
@@ -276,7 +332,7 @@ class DirectConnectionManager @Inject constructor(
         } catch (e: SecurityException) {
             Log.e(TAG, "Not allowed to join the lantern's WiFi", e)
             joinCallback = null
-            _join.value = DirectJoin.NotFound
+            _join.value = DirectJoin.Failed(wifi.ssid, DirectJoinFailure.NotFound)
         }
     }
 
@@ -290,15 +346,13 @@ class DirectConnectionManager @Inject constructor(
             Log.d(TAG, "Join request already released", e)
         }
         _lantern.value?.let { forget(it.network) }
-        if (_join.value == DirectJoin.Joined || _join.value == DirectJoin.Joining) _join.value = DirectJoin.Idle
+        _join.value = DirectJoin.Idle
     }
 
     /** Clears a finished "Connect directly" message. */
     fun acknowledge() {
         val state = _join.value
-        if (state == DirectJoin.NotFound || state == DirectJoin.NotSaved || state == DirectJoin.LeftAutomatically) {
-            _join.value = DirectJoin.Idle
-        }
+        if (state is DirectJoin.Failed || state is DirectJoin.Ended) _join.value = DirectJoin.Idle
     }
 
     /** Whether the user joined through the app (so the app offers to leave). */

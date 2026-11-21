@@ -62,6 +62,7 @@ private const val TAG = "screen_DeviceList"
  */
 private const val DEVICE_OFFLINE_TIMEOUT_MS = 60000L
 
+@Suppress("LongParameterList", "LongMethod") // The list screen's callbacks and layout.
 @Composable
 fun DeviceList(
     selectedDevice: DeviceWithState?,
@@ -73,6 +74,8 @@ fun DeviceList(
     onRefresh: () -> Unit,
     onOpenDrawer: () -> Unit,
     viewModel: DeviceWebsocketListViewModel = hiltViewModel(),
+    /** Shown above the lanterns, e.g. the "Connect directly" status. */
+    header: @Composable () -> Unit = {},
 ) {
     val allDevices by viewModel.allDevicesWithState.collectAsStateWithLifecycle()
     val showOfflineDevicesLast by viewModel.showOfflineDevicesLast.collectAsStateWithLifecycle()
@@ -166,6 +169,7 @@ fun DeviceList(
                             .height(0.dp),
                     )
                 }
+                item(key = "header") { header() }
                 if (visibleDevices.isEmpty() && !isWLEDCaptivePortal) {
                     // Don't show the empty page during the initial load to improve the user
                     // experience.

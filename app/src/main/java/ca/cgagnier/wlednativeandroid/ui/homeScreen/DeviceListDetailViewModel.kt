@@ -60,6 +60,9 @@ class DeviceListDetailViewModel @Inject constructor(
 
     fun stopDirectConnection() = directConnection.stopDirect()
 
+    /** "Try again" / "Reconnect": the same Parol WiFi as last time. */
+    fun retryDirectConnection() = directConnection.retry()
+
     fun acknowledgeDirectJoin() = directConnection.acknowledge()
 
     val showHiddenDevices = preferencesRepository.showHiddenDevices
