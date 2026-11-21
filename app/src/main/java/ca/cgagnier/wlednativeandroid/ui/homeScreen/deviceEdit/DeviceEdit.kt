@@ -256,7 +256,11 @@ fun DeviceEditContent(
         LanternWifiDialog(device = device.device, onDismiss = { showLanternWifiDialog = false })
     }
     if (showPresetPackDialog) {
-        PresetPackDialog(device = device, onDismiss = { showPresetPackDialog = false })
+        PresetPackDialog(
+            device = device,
+            onDismiss = { showPresetPackDialog = false },
+            viewModel = hiltViewModel(key = "presetPack:${device.device.macAddress}"),
+        )
     }
     uiState.updateDetailsVersion?.let { versionDetails ->
         UpdateDetailsDialog(

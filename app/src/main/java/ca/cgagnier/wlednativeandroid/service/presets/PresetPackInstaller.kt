@@ -28,6 +28,9 @@ private const val PRESET_GAP_MS = 500L
 /** Playlists are written in the device's main loop after the reply, so they get longer. */
 private const val PLAYLIST_GAP_MS = 1000L
 
+/** Wait before reading presets.json again when it looked damaged. */
+private const val RECHECK_DELAY_MS = 1500L
+
 enum class RepairResult {
     Repaired,
 
@@ -109,7 +112,7 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
     /** Adds what is missing. Does not start anything; [ensureAll] for a device does. */
     suspend fun ensureAll(api: DeviceApi, packs: List<PresetPack> = PresetPacks.ALL): PackSetupResult {
         val effects = api.getEffects().body()
-        val text = effects?.let { presetsText(api) }
+        val text = effects?.let { confirmedPresetsText(api) }
         val presets = text?.let { parsePresets(it) }
         return when {
             effects == null || text == null -> PackSetupResult.Unreachable
@@ -270,7 +273,21 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
      * The device's presets, or null if presets.json exists but cannot be parsed (an empty or cut-off file
      * included). A device that never had a preset has no presets.json, which counts as empty.
      */
-    suspend fun readPresets(api: DeviceApi): Map<*, *>? = presetsText(api)?.let { parsePresets(it) }
+    suspend fun readPresets(api: DeviceApi): Map<*, *>? = confirmedPresetsText(api)?.let { parsePresets(it) }
+
+    /**
+     * presets.json as text, read a second time when the first read looks damaged: a read cut short (the
+     * phone switching WiFi, the lantern busy writing) must not be taken for a damaged file and offer Repair.
+     */
+    private suspend fun confirmedPresetsText(api: DeviceApi): String? {
+        val first = presetsText(api)
+        if (first == null || looksIntact(first)) return first
+        Log.w(TAG, "presets.json looks damaged; reading it again to make sure")
+        delay(RECHECK_DELAY_MS)
+        return presetsText(api)
+    }
+
+    private fun looksIntact(text: String) = parsePresets(text) != null && PresetsFileRepair.problem(text) == null
 
     /** presets.json as text; `{}` when the device has none yet. Null only if the response was empty. */
     private suspend fun presetsText(api: DeviceApi): String? {

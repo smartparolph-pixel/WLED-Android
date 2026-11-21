@@ -73,7 +73,12 @@ interface DeviceApi {
  *
  * @param client The OkHttpClient to use for the API calls.
  */
-class DeviceApiFactory(private val client: OkHttpClient) {
+class DeviceApiFactory(sharedClient: OkHttpClient) {
+    /**
+     * Lanterns are always asked directly: no HTTP cache. Different lanterns share the same address on a
+     * direct connection (4.3.2.1), and a lantern's files (presets.json…) change under the same URL.
+     */
+    private val client: OkHttpClient = sharedClient.newBuilder().cache(null).build()
 
     /**
      * Create a new DeviceApi instance from a device address.

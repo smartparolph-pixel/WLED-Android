@@ -10,6 +10,7 @@ import ca.cgagnier.wlednativeandroid.service.presets.PackSetupResult
 import ca.cgagnier.wlednativeandroid.service.presets.PresetPackInstaller
 import ca.cgagnier.wlednativeandroid.service.presets.RepairResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,6 +34,7 @@ class PresetPackViewModel @Inject constructor(private val installer: PresetPackI
         private set
 
     private var preparedFor: String? = null
+    private var prepareJob: Job? = null
 
     /** Rebuilds a damaged presets.json from its intact entries, then checks the playlists again. */
     fun repair(device: Device) {
@@ -55,7 +57,12 @@ class PresetPackViewModel @Inject constructor(private val installer: PresetPackI
         if (preparedFor == device.macAddress && setup is PackSetupResult.Ready) return
         preparedFor = device.macAddress
         setup = null
-        viewModelScope.launch { setup = installer.ensureAll(device) }
+        prepareJob?.cancel()
+        prepareJob = viewModelScope.launch {
+            val result = installer.ensureAll(device)
+            // A late answer for a lantern no longer shown is dropped.
+            if (preparedFor == device.macAddress) setup = result
+        }
     }
 
     fun retry(device: Device) {
