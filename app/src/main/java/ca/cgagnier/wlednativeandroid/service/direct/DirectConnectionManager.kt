@@ -11,6 +11,9 @@ import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import ca.cgagnier.wlednativeandroid.model.DEFAULT_WLED_AP_IP
 import ca.cgagnier.wlednativeandroid.model.wledapi.Info
 import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
@@ -39,6 +42,9 @@ private const val PROBE_RETRY_MS = 2000L
 private const val PROBE_TIMEOUT_SECONDS = 4L
 private const val JOIN_TIMEOUT_MS = 60_000
 
+/** "Connect directly" is left this long after Sinag goes to the background, so a quick app switch keeps it. */
+private const val BACKGROUND_GRACE_MS = 30_000L
+
 /** A saved lantern reached over its own WiFi. */
 data class DirectLantern(val macAddress: String, val network: Network)
 
@@ -56,6 +62,9 @@ sealed interface DirectJoin {
 
     /** A lantern answered but it isn't one saved in the app. */
     data object NotSaved : DirectJoin
+
+    /** Left on its own after Sinag was in the background; the phone went back to its usual WiFi. */
+    data object LeftAutomatically : DirectJoin
 }
 
 /**
@@ -118,6 +127,34 @@ class DirectConnectionManager @Inject constructor(
             .build()
         runCatching { connectivityManager.registerNetworkCallback(request, watcher) }
             .onFailure { Log.e(TAG, "Could not watch WiFi networks", it) }
+        scope.launch(Dispatchers.Main) { ProcessLifecycleOwner.get().lifecycle.addObserver(appVisibility) }
+    }
+
+    private var leaveJob: Job? = null
+
+    /**
+     * When Sinag goes to the background (closed, or another app opened), the lantern's WiFi joined with
+     * "Connect directly" is released after [BACKGROUND_GRACE_MS], and Android rejoins the phone's usual WiFi.
+     * Coming back within that time keeps it. A WiFi joined in Android's settings is left as it is.
+     */
+    private val appVisibility = object : DefaultLifecycleObserver {
+        override fun onStop(owner: LifecycleOwner) {
+            if (joinCallback == null) return
+            leaveJob?.cancel()
+            leaveJob = scope.launch {
+                delay(BACKGROUND_GRACE_MS)
+                if (joinCallback != null) {
+                    Log.i(TAG, "Sinag is in the background: leaving the lantern's WiFi")
+                    stopDirect()
+                    _join.value = DirectJoin.LeftAutomatically
+                }
+            }
+        }
+
+        override fun onStart(owner: LifecycleOwner) {
+            leaveJob?.cancel()
+            leaveJob = null
+        }
     }
 
     private fun consider(network: Network, linkProperties: LinkProperties) {
@@ -259,7 +296,9 @@ class DirectConnectionManager @Inject constructor(
     /** Clears a finished "Connect directly" message. */
     fun acknowledge() {
         val state = _join.value
-        if (state == DirectJoin.NotFound || state == DirectJoin.NotSaved) _join.value = DirectJoin.Idle
+        if (state == DirectJoin.NotFound || state == DirectJoin.NotSaved || state == DirectJoin.LeftAutomatically) {
+            _join.value = DirectJoin.Idle
+        }
     }
 
     /** Whether the user joined through the app (so the app offers to leave). */

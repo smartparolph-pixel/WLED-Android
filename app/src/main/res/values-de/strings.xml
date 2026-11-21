@@ -372,4 +372,5 @@
     <string name="lantern_wifi_save_offer_text">Dann kannst du es in den WLAN-Einstellungen ohne Passwort verbinden, und das Handy verbindet sich selbst wieder. Android fragt nach einer Bestätigung.</string>
     <string name="lantern_wifi_save">Speichern</string>
     <string name="lantern_wifi_not_now">Nicht jetzt</string>
+    <string name="direct_connection_left_automatically">Sinag hat das Parol-WLAN verlassen, während es geschlossen war. Dein Handy ist wieder in seinem üblichen WLAN.</string>
 </resources>

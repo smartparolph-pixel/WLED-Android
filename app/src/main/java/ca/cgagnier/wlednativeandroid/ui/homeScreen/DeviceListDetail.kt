@@ -285,6 +285,7 @@ private fun DirectJoinMessages(viewModel: DeviceListDetailViewModel) {
             DirectJoin.Joined -> R.string.direct_connection_joined
             DirectJoin.NotFound -> R.string.direct_connection_not_found
             DirectJoin.NotSaved -> R.string.direct_connection_not_saved
+            DirectJoin.LeftAutomatically -> R.string.direct_connection_left_automatically
             DirectJoin.Idle, DirectJoin.Joining -> null
         } ?: return@LaunchedEffect
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()

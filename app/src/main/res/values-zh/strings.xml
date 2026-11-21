@@ -369,4 +369,5 @@
     <string name="lantern_wifi_save_offer_text">之后可以在手机的 WiFi 设置中直接连接，无需输入密码，手机也会自动重新连接。Android 会请您确认。</string>
     <string name="lantern_wifi_save">保存</string>
     <string name="lantern_wifi_not_now">以后再说</string>
+    <string name="direct_connection_left_automatically">Sinag 关闭期间已断开 Parol 的 WiFi，您的手机已回到常用的 WiFi。</string>
 </resources>

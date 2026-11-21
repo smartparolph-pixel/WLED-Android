@@ -371,4 +371,5 @@
     <string name="lantern_wifi_save_offer_text">Vous pourrez le rejoindre depuis les paramètres WiFi sans saisir le mot de passe, et le téléphone s\'y reconnectera seul. Android vous demande de confirmer.</string>
     <string name="lantern_wifi_save">Enregistrer</string>
     <string name="lantern_wifi_not_now">Plus tard</string>
+    <string name="direct_connection_left_automatically">Sinag a quitté le WiFi du Parol pendant qu\'il était fermé. Votre téléphone est de retour sur son WiFi habituel.</string>
 </resources>

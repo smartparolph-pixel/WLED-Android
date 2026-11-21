@@ -374,4 +374,5 @@
     <string name="lantern_wifi_save_offer_text">Then you can join it from the phone\'s WiFi settings without typing the password, and the phone reconnects on its own. Android asks you to confirm.</string>
     <string name="lantern_wifi_save">Save</string>
     <string name="lantern_wifi_not_now">Not now</string>
+    <string name="direct_connection_left_automatically">Sinag left the Parol\'s WiFi while it was closed. Your phone is back on its usual WiFi.</string>
 </resources>
