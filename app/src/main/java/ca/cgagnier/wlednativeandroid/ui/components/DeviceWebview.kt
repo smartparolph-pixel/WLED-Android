@@ -44,12 +44,12 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -76,8 +76,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -89,6 +89,8 @@ import ca.cgagnier.wlednativeandroid.FileUploadContract
 import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.ui.MainActivity
+import ca.cgagnier.wlednativeandroid.ui.applock.LocalAppLockManager
+import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.components.LoadingState.Finished
 import ca.cgagnier.wlednativeandroid.ui.components.LoadingState.Loading
 import kotlinx.coroutines.CoroutineScope
@@ -101,7 +103,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** The muted Sinag lockup on the "device unreachable" screen takes this share of the width. */
+private const val LOCKUP_WIDTH_FRACTION = 0.7f
+private const val HALF_LUMINANCE = 0.5f
+
 private const val TAG = "ui.components.DeviceWebView"
+
+/** WLED's settings, file editor and firmware update pages. */
+private val SETTINGS_PATHS = listOf("/settings", "/edit", "/update")
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -122,6 +131,16 @@ fun DeviceWebView(
     val webView = webViewViewModel.webView().collectAsState().value
     navigator.backQueue = webViewViewModel.backQueue
     var showDownloadCompleteToast by remember { mutableStateOf(false) }
+    // The lantern's own Config pages are settings too: with App lock "Settings only" they ask first.
+    val appLock = LocalAppLockManager.current
+    client.needsSettingsUnlock = { appLock?.settingsNeedUnlock() == true }
+    client.settingsGuard = rememberSettingsGuard()
+    // The lantern's page is light or dark with the app; also applied right away when the app's theme changes.
+    val lightTheme = MaterialTheme.colorScheme.background.luminance() > HALF_LUMINANCE
+    client.lightTheme = lightTheme
+    LaunchedEffect(webView, lightTheme) {
+        webView.evaluateJavascript(WledPageTheme.script(lightTheme), null)
+    }
 
     // Add this DisposableEffect to prevent memory leaks and crashes on configuration changes.
     DisposableEffect(webView) {
@@ -282,7 +301,7 @@ fun DeviceErrorScreen(onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
-        Image(painter = painterResource(id = R.drawable.akemi_018_teeth), contentDescription = null)
+        SinagLockup(modifier = Modifier.fillMaxWidth(LOCKUP_WIDTH_FRACTION), mono = true)
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.device_error_title),
@@ -308,6 +327,24 @@ class CustomWebViewClient : WebViewClient() {
     lateinit var navigator: WebViewNavigator
         internal set
 
+    /** True when opening the device's settings pages must ask for the phone's unlock first. */
+    var needsSettingsUnlock: () -> Boolean = { false }
+
+    /** Asks for the phone's unlock, then runs the action. */
+    var settingsGuard: (action: () -> Unit) -> Unit = { it() }
+
+    /** The app is in its light theme: the lantern's page follows it (see [WledPageTheme]). */
+    var lightTheme: Boolean = false
+
+    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        val path = request.url.path.orEmpty()
+        val settingsPage = SETTINGS_PATHS.any { path == it || path.startsWith("$it/") }
+        if (!request.isForMainFrame || !settingsPage || !needsSettingsUnlock()) return false
+        val url = request.url.toString()
+        settingsGuard { view.loadUrl(url) }
+        return true
+    }
+
     override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         Log.d(TAG, "onPageStarted $url")
@@ -322,6 +359,7 @@ class CustomWebViewClient : WebViewClient() {
         Log.d(TAG, "onPageFinished $url")
         if (url != "about:blank") {
             state.loadingState = Finished
+            view.evaluateJavascript(WledPageTheme.script(lightTheme), null)
         }
     }
 

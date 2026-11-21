@@ -9,8 +9,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -21,8 +23,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ca.cgagnier.wlednativeandroid.model.wledapi.State
 import ca.cgagnier.wlednativeandroid.repository.ThemeSettings
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
-import com.materialkolor.DynamicMaterialTheme
-import com.materialkolor.PaletteStyle
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -264,8 +264,8 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun WLEDNativeTheme(
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Sinag colours on every phone: the wallpaper-based colours of Android 12+ are off by default.
+    dynamicColor: Boolean = false,
     themeViewModel: ThemeViewModel = hiltViewModel(),
     content: @Composable () -> Unit,
 ) {
@@ -285,8 +285,8 @@ fun WLEDNativeTheme(
 @Composable
 fun WLEDNativeTheme(
     darkTheme: Boolean,
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Sinag colours on every phone: the wallpaper-based colours of Android 12+ are off by default.
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val view = LocalView.current
@@ -322,27 +322,18 @@ fun getColorFromDeviceState(state: State?): Int = state?.segment?.firstOrNull()?
         android.graphics.Color.rgb(r, g, b)
     } ?: android.graphics.Color.WHITE
 
+/**
+ * The lantern's current light colour, shown as a small dot on its card ([LanternColorDot]) rather than
+ * tinting the whole card, so every screen keeps the Sinag colours.
+ */
+val LocalLanternColor = compositionLocalOf<Color?> { null }
+
+/** Gives [content] the lantern's current light colour (see [LocalLanternColor]), in the app's own theme. */
 @Composable
-fun DeviceTheme(
-    device: DeviceWithState,
-    themeViewModel: ThemeViewModel = hiltViewModel(),
-    content: @Composable () -> Unit,
-) {
+fun DeviceTheme(device: DeviceWithState, content: @Composable () -> Unit) {
     val stateInfo by device.stateInfo
-
-    val theme by themeViewModel.theme.collectAsStateWithLifecycle()
-    val darkTheme = when (theme) {
-        ThemeSettings.Auto -> isSystemInDarkTheme()
-        ThemeSettings.Dark -> true
-        else -> false
-    }
-
-    DynamicMaterialTheme(
-        seedColor = Color(getColorFromDeviceState(stateInfo?.state)),
-        isDark = darkTheme,
-        style = if (device.isOnline) PaletteStyle.Vibrant else PaletteStyle.Neutral,
-        animate = true,
-    ) {
+    val color = stateInfo?.state?.let { Color(getColorFromDeviceState(it)) }
+    CompositionLocalProvider(LocalLanternColor provides color.takeIf { device.isOnline }) {
         content()
     }
 }

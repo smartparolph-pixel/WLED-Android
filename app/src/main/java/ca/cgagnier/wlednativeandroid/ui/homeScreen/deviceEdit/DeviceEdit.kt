@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +68,9 @@ import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketStatus
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceVisibleSwitch
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.lanternwifi.LanternWifiDialog
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.presets.PresetPackDialog
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.timezone.DeviceTimezoneDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateDetailsDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateDisclaimerDialog
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.update.UpdateInstallingDialog
@@ -94,10 +98,11 @@ fun DeviceEdit(
     }
 
     // Merge the device-owned updateTag into the VM state.
-    val uiState = vmState.copy(updateTag = updateTag)
+    val renameStatus by viewModel.renameStatus.collectAsState()
+    val uiState = vmState.copy(updateTag = updateTag, renameStatus = renameStatus)
 
     val actions = DeviceEditActions(
-        onCustomNameChange = { viewModel.updateCustomName(device.device, it) },
+        onCustomNameChange = { viewModel.renameLantern(device.device, it) },
         onDeviceHiddenChange = { viewModel.updateDeviceHidden(device.device, it) },
         onBranchChange = { viewModel.updateDeviceBranch(device.device, it) },
         onCheckForUpdates = { viewModel.checkForUpdates(device.device) },
@@ -154,6 +159,9 @@ fun DeviceEditContent(
         Pair(Branch.STABLE, stringResource(R.string.stable)),
         Pair(Branch.BETA, stringResource(R.string.beta)),
     )
+    var showTimezoneDialog by remember { mutableStateOf(false) }
+    var showPresetPackDialog by remember { mutableStateOf(false) }
+    var showLanternWifiDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -187,7 +195,7 @@ fun DeviceEditContent(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                CustomNameTextField(device.device, actions.onCustomNameChange)
+                LanternNameTextField(device.device, uiState.renameStatus, actions.onCustomNameChange)
                 DeviceVisibleSwitch(
                     modifier = Modifier.padding(top = 4.dp),
                     isHidden = device.device.isHidden,
@@ -204,6 +212,30 @@ fun DeviceEditContent(
                     onCheckForUpdates = actions.onCheckForUpdates,
                     onSeeUpdateDetails = actions.onSeeUpdateDetails,
                 )
+                OutlinedButton(
+                    onClick = { showTimezoneDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                ) {
+                    Text(stringResource(R.string.timezone_button))
+                }
+                OutlinedButton(
+                    onClick = { showLanternWifiDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                ) {
+                    Text(stringResource(R.string.lantern_wifi_title))
+                }
+                OutlinedButton(
+                    onClick = { showPresetPackDialog = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                ) {
+                    Text(stringResource(R.string.preset_pack_button))
+                }
                 Spacer(Modifier.height(24.dp))
                 Text(
                     stringResource(
@@ -217,6 +249,19 @@ fun DeviceEditContent(
     }
 
     // Dialogs — shown conditionally based on uiState.
+    if (showTimezoneDialog) {
+        DeviceTimezoneDialog(device = device.device, onDismiss = { showTimezoneDialog = false })
+    }
+    if (showLanternWifiDialog) {
+        LanternWifiDialog(device = device.device, onDismiss = { showLanternWifiDialog = false })
+    }
+    if (showPresetPackDialog) {
+        PresetPackDialog(
+            device = device,
+            onDismiss = { showPresetPackDialog = false },
+            viewModel = hiltViewModel(key = "presetPack:${device.device.macAddress}"),
+        )
+    }
     uiState.updateDetailsVersion?.let { versionDetails ->
         UpdateDetailsDialog(
             device = device,
@@ -406,29 +451,34 @@ private fun DeviceOfflineStatus() {
 }
 
 /**
- * Editable custom name field with debounced saves.
- *
- * Only persists changes after typing stops for 800 ms.
+ * The lantern's name, saved on the lantern itself so every phone shows it (or on this phone only when the
+ * lantern can't be reached). Saved after typing stops for 800 ms.
  */
 @Composable
-private fun CustomNameTextField(device: Device, onValueChange: (String) -> Unit) {
-    val deviceName = device.customName
-    var inputText by remember { mutableStateOf(TextFieldValue(deviceName)) }
+private fun LanternNameTextField(device: Device, status: RenameStatus, onValueChange: (String) -> Unit) {
+    val currentName = deviceName(device)
+    var inputText by remember { mutableStateOf(TextFieldValue(currentName)) }
+    val hint = when (status) {
+        RenameStatus.Idle, RenameStatus.Saving -> R.string.lantern_name_hint
+        RenameStatus.SavedOnLantern -> R.string.lantern_name_saved
+        RenameStatus.SavedOnPhone -> R.string.lantern_name_phone_only
+        RenameStatus.Empty -> R.string.provision_error_name_required
+        RenameStatus.TooLong -> R.string.provision_error_name_too_long
+    }
     OutlinedTextField(
         value = inputText,
         onValueChange = { inputText = it },
-        label = { Text(stringResource(R.string.custom_name)) },
-        supportingText = {
-            Text(stringResource(R.string.leave_this_empty_to_use_the_device_name))
-        },
+        label = { Text(stringResource(R.string.provision_device_name)) },
+        isError = status == RenameStatus.Empty || status == RenameStatus.TooLong,
+        supportingText = { Text(stringResource(hint)) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, capitalization = KeyboardCapitalization.Words),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
     )
     LaunchedEffect(key1 = inputText.text) {
-        if (deviceName == inputText.text) return@LaunchedEffect
+        if (currentName == inputText.text.trim()) return@LaunchedEffect
         delay(800)
         onValueChange(inputText.text)
     }

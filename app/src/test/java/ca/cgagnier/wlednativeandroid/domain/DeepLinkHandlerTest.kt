@@ -24,6 +24,29 @@ class DeepLinkHandlerTest {
     // --- parseUri tests ---
 
     @Test
+    fun `parseUri with a Share Parol web link returns its Address`() {
+        val result = handler.parseUri(Uri.parse("https://sinagtechlabs.com/sinaginstall.html?a=192.168.68.60"))
+        assertEquals(DeepLink.Address("192.168.68.60"), result)
+        val www = handler.parseUri(Uri.parse("https://www.sinagtechlabs.com/sinaginstall.html?a=parol.local"))
+        assertEquals(DeepLink.Address("parol.local"), www)
+    }
+
+    @Test
+    fun `parseUri rejects other web links`() {
+        assertNull(handler.parseUri(Uri.parse("https://sinagtechlabs.com/other.html?a=192.168.68.60")))
+        assertNull(handler.parseUri(Uri.parse("https://example.com/sinaginstall.html?a=192.168.68.60")))
+        assertNull(handler.parseUri(Uri.parse("https://sinagtechlabs.com/sinaginstall.html?a=bad%2Fhost")))
+        assertNull(handler.parseUri(Uri.parse("https://sinagtechlabs.com/sinaginstall.html")))
+    }
+
+    @Test
+    fun `web share link round trips`() {
+        val link = DeepLinkHandler.webShareLink("192.168.68.60")
+        assertEquals("https://sinagtechlabs.com/sinaginstall.html?a=192.168.68.60", link)
+        assertEquals(DeepLink.Address("192.168.68.60"), handler.parseUri(Uri.parse(link)))
+    }
+
+    @Test
     fun `parseUri with wled scheme and MAC address returns MacAddress`() {
         val uri = Uri.parse("wled://AABBCCDDEEFF")
         val result = handler.parseUri(uri)

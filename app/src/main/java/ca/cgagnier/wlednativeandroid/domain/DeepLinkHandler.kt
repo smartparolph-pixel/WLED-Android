@@ -29,13 +29,44 @@ sealed class DeepLink {
  * - wled://{mac_address} - e.g., wled://AABBCCDDEEFF
  * - wled://{ip_or_hostname} - e.g., wled://192.168.1.50 or wled://wled.local
  * - http://4.3.2.1 - Default WLED AP mode IP
+ * - https://sinagtechlabs.com/sinaginstall.html?a={ip_or_hostname} - a "Share Parol" web link
  */
 class DeepLinkHandler @Inject constructor() {
 
     companion object {
         private const val SCHEME_WLED = "wled"
         private const val SCHEME_HTTP = "http"
+        private const val SCHEME_HTTPS = "https"
+        private val WEB_HOSTS = setOf("sinagtechlabs.com", "www.sinagtechlabs.com")
+        private const val WEB_SHARE_PATH = "/sinaginstall.html"
+        private const val WEB_SHARE_PAGE = "https://sinagtechlabs.com$WEB_SHARE_PATH"
+        private const val WEB_ADDRESS_PARAM = "a"
+        private val ADDRESS_REGEX = Regex("^[A-Za-z0-9.-]{1,253}$")
+
+        /**
+         * The QR code uses the web link once sinagtechlabs.com/sinaginstall.html and the app-link files are
+         * live (see docs/website); until then it uses the wled:// link, which needs Sinag installed.
+         */
+        const val SHARE_QR_USES_WEB_LINK = false
+
+        /** The Sinag download page, also shown to people without the app who open a share link. */
+        const val DOWNLOAD_PAGE = WEB_SHARE_PAGE
+
+        /** Web link to a lantern: opens Sinag when installed, the download page otherwise. */
+        fun webShareLink(address: String): String = "$WEB_SHARE_PAGE?$WEB_ADDRESS_PARAM=${Uri.encode(address)}"
+
+        /** The link the "Share Parol" QR code holds. */
+        fun qrLink(address: String): String = if (SHARE_QR_USES_WEB_LINK) webShareLink(address) else shareLink(address)
         private val MAC_ADDRESS_REGEX = Regex("^[0-9A-Fa-f]{12}$")
+
+        /** The link a "Share Parol" QR code holds; opening it on another phone adds the lantern there. */
+        fun shareLink(address: String): String = "$SCHEME_WLED://$address"
+
+        /** Opens [uri] (e.g. a scanned share link) in [MainActivity], which adds and shows the lantern. */
+        fun createViewIntent(context: Context, uri: Uri): Intent = Intent(Intent.ACTION_VIEW, uri)
+            .setClass(context, MainActivity::class.java)
+            .setPackage(context.packageName)
+            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         /**
          * Creates an Intent to open the app with the specified device.
@@ -45,6 +76,7 @@ class DeepLinkHandler @Inject constructor() {
          * @param macAddress The device's MAC address
          * @return An Intent configured to open the device in the app
          */
+
         fun createDeviceIntent(context: Context, macAddress: String): Intent =
             Intent(Intent.ACTION_VIEW, "$SCHEME_WLED://$macAddress".toUri())
                 .setClass(context, MainActivity::class.java)
@@ -77,6 +109,7 @@ class DeepLinkHandler @Inject constructor() {
         return when (uri.scheme?.lowercase()) {
             SCHEME_WLED -> parseWledScheme(uri)
             SCHEME_HTTP -> parseHttpScheme(uri)
+            SCHEME_HTTPS -> parseWebShareLink(uri)
             else -> null
         }
     }
@@ -90,6 +123,12 @@ class DeepLinkHandler @Inject constructor() {
         } else {
             DeepLink.Address(identifier)
         }
+    }
+
+    private fun parseWebShareLink(uri: Uri): DeepLink? {
+        if (uri.host?.lowercase() !in WEB_HOSTS || uri.path != WEB_SHARE_PATH) return null
+        val address = uri.getQueryParameter(WEB_ADDRESS_PARAM)?.trim()
+        return address?.takeIf { ADDRESS_REGEX.matches(it) }?.let { DeepLink.Address(it) }
     }
 
     private fun parseHttpScheme(uri: Uri): DeepLink? {

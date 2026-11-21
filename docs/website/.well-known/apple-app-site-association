@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.BUNDLEID"],
+        "components": [
+          { "/": "/sinaginstall.html", "comment": "Share Parol links: opens Sinag when installed" }
+        ]
+      }
+    ]
+  }
+}

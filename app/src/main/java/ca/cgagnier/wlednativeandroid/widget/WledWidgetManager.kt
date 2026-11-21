@@ -8,10 +8,12 @@ import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import ca.cgagnier.wlednativeandroid.R
+import ca.cgagnier.wlednativeandroid.model.DEFAULT_WLED_AP_IP
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.model.wledapi.JsonPost
 import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
 import ca.cgagnier.wlednativeandroid.service.api.DeviceApiFactory
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnectionManager
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.theme.getColorFromDeviceState
 import ca.cgagnier.wlednativeandroid.widget.components.getDeviceName
@@ -24,6 +26,7 @@ import javax.inject.Singleton
 class WledWidgetManager @Inject constructor(
     private val deviceApiFactory: DeviceApiFactory,
     private val deviceRepository: DeviceRepository,
+    private val directConnection: DirectConnectionManager,
 ) {
     companion object {
         private const val TAG = "WledWidgetManager"
@@ -43,7 +46,7 @@ class WledWidgetManager @Inject constructor(
         // This ensures all widgets for the device get the exact same state
         val newData = WidgetStateData(
             macAddress = deviceWithState.device.macAddress,
-            address = deviceWithState.device.address,
+            address = if (deviceWithState.isDirect) widgetAddress(deviceWithState) else deviceWithState.device.address,
             name = getDeviceName(deviceWithState.device, context.getString(R.string.default_device_name)),
             isOn = stateInfo.state.isOn ?: false,
             isOnline = true,
@@ -54,6 +57,10 @@ class WledWidgetManager @Inject constructor(
         Log.d(TAG, "Updating widgets from websocket for MAC ${deviceWithState.device.macAddress}")
         updateWidgetsForMacAddress(context, deviceWithState.device.macAddress, newData)
     }
+
+    private suspend fun widgetAddress(deviceWithState: DeviceWithState): String =
+        deviceRepository.findDeviceByMacAddress(deviceWithState.device.macAddress)?.address
+            ?: deviceWithState.device.address
 
     suspend fun updateAllWidgets(context: Context) {
         val manager = GlanceAppWidgetManager(context)
@@ -97,7 +104,10 @@ class WledWidgetManager @Inject constructor(
         jsonPost: JsonPost = JsonPost(verbose = true),
     ) {
         val device = deviceRepository.findDeviceByMacAddress(widgetData.macAddress)
-        val targetAddress = device?.address ?: widgetData.address
+        // On the lantern's own WiFi, reach it there; the widget keeps showing the saved address.
+        val direct = directConnection.lantern.value?.takeIf { it.macAddress == widgetData.macAddress }
+        val savedAddress = device?.address ?: widgetData.address
+        val targetAddress = if (direct != null) DEFAULT_WLED_AP_IP else savedAddress
 
         val api = deviceApiFactory.create(targetAddress)
         val response = api.postJson(jsonPost)
@@ -105,7 +115,7 @@ class WledWidgetManager @Inject constructor(
         if (response.isSuccessful) {
             response.body()?.let { body ->
                 val newData = widgetData.copy(
-                    address = targetAddress,
+                    address = savedAddress,
                     name = getDeviceName(device, context.getString(R.string.default_device_name)),
                     isOn = body.isOn ?: jsonPost.isOn ?: widgetData.isOn,
                     color = getColorFromDeviceState(body),

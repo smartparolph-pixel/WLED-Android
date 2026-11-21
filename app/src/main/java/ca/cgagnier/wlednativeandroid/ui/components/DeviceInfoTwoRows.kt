@@ -10,6 +10,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +38,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -59,6 +64,7 @@ import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketStatus
 import ca.cgagnier.wlednativeandroid.ui.preview.DevicePreviewParameterProvider
+import ca.cgagnier.wlednativeandroid.ui.theme.LocalLanternColor
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -77,6 +83,7 @@ fun DeviceInfoTwoRows(
 
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            LanternColorDot(modifier = Modifier.padding(end = 8.dp))
             Text(
                 deviceName(device.device),
                 style = MaterialTheme.typography.titleLarge,
@@ -95,8 +102,9 @@ fun DeviceInfoTwoRows(
             //  `fill = false`, the unused space is not distributed to the other elements.
             WebsocketStatusIndicator(device.websocketStatus.value)
             Text(
-                device.device.address,
+                if (device.isDirect) stringResource(R.string.direct_connection_badge) else device.device.address,
                 style = MaterialTheme.typography.labelMedium,
+                color = if (device.isDirect) MaterialTheme.colorScheme.primary else Color.Unspecified,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
@@ -138,6 +146,19 @@ fun DeviceInfoTwoRows(
             }
         }
     }
+}
+
+/** The lantern's current light colour (see [LocalLanternColor]); nothing when it is offline or unknown. */
+@Composable
+fun LanternColorDot(modifier: Modifier = Modifier) {
+    val color = LocalLanternColor.current ?: return
+    Box(
+        modifier = modifier
+            .size(14.dp)
+            .clip(CircleShape)
+            .background(color)
+            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
+    )
 }
 
 @Composable

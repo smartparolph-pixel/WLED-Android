@@ -9,6 +9,13 @@ enum ThemeSettings{
   Dark = 2;
 }
 
+// How long the app may stay in the background before App lock asks to unlock again.
+enum AppLockTimeout {
+  TWO_MINUTES = 0;
+  IMMEDIATELY = 1;
+  FIVE_MINUTES = 2;
+}
+
 message UserPreferences {
 
   string selected_device_address = 1;
@@ -35,4 +42,14 @@ message UserPreferences {
   int64 date_last_written = 10;
 
   bool show_hidden_devices = 11;
+
+  // 12 is taken by the Sinag account session on the claude/sinag-auth-screens branch.
+
+  // App lock: the phone's own fingerprint, face or screen lock is needed to open the app. Off by default.
+  bool app_lock_enabled = 13;
+
+  AppLockTimeout app_lock_timeout = 14;
+
+  // With app_lock_enabled: only changing settings needs the unlock, not opening the app.
+  bool app_lock_settings_only = 15;
 }

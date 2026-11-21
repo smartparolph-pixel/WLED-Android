@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lantern Navy, the Sinag app icon background. -->
+    <color name="ic_launcher_sinag_background">#122340</color>
+</resources>
