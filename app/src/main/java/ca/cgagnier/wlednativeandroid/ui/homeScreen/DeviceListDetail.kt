@@ -47,6 +47,7 @@ import ca.cgagnier.wlednativeandroid.ui.applock.rememberSettingsGuard
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.detail.DeviceDetail
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceAdd.DeviceAdd
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.deviceEdit.DeviceEdit
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.lanternwifi.rememberSaveWifiToPhone
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceList
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.list.DeviceWebsocketListViewModel
 import ca.cgagnier.wlednativeandroid.ui.homeScreen.provision.ProvisionDevice
@@ -278,6 +279,7 @@ private fun DirectConnectChooser(
 private fun DirectJoinMessages(viewModel: DeviceListDetailViewModel) {
     val context = LocalContext.current
     val join by viewModel.directJoin.collectAsStateWithLifecycle()
+    var saveOffer by remember { mutableStateOf<LanternWifiCredentials?>(null) }
     LaunchedEffect(join) {
         val message = when (join) {
             DirectJoin.Joined -> R.string.direct_connection_joined
@@ -286,6 +288,25 @@ private fun DirectJoinMessages(viewModel: DeviceListDetailViewModel) {
             DirectJoin.Idle, DirectJoin.Joining -> null
         } ?: return@LaunchedEffect
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        if (join == DirectJoin.Joined) saveOffer = viewModel.takeSaveToPhoneOffer()
         viewModel.acknowledgeDirectJoin()
+    }
+    val saveToPhone = rememberSaveWifiToPhone()
+    val offer = saveOffer
+    if (offer != null && saveToPhone != null) {
+        AlertDialog(
+            onDismissRequest = { saveOffer = null },
+            title = { Text(stringResource(R.string.lantern_wifi_save_offer_title, offer.ssid)) },
+            text = { Text(stringResource(R.string.lantern_wifi_save_offer_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    saveOffer = null
+                    saveToPhone(offer)
+                }) { Text(stringResource(R.string.lantern_wifi_save)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { saveOffer = null }) { Text(stringResource(R.string.lantern_wifi_not_now)) }
+            },
+        )
     }
 }

@@ -362,4 +362,11 @@
     <string name="provision_error_choose_wifi">请选择您的家庭 WiFi。</string>
     <string name="provision_wifi_location_off">请打开位置信息以列出附近的 WiFi 网络（Android 搜索 WiFi 时需要；Sinag 不会使用您的位置）。或手动输入名称。</string>
     <string name="provision_wifi_open_settings">打开设置</string>
+    <string name="lantern_wifi_save_to_phone">保存到这部手机的 WiFi</string>
+    <string name="lantern_wifi_saved_to_phone">已保存。手机现在无需密码即可连接此 WiFi。</string>
+    <string name="lantern_wifi_not_saved_to_phone">WiFi 未保存。您可以稍后在 Parol WiFi 中保存。</string>
+    <string name="lantern_wifi_save_offer_title">将 %1$s 保存到这部手机？</string>
+    <string name="lantern_wifi_save_offer_text">之后可以在手机的 WiFi 设置中直接连接，无需输入密码，手机也会自动重新连接。Android 会请您确认。</string>
+    <string name="lantern_wifi_save">保存</string>
+    <string name="lantern_wifi_not_now">以后再说</string>
 </resources>

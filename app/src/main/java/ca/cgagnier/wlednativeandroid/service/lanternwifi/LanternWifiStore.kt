@@ -20,6 +20,7 @@ import javax.inject.Singleton
 
 private const val TAG = "LanternWifiStore"
 private const val PREFS = "lantern_wifi"
+private const val OFFERS_PREFS = "lantern_wifi_offers"
 private const val KEY_ALIAS = "lantern_wifi"
 private const val KEYSTORE = "AndroidKeyStore"
 private const val TRANSFORMATION = "AES/GCM/NoPadding"
@@ -35,6 +36,9 @@ private const val SEPARATOR = '\n'
 class LanternWifiStore @Inject constructor(@param:ApplicationContext context: Context) {
     private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
+    /** Lantern WiFis already offered for saving to the phone (names only, no passwords). */
+    private val offers = context.getSharedPreferences(OFFERS_PREFS, Context.MODE_PRIVATE)
+
     private val _all = MutableStateFlow(readAll())
 
     /** Saved credentials by MAC (lowercase, no separators). */
@@ -46,6 +50,13 @@ class LanternWifiStore @Inject constructor(@param:ApplicationContext context: Co
         val sealed = encrypt(credentials.ssid + SEPARATOR + credentials.password) ?: return
         prefs.edit().putString(key(macAddress), sealed).apply()
         _all.value = _all.value + (key(macAddress) to credentials)
+    }
+
+    /** Marks [ssid] as offered for saving to the phone; false if it already was. */
+    fun markSaveOffered(ssid: String): Boolean {
+        if (offers.getBoolean(ssid, false)) return false
+        offers.edit().putBoolean(ssid, true).apply()
+        return true
     }
 
     fun remove(macAddress: String) {

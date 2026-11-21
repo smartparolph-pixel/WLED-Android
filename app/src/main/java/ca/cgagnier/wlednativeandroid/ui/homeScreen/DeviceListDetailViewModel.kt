@@ -14,6 +14,7 @@ import ca.cgagnier.wlednativeandroid.service.NetworkConnectivityManager
 import ca.cgagnier.wlednativeandroid.service.direct.DirectConnectionManager
 import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
 import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiStore
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.lanternwifi.canSaveWifiToPhone
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -34,7 +35,7 @@ class DeviceListDetailViewModel @Inject constructor(
     networkManager: NetworkConnectivityManager,
     private val deviceFirstContactService: DeviceFirstContactService,
     private val directConnection: DirectConnectionManager,
-    lanternWifiStore: LanternWifiStore,
+    private val lanternWifiStore: LanternWifiStore,
 ) : AndroidViewModel(application),
     DefaultLifecycleObserver {
     val isWLEDCaptivePortal = networkManager.isWLEDCaptivePortal
@@ -47,6 +48,15 @@ class DeviceListDetailViewModel @Inject constructor(
     val lanternWifis = lanternWifiStore.all
 
     fun connectDirectly(wifi: LanternWifiCredentials? = null) = directConnection.connectDirectly(wifi)
+
+    /**
+     * After the first "Connect directly" to a Parol WiFi: offer once to save it to the phone, so joining it
+     * from WiFi settings doesn't ask for the password.
+     */
+    fun takeSaveToPhoneOffer(): LanternWifiCredentials? {
+        val wifi = directConnection.joiningWifi ?: return null
+        return wifi.takeIf { canSaveWifiToPhone && lanternWifiStore.markSaveOffered(it.ssid) }
+    }
 
     fun stopDirectConnection() = directConnection.stopDirect()
 

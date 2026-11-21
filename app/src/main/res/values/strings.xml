@@ -367,4 +367,11 @@
     <string name="provision_error_choose_wifi">Choose your home WiFi.</string>
     <string name="provision_wifi_location_off">Turn on Location to list nearby WiFi networks (Android needs it for WiFi scans; Sinag doesn\'t use your location). Or enter the name manually.</string>
     <string name="provision_wifi_open_settings">Open settings</string>
+    <string name="lantern_wifi_save_to_phone">Save to this phone\'s WiFi</string>
+    <string name="lantern_wifi_saved_to_phone">Saved. The phone can now join this WiFi without asking for the password.</string>
+    <string name="lantern_wifi_not_saved_to_phone">The WiFi wasn\'t saved. You can save it later from Parol WiFi.</string>
+    <string name="lantern_wifi_save_offer_title">Save %1$s to this phone?</string>
+    <string name="lantern_wifi_save_offer_text">Then you can join it from the phone\'s WiFi settings without typing the password, and the phone reconnects on its own. Android asks you to confirm.</string>
+    <string name="lantern_wifi_save">Save</string>
+    <string name="lantern_wifi_not_now">Not now</string>
 </resources>

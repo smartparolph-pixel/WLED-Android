@@ -87,6 +87,11 @@ class DirectConnectionManager @Inject constructor(
 
     private val probes = mutableMapOf<Network, Job>()
 
+    /** The Parol WiFi (saved on this phone) last joined with "Connect directly"; null for WLED-AP. */
+    @Volatile
+    var joiningWifi: LanternWifiCredentials? = null
+        private set
+
     @Volatile
     private var joinCallback: ConnectivityManager.NetworkCallback? = null
 
@@ -197,6 +202,7 @@ class DirectConnectionManager @Inject constructor(
     @SuppressLint("NewApi") // Guarded by canJoin, which checks the API itself.
     fun connectDirectly(wifi: LanternWifiCredentials? = null) {
         if (!canJoin || joinCallback != null) return
+        joiningWifi = wifi
         _join.value = DirectJoin.Joining
         joinLanternWifi(wifi ?: LanternWifiCredentials(DirectConnection.AP_SSID, DirectConnection.AP_PASSWORD))
     }

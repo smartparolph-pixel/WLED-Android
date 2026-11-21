@@ -51,6 +51,7 @@ private const val PIN_LENGTH = 4
 fun LanternWifiCard(credentials: LanternWifiCredentials, modifier: Modifier = Modifier) {
     var showPassword by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val saveToPhone = rememberSaveWifiToPhone()
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         modifier = modifier.fillMaxWidth(),
@@ -80,6 +81,11 @@ fun LanternWifiCard(credentials: LanternWifiCredentials, modifier: Modifier = Mo
                 }
                 TextButton(onClick = { copyPassword(context, credentials) }) {
                     Text(stringResource(R.string.lantern_wifi_copy))
+                }
+            }
+            saveToPhone?.let { save ->
+                TextButton(onClick = { save(credentials) }) {
+                    Text(stringResource(R.string.lantern_wifi_save_to_phone))
                 }
             }
             Text(

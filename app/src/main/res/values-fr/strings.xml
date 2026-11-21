@@ -364,4 +364,11 @@
     <string name="provision_error_choose_wifi">Choisissez votre WiFi.</string>
     <string name="provision_wifi_location_off">Activez la localisation pour lister les réseaux WiFi à proximité (Android l\'exige pour la recherche WiFi ; Sinag n\'utilise pas votre position). Ou saisissez le nom.</string>
     <string name="provision_wifi_open_settings">Ouvrir les paramètres</string>
+    <string name="lantern_wifi_save_to_phone">Enregistrer dans le WiFi de ce téléphone</string>
+    <string name="lantern_wifi_saved_to_phone">Enregistré. Le téléphone peut maintenant rejoindre ce WiFi sans mot de passe.</string>
+    <string name="lantern_wifi_not_saved_to_phone">Le WiFi n\'a pas été enregistré. Vous pourrez le faire plus tard dans WiFi du Parol.</string>
+    <string name="lantern_wifi_save_offer_title">Enregistrer %1$s sur ce téléphone ?</string>
+    <string name="lantern_wifi_save_offer_text">Vous pourrez le rejoindre depuis les paramètres WiFi sans saisir le mot de passe, et le téléphone s\'y reconnectera seul. Android vous demande de confirmer.</string>
+    <string name="lantern_wifi_save">Enregistrer</string>
+    <string name="lantern_wifi_not_now">Plus tard</string>
 </resources>

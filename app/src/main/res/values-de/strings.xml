@@ -365,4 +365,11 @@
     <string name="provision_error_choose_wifi">Wähle dein Heim-WLAN.</string>
     <string name="provision_wifi_location_off">Schalte den Standort ein, um WLAN-Netzwerke in der Nähe anzuzeigen (Android braucht ihn für die WLAN-Suche; Sinag nutzt deinen Standort nicht). Oder gib den Namen manuell ein.</string>
     <string name="provision_wifi_open_settings">Einstellungen öffnen</string>
+    <string name="lantern_wifi_save_to_phone">Im WLAN dieses Handys speichern</string>
+    <string name="lantern_wifi_saved_to_phone">Gespeichert. Das Handy kann dieses WLAN jetzt ohne Passwort verbinden.</string>
+    <string name="lantern_wifi_not_saved_to_phone">Das WLAN wurde nicht gespeichert. Du kannst es später unter Parol-WLAN speichern.</string>
+    <string name="lantern_wifi_save_offer_title">%1$s auf diesem Handy speichern?</string>
+    <string name="lantern_wifi_save_offer_text">Dann kannst du es in den WLAN-Einstellungen ohne Passwort verbinden, und das Handy verbindet sich selbst wieder. Android fragt nach einer Bestätigung.</string>
+    <string name="lantern_wifi_save">Speichern</string>
+    <string name="lantern_wifi_not_now">Nicht jetzt</string>
 </resources>
