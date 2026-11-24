@@ -24,6 +24,7 @@ import ca.cgagnier.wlednativeandroid.R
 import ca.cgagnier.wlednativeandroid.service.status.LanternStatus
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.ui.components.deviceName
+import ca.cgagnier.wlednativeandroid.ui.components.rememberSteadyOnline
 import kotlinx.coroutines.delay
 
 private const val TICK_MS = 30_000L
@@ -33,6 +34,7 @@ private const val MILLIS_PER_SECOND = 1000L
 @Composable
 fun LanternStatusCard(device: DeviceWithState, presetNames: Map<Int, String>, modifier: Modifier = Modifier) {
     val stateInfo = device.stateInfo.value
+    val online = rememberSteadyOnline(device)
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -43,7 +45,7 @@ fun LanternStatusCard(device: DeviceWithState, presetNames: Map<Int, String>, mo
         Column(modifier = Modifier.padding(16.dp)) {
             Text(deviceName(device.device), style = MaterialTheme.typography.titleMedium)
             when {
-                stateInfo == null || !device.isOnline -> {
+                stateInfo == null || !online -> {
                     StatusLine(stringResource(R.string.lantern_status_not_connected))
                 }
 

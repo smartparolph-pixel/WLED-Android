@@ -80,6 +80,7 @@ fun DeviceInfoTwoRows(
     nameMaxLines: Int = 2,
 ) {
     val updateTag by device.updateVersionTagFlow.collectAsState(initial = null)
+    val online = rememberSteadyOnline(device)
 
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -100,7 +101,7 @@ fun DeviceInfoTwoRows(
             //  the address + offline message can't both fit. Right now, only the address can be
             //  truncated. This is due to the limitation of the weight system of a row. When using
             //  `fill = false`, the unused space is not distributed to the other elements.
-            WebsocketStatusIndicator(device.websocketStatus.value)
+            WebsocketStatusIndicator(shownStatus(device, online))
             Text(
                 if (device.isDirect) stringResource(R.string.direct_connection_badge) else device.device.address,
                 style = MaterialTheme.typography.labelMedium,
@@ -109,7 +110,7 @@ fun DeviceInfoTwoRows(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
-            deviceNetworkStrengthImage(device)
+            deviceNetworkStrengthImage(device, online)
             deviceBatteryPercentageImage(device)
 
             if (updateTag != null) {
@@ -121,7 +122,8 @@ fun DeviceInfoTwoRows(
                         .height(20.dp),
                 )
             }
-            if (showOfflineText(device)) {
+            // Never on a direct connection, where the line only says "Direct connection".
+            if (!online && !device.isDirect) {
                 OfflineSinceText(
                     device.device,
                     currentTime = currentTime,
@@ -147,28 +149,6 @@ fun DeviceInfoTwoRows(
         }
     }
 }
-
-/**
- * Whether to add "(Offline, …)" after the address. Never on a direct connection, where the card only says
- * "Direct connection". Otherwise only once the lantern has been unreachable for [OFFLINE_TEXT_DELAY_MS]:
- * WLED closes websockets when it has too many open (the list, the lantern page, a browser), and the quick
- * reconnect that follows made the text flash on and off.
- */
-@Composable
-private fun showOfflineText(device: DeviceWithState): Boolean {
-    val online = device.isOnline
-    var offlineLongEnough by remember { mutableStateOf(false) }
-    LaunchedEffect(online) {
-        offlineLongEnough = false
-        if (!online) {
-            delay(OFFLINE_TEXT_DELAY_MS)
-            offlineLongEnough = true
-        }
-    }
-    return !online && !device.isDirect && offlineLongEnough
-}
-
-private const val OFFLINE_TEXT_DELAY_MS = 10_000L
 
 /** The lantern's current light colour (see [LocalLanternColor]); nothing when it is offline or unknown. */
 @Composable

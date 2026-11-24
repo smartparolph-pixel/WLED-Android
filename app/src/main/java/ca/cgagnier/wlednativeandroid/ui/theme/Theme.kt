@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ca.cgagnier.wlednativeandroid.model.wledapi.State
 import ca.cgagnier.wlednativeandroid.repository.ThemeSettings
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
+import ca.cgagnier.wlednativeandroid.ui.components.rememberSteadyOnline
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -333,7 +334,8 @@ val LocalLanternColor = compositionLocalOf<Color?> { null }
 fun DeviceTheme(device: DeviceWithState, content: @Composable () -> Unit) {
     val stateInfo by device.stateInfo
     val color = stateInfo?.state?.let { Color(getColorFromDeviceState(it)) }
-    CompositionLocalProvider(LocalLanternColor provides color.takeIf { device.isOnline }) {
+    val online = rememberSteadyOnline(device)
+    CompositionLocalProvider(LocalLanternColor provides color.takeIf { online }) {
         content()
     }
 }
