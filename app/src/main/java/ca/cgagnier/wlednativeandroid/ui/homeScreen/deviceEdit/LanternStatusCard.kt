@@ -46,7 +46,9 @@ fun LanternStatusCard(device: DeviceWithState, presetNames: Map<Int, String>, mo
                 stateInfo == null || !device.isOnline -> {
                     StatusLine(stringResource(R.string.lantern_status_not_connected))
                 }
+
                 stateInfo.state.isOn == false -> StatusLine(stringResource(R.string.lantern_status_off))
+
                 else -> {
                     val state = stateInfo.state
                     val id = LanternStatus.playingId(state.selectedPresetId, state.selectedPlaylistId)
