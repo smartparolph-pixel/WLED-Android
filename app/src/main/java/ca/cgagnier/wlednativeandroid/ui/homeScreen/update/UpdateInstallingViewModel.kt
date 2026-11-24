@@ -208,10 +208,9 @@ class UpdateInstallingViewModel @Inject constructor(
     private fun updateDeviceUpdated() = viewModelScope.launch(Dispatchers.IO) {
         val device = device.value ?: return@launch
         Log.d(TAG, "Resetting skipUpdateTag")
-        val updatedDevice = device.device.copy(
-            skipUpdateTag = "",
-        )
-        deviceRepository.update(updatedDevice)
+        // From the saved record: on a direct connection the device in use has a temporary address.
+        val saved = deviceRepository.findDeviceByMacAddress(device.device.macAddress) ?: device.device
+        deviceRepository.update(saved.copy(skipUpdateTag = ""))
     }
 
     private fun getHtmlErrorMessage(response: Response<ResponseBody>): String {

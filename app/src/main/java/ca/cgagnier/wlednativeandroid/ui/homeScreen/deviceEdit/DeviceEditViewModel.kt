@@ -157,16 +157,25 @@ class DeviceEditViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Saves a change to [device], starting from its saved record: on a direct connection the device in use
+     * has the lantern's temporary address (4.3.2.1), which must never replace its home address.
+     */
+    private suspend fun updateSaved(device: Device, change: (Device) -> Device) {
+        val saved = deviceRepository.findDeviceByMacAddress(device.macAddress) ?: device
+        deviceRepository.update(change(saved))
+    }
+
     /** Toggles the hidden-from-list flag on [device]. */
     fun updateDeviceHidden(device: Device, isHidden: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         Log.d(TAG, "updateDeviceHidden: ${device.originalName}, isHidden: $isHidden")
-        deviceRepository.update(device.copy(isHidden = isHidden))
+        updateSaved(device) { it.copy(isHidden = isHidden) }
     }
 
     /** Changes the update [branch] (stable / beta) for the [device]. */
     fun updateDeviceBranch(device: Device, branch: Branch) = viewModelScope.launch(Dispatchers.IO) {
         Log.d(TAG, "updateDeviceBranch: ${device.originalName}, updateChannel: $branch")
-        deviceRepository.update(device.copy(branch = branch))
+        updateSaved(device) { it.copy(branch = branch) }
     }
 
     /** Fetches and shows the release details for a specific [version] tag. */
@@ -182,7 +191,7 @@ class DeviceEditViewModel @Inject constructor(
     /** Marks the given [version] as skipped for [device] and closes the dialog. */
     fun skipUpdate(device: Device, version: VersionWithAssets) = viewModelScope.launch(Dispatchers.IO) {
         Log.d(TAG, "Saving skipUpdateTag")
-        deviceRepository.update(device.copy(skipUpdateTag = version.version.tagName))
+        updateSaved(device) { it.copy(skipUpdateTag = version.version.tagName) }
         updateDetailsVersion.value = null
     }
 
@@ -230,8 +239,7 @@ class DeviceEditViewModel @Inject constructor(
     fun checkForUpdates(device: Device) {
         viewModelScope.launch(Dispatchers.IO) {
             isCheckingUpdates.value = true
-            val updatedDevice = device.copy(skipUpdateTag = "")
-            deviceRepository.update(updatedDevice)
+            updateSaved(device) { it.copy(skipUpdateTag = "") }
             try {
                 val repo = repositoryDao.getRepositoryById(device.repositoryId)
                 val repoStr = repo?.ownerAndRepo ?: DEFAULT_REPO
