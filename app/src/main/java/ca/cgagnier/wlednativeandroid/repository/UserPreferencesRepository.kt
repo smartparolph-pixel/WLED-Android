@@ -11,6 +11,29 @@ class UserPreferencesRepository(private val dataStore: DataStore<UserPreferences
     val showOfflineDevicesLast get() = dataStore.data.map { it.showOfflineLast }
     val showHiddenDevices get() = dataStore.data.map { it.showHiddenDevices }
     val lastUpdateCheckDate get() = dataStore.data.map { it.lastUpdateCheckDate }
+    val appLockEnabled get() = dataStore.data.map { it.appLockEnabled }
+    val appLockTimeout get() = dataStore.data.map { it.appLockTimeout }
+    val appLockSettingsOnly get() = dataStore.data.map { it.appLockSettingsOnly }
+
+    /** Off, settings only, or the whole app (see [ca.cgagnier.wlednativeandroid.service.applock.AppLockMode]). */
+    suspend fun updateAppLockMode(enabled: Boolean, settingsOnly: Boolean) {
+        dataStore.updateData {
+            it.toBuilder()
+                .setAppLockEnabled(enabled)
+                .setAppLockSettingsOnly(settingsOnly)
+                .setDateLastWritten(System.currentTimeMillis())
+                .build()
+        }
+    }
+
+    suspend fun updateAppLockTimeout(timeout: AppLockTimeout) {
+        dataStore.updateData {
+            it.toBuilder()
+                .setAppLockTimeout(timeout)
+                .setDateLastWritten(System.currentTimeMillis())
+                .build()
+        }
+    }
 
     suspend fun updateThemeMode(themeSettings: ThemeSettings) {
         Log.d(TAG, "updateThemeMode")

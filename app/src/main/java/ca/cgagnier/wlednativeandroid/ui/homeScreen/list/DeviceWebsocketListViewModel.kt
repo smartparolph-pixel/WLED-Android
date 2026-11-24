@@ -11,6 +11,9 @@ import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.model.wledapi.State
 import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
 import ca.cgagnier.wlednativeandroid.repository.UserPreferencesRepository
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnection
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnectionManager
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiStore
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketClient
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketClientFactory
@@ -21,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
@@ -30,6 +34,7 @@ import javax.inject.Inject
 
 private const val TAG = "DeviceWebsocketListViewModel"
 
+@Suppress("LongParameterList") // Injected by Hilt.
 @HiltViewModel
 class DeviceWebsocketListViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository,
@@ -37,10 +42,16 @@ class DeviceWebsocketListViewModel @Inject constructor(
     private val websocketClientFactory: WebsocketClientFactory,
     private val widgetManager: WledWidgetManager,
     @ApplicationContext private val applicationContext: Context,
+    directConnection: DirectConnectionManager,
+    private val lanternWifiStore: LanternWifiStore,
 ) : ViewModel(),
     DefaultLifecycleObserver {
     private val activeClients = MutableStateFlow<Map<String, WebsocketClient>>(emptyMap())
-    private val devicesFromDb = deviceRepository.allDevices
+
+    // The saved devices, with the one on its own WiFi ("Direct connection") at the lantern's address.
+    private val devicesFromDb = combine(deviceRepository.allDevices, directConnection.lantern) { devices, lantern ->
+        DirectConnection.reachable(devices, lantern?.macAddress)
+    }
 
     val showOfflineDevicesLast = userPreferencesRepository.showOfflineDevicesLast.stateIn(
         scope = viewModelScope,
@@ -203,6 +214,7 @@ class DeviceWebsocketListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             Log.d(TAG, "Deleting device ${device.originalName} - ${device.address}")
             widgetManager.deleteWidgetsForDevice(applicationContext, device.macAddress)
+            lanternWifiStore.remove(device.macAddress)
             deviceRepository.delete(device)
         }
     }

@@ -5,7 +5,6 @@ import ca.cgagnier.wlednativeandroid.model.Asset
 import ca.cgagnier.wlednativeandroid.model.Branch
 import ca.cgagnier.wlednativeandroid.model.Repository
 import ca.cgagnier.wlednativeandroid.model.Version
-import ca.cgagnier.wlednativeandroid.model.VersionWithAssets
 import ca.cgagnier.wlednativeandroid.model.githubapi.Release
 import ca.cgagnier.wlednativeandroid.model.wledapi.Info
 import ca.cgagnier.wlednativeandroid.model.wledapi.isOtaEnabled
@@ -113,18 +112,15 @@ class ReleaseService @Inject constructor(
      *      otherwise an empty string.
      */
     suspend fun getNewerReleaseTag(deviceInfo: Info, branch: Branch, ignoreVersion: String): String? {
-        if (!isDeviceEligibleForUpdate(deviceInfo)) {
-            return null
-        }
-
+        // Parol lanterns are only offered firmware approved for Sinag, not simply the newest release.
+        val approvedTag = ApprovedFirmware.updateFor(deviceInfo.version)
+            ?.takeIf { isDeviceEligibleForUpdate(deviceInfo) }
+            ?: return null
         val repositoryStr = getRepositoryFromInfo(deviceInfo)
-        val repository = repositoryDao.getRepositoryByOwnerAndRepo(repositoryStr)
-
-        val latestVersion = repository?.let {
-            getLatestVersionWithAssets(it.id, branch)
-        }
-
-        return latestVersion?.version?.tagName?.takeIf {
+        // Must be a published release with its files, or the update can't be downloaded.
+        val approvedVersion = repositoryDao.getRepositoryByOwnerAndRepo(repositoryStr)
+            ?.let { versionWithAssetsRepository.getVersionByTag(it.id, approvedTag) }
+        return approvedVersion?.version?.tagName?.takeIf {
             shouldOfferUpdate(deviceInfo, it, ignoreVersion, branch)
         }
     }
@@ -173,14 +169,6 @@ class ReleaseService @Inject constructor(
     } catch (e: Exception) {
         Log.i(TAG, "Non-SemVer version detected ($latestTagName), offering update as it differs from current.")
         true
-    }
-
-    private suspend fun getLatestVersionWithAssets(repositoryId: Long, branch: Branch): VersionWithAssets? {
-        if (branch == Branch.BETA) {
-            return versionWithAssetsRepository.getLatestBetaVersionWithAssets(repositoryId)
-        }
-
-        return versionWithAssetsRepository.getLatestStableVersionWithAssets(repositoryId)
     }
 
     /**

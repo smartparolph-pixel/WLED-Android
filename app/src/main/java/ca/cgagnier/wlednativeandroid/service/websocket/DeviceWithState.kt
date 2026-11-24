@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import ca.cgagnier.wlednativeandroid.model.AP_MODE_MAC_ADDRESS
 import ca.cgagnier.wlednativeandroid.model.Device
 import ca.cgagnier.wlednativeandroid.model.wledapi.DeviceStateInfo
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnection
 import ca.cgagnier.wlednativeandroid.service.update.DeviceUpdateManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -27,6 +28,10 @@ class DeviceWithState(initialDevice: Device, deviceUpdateManager: DeviceUpdateMa
     val isAPMode: Boolean
         @JvmName("isAPMode")
         get() = device.macAddress == AP_MODE_MAC_ADDRESS
+
+    /** Reached over the lantern's own WiFi ("Direct connection") instead of the home WiFi. */
+    val isDirect: Boolean
+        get() = DirectConnection.isDirect(device)
 }
 
 enum class WebsocketStatus {

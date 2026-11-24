@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -50,9 +49,9 @@ fun NoDevicesItem(
             horizontalAlignment = CenterHorizontally,
         ) {
             Image(
-                modifier = Modifier.heightIn(0.dp, 80.dp),
-                painter = painterResource(id = R.drawable.akemi_018_teeth),
-                contentDescription = stringResource(R.string.awkward_akemi_character),
+                modifier = Modifier.size(80.dp),
+                painter = painterResource(id = R.drawable.sinag_app_icon),
+                contentDescription = stringResource(R.string.sinag_logo),
             )
             Text(stringResource(R.string.you_dont_have_any_visible_devices))
             Button(

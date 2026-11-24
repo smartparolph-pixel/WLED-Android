@@ -11,6 +11,10 @@ import ca.cgagnier.wlednativeandroid.repository.UserPreferencesRepository
 import ca.cgagnier.wlednativeandroid.service.DeviceDiscovery
 import ca.cgagnier.wlednativeandroid.service.DeviceFirstContactService
 import ca.cgagnier.wlednativeandroid.service.NetworkConnectivityManager
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnectionManager
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiCredentials
+import ca.cgagnier.wlednativeandroid.service.lanternwifi.LanternWifiStore
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.lanternwifi.canSaveWifiToPhone
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -30,9 +34,36 @@ class DeviceListDetailViewModel @Inject constructor(
     private val preferencesRepository: UserPreferencesRepository,
     networkManager: NetworkConnectivityManager,
     private val deviceFirstContactService: DeviceFirstContactService,
+    private val directConnection: DirectConnectionManager,
+    private val lanternWifiStore: LanternWifiStore,
 ) : AndroidViewModel(application),
     DefaultLifecycleObserver {
     val isWLEDCaptivePortal = networkManager.isWLEDCaptivePortal
+
+    /** "Connect directly": joining the lantern's own WiFi from the app. */
+    val directJoin = directConnection.join
+    val canConnectDirectly = directConnection.canJoin
+
+    /** Lanterns' own WiFis saved on this phone, to choose from in "Connect directly". */
+    val lanternWifis = lanternWifiStore.all
+
+    fun connectDirectly(wifi: LanternWifiCredentials? = null) = directConnection.connectDirectly(wifi)
+
+    /**
+     * After the first "Connect directly" to a Parol WiFi: offer once to save it to the phone, so joining it
+     * from WiFi settings doesn't ask for the password.
+     */
+    fun takeSaveToPhoneOffer(): LanternWifiCredentials? {
+        val wifi = directConnection.joiningWifi ?: return null
+        return wifi.takeIf { canSaveWifiToPhone && lanternWifiStore.markSaveOffered(it.ssid) }
+    }
+
+    fun stopDirectConnection() = directConnection.stopDirect()
+
+    /** "Try again" / "Reconnect": the same Parol WiFi as last time. */
+    fun retryDirectConnection() = directConnection.retry()
+
+    fun acknowledgeDirectJoin() = directConnection.acknowledge()
 
     val showHiddenDevices = preferencesRepository.showHiddenDevices
         .stateIn(
@@ -50,6 +81,9 @@ class DeviceListDetailViewModel @Inject constructor(
 
     private val _isAddDeviceDialogVisible = MutableStateFlow(false)
     val isAddDeviceDialogVisible: StateFlow<Boolean> = _isAddDeviceDialogVisible
+
+    private val _isProvisionDialogVisible = MutableStateFlow(false)
+    val isProvisionDialogVisible: StateFlow<Boolean> = _isProvisionDialogVisible
 
     init {
         // This ensures onResume/onPause are called only when the APP goes background/foreground,
@@ -120,5 +154,13 @@ class DeviceListDetailViewModel @Inject constructor(
         _isAddDeviceDialogVisible.update {
             false
         }
+    }
+
+    fun showProvisionDialog() {
+        _isProvisionDialogVisible.update { true }
+    }
+
+    fun hideProvisionDialog() {
+        _isProvisionDialogVisible.update { false }
     }
 }

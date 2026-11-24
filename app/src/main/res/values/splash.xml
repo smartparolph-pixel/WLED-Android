@@ -2,8 +2,8 @@
 <resources>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#202020</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_rgb_foreground</item>
+        <item name="windowSplashScreenBackground">@color/ic_launcher_sinag_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_sinag_foreground</item>
         <item name="postSplashScreenTheme">@style/Theme.MaterialComponents.DayNight.NoActionBar</item>
     </style>
 

@@ -8,6 +8,7 @@ import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
 import ca.cgagnier.wlednativeandroid.repository.RepositoryDao
 import ca.cgagnier.wlednativeandroid.repository.getOrCreateRepositoryId
 import ca.cgagnier.wlednativeandroid.service.api.DeviceApiFactory
+import ca.cgagnier.wlednativeandroid.service.direct.DirectConnection
 import ca.cgagnier.wlednativeandroid.service.update.getRepositoryFromInfo
 import ca.cgagnier.wlednativeandroid.util.isIpAddress
 import ca.cgagnier.wlednativeandroid.widget.WledWidgetManager
@@ -62,7 +63,12 @@ class DeviceFirstContactService @Inject constructor(
         // Keep user-defined hostnames (e.g. "wled.local") and only update if the existing address
         // is an IP. This is to avoid overriding a device being added by an url which could be on a
         // different network (and couldn't be reached by IP address directly).
-        val deviceAddress = if (device.address.isIpAddress()) newAddress else device.address
+        // Nor with the lantern's own address (4.3.2.1): it only works on the lantern's WiFi.
+        val deviceAddress = if (device.address.isIpAddress()) {
+            DirectConnection.addressToSave(device.address, newAddress)
+        } else {
+            device.address
+        }
         val updatedDevice: Device
         if (info != null) {
             val deviceRepositoryStr = getRepositoryFromInfo(info)

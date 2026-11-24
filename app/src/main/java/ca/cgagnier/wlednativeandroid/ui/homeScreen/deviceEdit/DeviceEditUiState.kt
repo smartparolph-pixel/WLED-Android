@@ -17,7 +17,24 @@ data class DeviceEditUiState(
     val updateDetailsVersion: VersionWithAssets? = null,
     val updateDisclaimerVersion: VersionWithAssets? = null,
     val updateInstallVersion: VersionWithAssets? = null,
+    val renameStatus: RenameStatus = RenameStatus.Idle,
+    /** The lantern's preset / playlist names by id, for "Now playing". */
+    val presetNames: Map<Int, String> = emptyMap(),
 )
+
+/** How the last rename went. */
+enum class RenameStatus {
+    Idle,
+    Saving,
+
+    /** Saved on the lantern: every phone shows it. */
+    SavedOnLantern,
+
+    /** The lantern couldn't be reached (or has a settings PIN): saved on this phone only. */
+    SavedOnPhone,
+    Empty,
+    TooLong,
+}
 
 /**
  * All user-triggered actions on the device edit screen.

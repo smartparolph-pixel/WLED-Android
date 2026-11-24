@@ -11,23 +11,34 @@ import ca.cgagnier.wlednativeandroid.model.VersionWithAssets
 import ca.cgagnier.wlednativeandroid.repository.DeviceRepository
 import ca.cgagnier.wlednativeandroid.repository.RepositoryDao
 import ca.cgagnier.wlednativeandroid.repository.VersionWithAssetsRepository
+import ca.cgagnier.wlednativeandroid.service.api.DeviceApiFactory
 import ca.cgagnier.wlednativeandroid.service.api.github.GithubApi
+import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningDefaults
+import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningPayloads
+import ca.cgagnier.wlednativeandroid.service.status.LanternStatus
 import ca.cgagnier.wlednativeandroid.service.update.DEFAULT_REPO
 import ca.cgagnier.wlednativeandroid.service.update.ReleaseService
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.widget.WledWidgetManager
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
 import javax.inject.Inject
 
 private const val TAG = "DeviceEditViewModel"
+private val JSON = "application/json".toMediaType()
 
 /**
  * ViewModel for the device edit screen.
@@ -46,7 +57,20 @@ class DeviceEditViewModel @Inject constructor(
     private val releaseService: ReleaseService,
     private val widgetManager: WledWidgetManager,
     @param:ApplicationContext private val applicationContext: Context,
+    private val deviceApiFactory: DeviceApiFactory,
 ) : ViewModel() {
+
+    private val _renameStatus = MutableStateFlow(RenameStatus.Idle)
+
+    /** How the last rename went; merged into the UI state by the screen. */
+    val renameStatus: StateFlow<RenameStatus> = _renameStatus.asStateFlow()
+
+    private val _presetNames = MutableStateFlow<Map<Int, String>>(emptyMap())
+
+    /** The lantern's preset / playlist names by id, for "Now playing"; merged into the UI state by the screen. */
+    val presetNames: StateFlow<Map<Int, String>> = _presetNames.asStateFlow()
+    private var presetNamesJob: Job? = null
+    private val moshi = Moshi.Builder().build()
 
     private val updateDetailsVersion = MutableStateFlow<VersionWithAssets?>(null)
     private val updateDisclaimerVersion = MutableStateFlow<VersionWithAssets?>(null)
@@ -86,24 +110,72 @@ class DeviceEditViewModel @Inject constructor(
         repository.value = repositoryDao.getRepositoryById(repositoryId)
     }
 
-    /** Persists a new custom name for the [device] and updates any active widgets. */
-    fun updateCustomName(device: Device, name: String) = viewModelScope.launch(Dispatchers.IO) {
-        val updatedDevice = device.copy(customName = name)
-        Log.d(TAG, "updateCustomName: $name")
+    /**
+     * Renames the lantern: saved on the lantern itself (`id.name`), so every phone shows it, and any
+     * name kept on this phone only is cleared. If the lantern can't be reached (or has a settings PIN), the
+     * name is kept on this phone only, as before.
+     */
+    fun renameLantern(device: Device, name: String) = viewModelScope.launch(Dispatchers.IO) {
+        val trimmed = name.trim()
+        val tooLong = trimmed.toByteArray(Charsets.UTF_8).size > ProvisioningDefaults.DEVICE_NAME_MAX_BYTES
+        if (trimmed.isEmpty() || tooLong) {
+            _renameStatus.value = if (tooLong) RenameStatus.TooLong else RenameStatus.Empty
+            return@launch
+        }
+        _renameStatus.value = RenameStatus.Saving
+        val savedOnLantern = try {
+            val body = ProvisioningPayloads.nameConfigJson(trimmed).toRequestBody(JSON)
+            deviceApiFactory.create(device).postConfig(body).isSuccessful
+        } catch (e: IOException) {
+            Log.w(TAG, "Could not rename the lantern; keeping the name on this phone", e)
+            false
+        }
+        // Start from the saved record: on a direct connection the device in use has a temporary address.
+        val saved = deviceRepository.findDeviceByMacAddress(device.macAddress) ?: device
+        val updatedDevice = if (savedOnLantern) {
+            saved.copy(customName = "", originalName = trimmed)
+        } else {
+            saved.copy(customName = trimmed)
+        }
         deviceRepository.update(updatedDevice)
         widgetManager.updateWidgetDeviceDetails(applicationContext, updatedDevice)
+        _renameStatus.value = if (savedOnLantern) RenameStatus.SavedOnLantern else RenameStatus.SavedOnPhone
+    }
+
+    /** Reads the preset / playlist names from the lantern's presets.json (read only, nothing is written). */
+    fun loadPresetNames(device: Device) {
+        if (presetNamesJob?.isActive == true) return
+        presetNamesJob = viewModelScope.launch(Dispatchers.IO) {
+            val text = try {
+                deviceApiFactory.create(device).getPresets().body()?.string()
+            } catch (e: IOException) {
+                Log.w(TAG, "Could not read the lantern's presets", e)
+                null
+            } ?: return@launch
+            val presets = runCatching { moshi.adapter(Map::class.java).fromJson(text) }.getOrNull() ?: return@launch
+            _presetNames.value = LanternStatus.presetNames(presets)
+        }
+    }
+
+    /**
+     * Saves a change to [device], starting from its saved record: on a direct connection the device in use
+     * has the lantern's temporary address (4.3.2.1), which must never replace its home address.
+     */
+    private suspend fun updateSaved(device: Device, change: (Device) -> Device) {
+        val saved = deviceRepository.findDeviceByMacAddress(device.macAddress) ?: device
+        deviceRepository.update(change(saved))
     }
 
     /** Toggles the hidden-from-list flag on [device]. */
     fun updateDeviceHidden(device: Device, isHidden: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         Log.d(TAG, "updateDeviceHidden: ${device.originalName}, isHidden: $isHidden")
-        deviceRepository.update(device.copy(isHidden = isHidden))
+        updateSaved(device) { it.copy(isHidden = isHidden) }
     }
 
     /** Changes the update [branch] (stable / beta) for the [device]. */
     fun updateDeviceBranch(device: Device, branch: Branch) = viewModelScope.launch(Dispatchers.IO) {
         Log.d(TAG, "updateDeviceBranch: ${device.originalName}, updateChannel: $branch")
-        deviceRepository.update(device.copy(branch = branch))
+        updateSaved(device) { it.copy(branch = branch) }
     }
 
     /** Fetches and shows the release details for a specific [version] tag. */
@@ -119,7 +191,7 @@ class DeviceEditViewModel @Inject constructor(
     /** Marks the given [version] as skipped for [device] and closes the dialog. */
     fun skipUpdate(device: Device, version: VersionWithAssets) = viewModelScope.launch(Dispatchers.IO) {
         Log.d(TAG, "Saving skipUpdateTag")
-        deviceRepository.update(device.copy(skipUpdateTag = version.version.tagName))
+        updateSaved(device) { it.copy(skipUpdateTag = version.version.tagName) }
         updateDetailsVersion.value = null
     }
 
@@ -167,8 +239,7 @@ class DeviceEditViewModel @Inject constructor(
     fun checkForUpdates(device: Device) {
         viewModelScope.launch(Dispatchers.IO) {
             isCheckingUpdates.value = true
-            val updatedDevice = device.copy(skipUpdateTag = "")
-            deviceRepository.update(updatedDevice)
+            updateSaved(device) { it.copy(skipUpdateTag = "") }
             try {
                 val repo = repositoryDao.getRepositoryById(device.repositoryId)
                 val repoStr = repo?.ownerAndRepo ?: DEFAULT_REPO

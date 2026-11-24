@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,23 +22,29 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import ca.cgagnier.wlednativeandroid.BuildConfig
 import ca.cgagnier.wlednativeandroid.R
+import ca.cgagnier.wlednativeandroid.service.direct.DirectJoin
+import ca.cgagnier.wlednativeandroid.service.direct.inProgress
+import ca.cgagnier.wlednativeandroid.service.direct.ssid
+import ca.cgagnier.wlednativeandroid.ui.homeScreen.share.scanShareCode
 import ca.cgagnier.wlednativeandroid.util.openUriSafely
 
+@Suppress("LongParameterList") // One callback per drawer item.
 @Composable
 internal fun DrawerContent(
     showHiddenDevices: Boolean,
     addDevice: () -> Unit,
+    provisionDevice: () -> Unit,
     toggleShowHiddenDevices: () -> Unit,
     openSettings: () -> Unit,
+    directConnection: DirectDrawerAction? = null,
 ) {
     val uriHandler = LocalUriHandler.current
     val scrollState = rememberScrollState()
@@ -45,12 +53,44 @@ internal fun DrawerContent(
         modifier = Modifier.verticalScroll(scrollState),
     ) {
         DrawerHeader()
-        DrawerMainActions(addDevice, showHiddenDevices, toggleShowHiddenDevices, openSettings)
+        DrawerMainActions(addDevice, provisionDevice, showHiddenDevices, toggleShowHiddenDevices, openSettings)
+        directConnection?.let { DirectConnectionItem(it) }
         HorizontalDivider(modifier = Modifier.padding(12.dp))
         DrawerExternalLinks(uriHandler)
         Spacer(Modifier.height(24.dp))
-        DrawerVersionInfo()
     }
+}
+
+/** "Connect directly" to a lantern's own WiFi; while connecting, cancels it, and once connected, leaves it. */
+data class DirectDrawerAction(val state: DirectJoin, val onClick: () -> Unit)
+
+@Composable
+private fun DirectConnectionItem(action: DirectDrawerAction) {
+    val state = action.state
+    val ssid = state.ssid.orEmpty()
+    val (label, badge) = when {
+        state.inProgress -> stringResource(R.string.direct_connection_connecting_to, ssid) to R.string.cancel
+
+        state is DirectJoin.Connected -> stringResource(R.string.direct_status_connected_title, ssid) to
+            R.string.direct_status_leave
+
+        else -> stringResource(R.string.direct_connection_connect) to null
+    }
+    NavigationDrawerItem(
+        label = { Text(text = label) },
+        icon = {
+            if (state.inProgress) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(painter = painterResource(R.drawable.ic_baseline_router_24), contentDescription = null)
+            }
+        },
+        badge = badge?.let { { Text(stringResource(it), style = MaterialTheme.typography.labelLarge) } },
+        // Highlighted while connecting or connected, so it's clear which state the phone is in.
+        selected = state.inProgress || state is DirectJoin.Connected,
+        onClick = action.onClick,
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+    )
 }
 
 @Composable
@@ -62,8 +102,9 @@ private fun DrawerHeader() {
         horizontalArrangement = Arrangement.Center,
     ) {
         Image(
-            painter = painterResource(id = R.drawable.wled_logo_akemi),
-            contentDescription = stringResource(R.string.app_logo),
+            painter = painterResource(id = R.drawable.sinag_app_icon),
+            contentDescription = stringResource(R.string.sinag_logo),
+            modifier = Modifier.size(72.dp),
         )
     }
 }
@@ -71,6 +112,7 @@ private fun DrawerHeader() {
 @Composable
 private fun DrawerMainActions(
     addDevice: () -> Unit,
+    provisionDevice: () -> Unit,
     showHiddenDevices: Boolean,
     toggleShowHiddenDevices: () -> Unit,
     openSettings: () -> Unit,
@@ -85,6 +127,31 @@ private fun DrawerMainActions(
         },
         selected = false,
         onClick = addDevice,
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+    )
+    NavigationDrawerItem(
+        label = { Text(text = stringResource(R.string.provision_menu_item)) },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_router_24),
+                contentDescription = stringResource(R.string.provision_menu_item),
+            )
+        },
+        selected = false,
+        onClick = provisionDevice,
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+    )
+    val context = LocalContext.current
+    NavigationDrawerItem(
+        label = { Text(text = stringResource(R.string.share_scan_menu_item)) },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.baseline_qr_code_24),
+                contentDescription = stringResource(R.string.share_scan_menu_item),
+            )
+        },
+        selected = false,
+        onClick = { scanShareCode(context) },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
     )
     ToggleHiddenDeviceButton(showHiddenDevices, toggleShowHiddenDevices)
@@ -116,39 +183,6 @@ private fun DrawerExternalLinks(uriHandler: UriHandler) {
         onClick = { uriHandler.openUriSafely("https://kno.wled.ge/") },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
     )
-    NavigationDrawerItem(
-        label = { Text(text = stringResource(R.string.support_me)) },
-        icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_coffee_24),
-                contentDescription = stringResource(R.string.support_me),
-            )
-        },
-        selected = false,
-        onClick = { uriHandler.openUriSafely("https://github.com/sponsors/Moustachauve") },
-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-    )
-}
-
-@Composable
-private fun DrawerVersionInfo() {
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        val debugString =
-            if (BuildConfig.BUILD_TYPE != "release") " - ${BuildConfig.BUILD_TYPE}" else ""
-        Text(
-            "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})$debugString",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Text(
-            BuildConfig.APPLICATION_ID,
-            style = MaterialTheme.typography.bodySmall,
-        )
-    }
 }
 
 @Composable
