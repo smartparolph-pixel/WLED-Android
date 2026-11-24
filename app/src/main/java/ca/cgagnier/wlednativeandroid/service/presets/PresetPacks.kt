@@ -43,8 +43,16 @@ object PresetPacks {
     /**
      * Speeds that differ from the effect's default. Sunrise's speed is its length in minutes (60 by
      * default), which looks dark for most of a 60 s playlist slot; 1 makes it rise within the slot.
+     * Lightning and Halloween Eyes are dark between bursts for up to 13 s and 33 s at their defaults:
+     * Lightning 235 strikes at most 1.9 s apart, Halloween Eyes 8 ("Eye off time") waits 1–2 s.
      */
-    private val SPEEDS = mapOf("Sunrise" to 1)
+    private const val LIGHTNING_SPEED = 235
+    private const val HALLOWEEN_EYES_OFF_TIME = 8
+    private val SPEEDS = mapOf(
+        "Sunrise" to 1,
+        "Lightning" to LIGHTNING_SPEED,
+        "Halloween Eyes" to HALLOWEEN_EYES_OFF_TIME,
+    )
 
     /**
      * A pack whose presets are named after their effects, so an effect used by several playlists is saved

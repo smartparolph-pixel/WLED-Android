@@ -152,6 +152,14 @@ class PresetPacksTest {
     }
 
     @Test
+    fun lightningAndHalloweenEyesBurstAboutEveryTwoSeconds() {
+        val speeds = PresetPacks.SPOOKY_SWITCH.presets.associate { it.name to it.speed }
+        assertEquals(235, speeds["Lightning"])
+        assertEquals(8, speeds["Halloween Eyes"])
+        assertEquals(null, speeds["Strobe Mega"])
+    }
+
+    @Test
     fun missingEffectIsLeftOutOfThePlaylist() {
         val older = effects.toMutableList().apply { this[87] = "RSVD" }
         val plan = PresetPackPlanner.plan(pack, parse("{}"), older)
