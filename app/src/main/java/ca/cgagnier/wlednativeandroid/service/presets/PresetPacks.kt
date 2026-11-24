@@ -147,9 +147,15 @@ object PresetPacks {
         SPOOKY_SWITCH,
     )
 
-    /** Every effect of the other playlists in a new random order each loop. It cannot be edited. */
+    /**
+     * Effects left out of 🎲 Random: Sunrise is a one-minute sunrise from black, so in a 20-second slot it
+     * looks dark (it stays in 🌅 Rise & Shine, which gives it 60 seconds).
+     */
+    private val NOT_IN_RANDOM = setOf("Sunrise")
+
+    /** Every effect of the other playlists (but [NOT_IN_RANDOM]) in a new random order each loop. Locked. */
     val RANDOM = PresetPack(
-        presets = THEMED.flatMap { it.presets }.distinctBy { it.name },
+        presets = THEMED.flatMap { it.presets }.distinctBy { it.name }.filterNot { it.name in NOT_IN_RANDOM },
         playlist = PlaylistSpec(
             name = "🎲 Random",
             quickLoad = "🎲",

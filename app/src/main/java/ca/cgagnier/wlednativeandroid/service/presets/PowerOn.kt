@@ -17,13 +17,19 @@ object PowerOn {
 
     /**
      * The power-on playlist to set, or null to leave the lantern as it is: [defaultId] (🎆 Sky Full of Sparks)
-     * when none is set yet, or when the one set no longer exists (e.g. the user deleted their playlist).
+     * when none is set yet, or when the one set isn't a playlist on the lantern any more (deleted, or its number
+     * now holds a single effect after a reset or Repair). [playlistIds]: the lantern's playlists.
      */
-    fun presetToSet(current: Int, existingIds: Set<Int>, defaultId: Int?): Int? = when {
+    fun presetToSet(current: Int, playlistIds: Set<Int>, defaultId: Int?): Int? = when {
         defaultId == null -> null
-        current == 0 || current !in existingIds -> defaultId
+        current == 0 || current !in playlistIds -> defaultId
         else -> null
     }
+
+    /** Ids of the entries in presets.json that are playlists. */
+    fun playlistIds(presets: Map<*, *>): Set<Int> = presets.mapNotNull { (id, entry) ->
+        id.toString().toIntOrNull()?.takeIf { (entry as? Map<*, *>)?.get("playlist") != null }
+    }.toSet()
 
     /**
      * Body for `POST /json/cfg`: start [presetId] at power-up with the lights on, at [brightness] if given

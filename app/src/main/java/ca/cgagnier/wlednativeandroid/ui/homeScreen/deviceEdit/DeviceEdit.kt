@@ -64,6 +64,7 @@ import ca.cgagnier.wlednativeandroid.model.wledapi.Info
 import ca.cgagnier.wlednativeandroid.model.wledapi.Leds
 import ca.cgagnier.wlednativeandroid.model.wledapi.State
 import ca.cgagnier.wlednativeandroid.model.wledapi.Wifi
+import ca.cgagnier.wlednativeandroid.service.status.LanternStatus
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.service.websocket.WebsocketStatus
 import ca.cgagnier.wlednativeandroid.ui.components.DeviceVisibleSwitch
@@ -99,7 +100,15 @@ fun DeviceEdit(
 
     // Merge the device-owned updateTag into the VM state.
     val renameStatus by viewModel.renameStatus.collectAsState()
-    val uiState = vmState.copy(updateTag = updateTag, renameStatus = renameStatus)
+    val presetNames by viewModel.presetNames.collectAsState()
+    val uiState = vmState.copy(updateTag = updateTag, renameStatus = renameStatus, presetNames = presetNames)
+
+    // Names for "Now playing", read again when something not yet known starts playing.
+    val state = device.stateInfo.value?.state
+    val playingId = LanternStatus.playingId(state?.selectedPresetId, state?.selectedPlaylistId)
+    LaunchedEffect(playingId, device.device.address) {
+        if (playingId != null && playingId !in presetNames) viewModel.loadPresetNames(device.device)
+    }
 
     val actions = DeviceEditActions(
         onCustomNameChange = { viewModel.renameLantern(device.device, it) },
@@ -187,6 +196,7 @@ fun DeviceEditContent(
                     .verticalScroll(rememberScrollState())
                     .padding(12.dp),
             ) {
+                LanternStatusCard(device = device, presetNames = uiState.presetNames)
                 OutlinedTextField(
                     value = device.device.address,
                     enabled = false,

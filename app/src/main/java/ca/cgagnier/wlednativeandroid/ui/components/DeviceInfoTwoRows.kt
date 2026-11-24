@@ -121,7 +121,7 @@ fun DeviceInfoTwoRows(
                         .height(20.dp),
                 )
             }
-            if (!device.isOnline) {
+            if (showOfflineText(device)) {
                 OfflineSinceText(
                     device.device,
                     currentTime = currentTime,
@@ -147,6 +147,28 @@ fun DeviceInfoTwoRows(
         }
     }
 }
+
+/**
+ * Whether to add "(Offline, …)" after the address. Never on a direct connection, where the card only says
+ * "Direct connection". Otherwise only once the lantern has been unreachable for [OFFLINE_TEXT_DELAY_MS]:
+ * WLED closes websockets when it has too many open (the list, the lantern page, a browser), and the quick
+ * reconnect that follows made the text flash on and off.
+ */
+@Composable
+private fun showOfflineText(device: DeviceWithState): Boolean {
+    val online = device.isOnline
+    var offlineLongEnough by remember { mutableStateOf(false) }
+    LaunchedEffect(online) {
+        offlineLongEnough = false
+        if (!online) {
+            delay(OFFLINE_TEXT_DELAY_MS)
+            offlineLongEnough = true
+        }
+    }
+    return !online && !device.isDirect && offlineLongEnough
+}
+
+private const val OFFLINE_TEXT_DELAY_MS = 10_000L
 
 /** The lantern's current light colour (see [LocalLanternColor]); nothing when it is offline or unknown. */
 @Composable

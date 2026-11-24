@@ -19,15 +19,29 @@ class PowerOnTest {
 
     @Test
     fun setsSkyFullOfSparksWhenNoneIsSetOrTheChosenOneIsGone() {
-        val existing = setOf(1, 2, 7, 12)
-        assertEquals(7, PowerOn.presetToSet(current = 0, existingIds = existing, defaultId = 7))
-        assertEquals(7, PowerOn.presetToSet(current = 30, existingIds = existing, defaultId = 7))
+        val playlists = setOf(7, 12)
+        assertEquals(7, PowerOn.presetToSet(current = 0, playlistIds = playlists, defaultId = 7))
+        assertEquals(7, PowerOn.presetToSet(current = 30, playlistIds = playlists, defaultId = 7))
+    }
+
+    @Test
+    fun aBootPresetThatIsNoLongerAPlaylistIsReplaced() {
+        // Preset 3 exists but holds a single effect now (e.g. after a reset): power-on goes back to the default.
+        val presets = parse(
+            """
+            {"3":{"n":"Fireworks","seg":{"fx":42}},
+             "7":{"n":"Sky","playlist":{"ps":[1,2]}},
+             "12":{"n":"Mine","playlist":{"ps":[3]}}}
+            """.trimIndent(),
+        )
+        assertEquals(setOf(7, 12), PowerOn.playlistIds(presets))
+        assertEquals(7, PowerOn.presetToSet(current = 3, playlistIds = PowerOn.playlistIds(presets), defaultId = 7))
     }
 
     @Test
     fun keepsTheUsersChoice() {
-        assertNull(PowerOn.presetToSet(current = 12, existingIds = setOf(7, 12), defaultId = 7))
-        assertNull(PowerOn.presetToSet(current = 0, existingIds = setOf(7), defaultId = null))
+        assertNull(PowerOn.presetToSet(current = 12, playlistIds = setOf(7, 12), defaultId = 7))
+        assertNull(PowerOn.presetToSet(current = 0, playlistIds = setOf(7), defaultId = null))
     }
 
     @Test

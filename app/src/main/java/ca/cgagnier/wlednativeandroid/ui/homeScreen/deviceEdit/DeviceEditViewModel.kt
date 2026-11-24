@@ -15,13 +15,16 @@ import ca.cgagnier.wlednativeandroid.service.api.DeviceApiFactory
 import ca.cgagnier.wlednativeandroid.service.api.github.GithubApi
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningDefaults
 import ca.cgagnier.wlednativeandroid.service.provisioning.ProvisioningPayloads
+import ca.cgagnier.wlednativeandroid.service.status.LanternStatus
 import ca.cgagnier.wlednativeandroid.service.update.DEFAULT_REPO
 import ca.cgagnier.wlednativeandroid.service.update.ReleaseService
 import ca.cgagnier.wlednativeandroid.service.websocket.DeviceWithState
 import ca.cgagnier.wlednativeandroid.widget.WledWidgetManager
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -61,6 +64,13 @@ class DeviceEditViewModel @Inject constructor(
 
     /** How the last rename went; merged into the UI state by the screen. */
     val renameStatus: StateFlow<RenameStatus> = _renameStatus.asStateFlow()
+
+    private val _presetNames = MutableStateFlow<Map<Int, String>>(emptyMap())
+
+    /** The lantern's preset / playlist names by id, for "Now playing"; merged into the UI state by the screen. */
+    val presetNames: StateFlow<Map<Int, String>> = _presetNames.asStateFlow()
+    private var presetNamesJob: Job? = null
+    private val moshi = Moshi.Builder().build()
 
     private val updateDetailsVersion = MutableStateFlow<VersionWithAssets?>(null)
     private val updateDisclaimerVersion = MutableStateFlow<VersionWithAssets?>(null)
@@ -130,6 +140,21 @@ class DeviceEditViewModel @Inject constructor(
         deviceRepository.update(updatedDevice)
         widgetManager.updateWidgetDeviceDetails(applicationContext, updatedDevice)
         _renameStatus.value = if (savedOnLantern) RenameStatus.SavedOnLantern else RenameStatus.SavedOnPhone
+    }
+
+    /** Reads the preset / playlist names from the lantern's presets.json (read only, nothing is written). */
+    fun loadPresetNames(device: Device) {
+        if (presetNamesJob?.isActive == true) return
+        presetNamesJob = viewModelScope.launch(Dispatchers.IO) {
+            val text = try {
+                deviceApiFactory.create(device).getPresets().body()?.string()
+            } catch (e: IOException) {
+                Log.w(TAG, "Could not read the lantern's presets", e)
+                null
+            } ?: return@launch
+            val presets = runCatching { moshi.adapter(Map::class.java).fromJson(text) }.getOrNull() ?: return@launch
+            _presetNames.value = LanternStatus.presetNames(presets)
+        }
     }
 
     /** Toggles the hidden-from-list flag on [device]. */

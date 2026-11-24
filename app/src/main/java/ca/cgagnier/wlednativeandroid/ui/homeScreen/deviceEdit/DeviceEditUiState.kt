@@ -18,6 +18,8 @@ data class DeviceEditUiState(
     val updateDisclaimerVersion: VersionWithAssets? = null,
     val updateInstallVersion: VersionWithAssets? = null,
     val renameStatus: RenameStatus = RenameStatus.Idle,
+    /** The lantern's preset / playlist names by id, for "Now playing". */
+    val presetNames: Map<Int, String> = emptyMap(),
 )
 
 /** How the last rename went. */

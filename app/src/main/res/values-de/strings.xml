@@ -393,4 +393,13 @@
     <string name="direct_status_wifi_settings">WLAN-Einstellungen</string>
     <string name="direct_chooser_connecting">Verbinde…</string>
     <string name="direct_chooser_connected">Verbunden</string>
+    <string name="lantern_status_now_playing">Läuft gerade: %1$s</string>
+    <string name="lantern_status_nothing">nichts Gespeichertes</string>
+    <string name="lantern_status_preset_number">Preset %1$d</string>
+    <string name="lantern_status_off">Die Laterne ist aus</string>
+    <string name="lantern_status_not_connected">Nicht verbunden</string>
+    <string name="lantern_status_on_for">An seit %1$s</string>
+    <string name="lantern_status_minutes">%1$d Min.</string>
+    <string name="lantern_status_hours_minutes">%1$d Std. %2$d Min.</string>
+    <string name="lantern_status_days_hours">%1$d T. %2$d Std.</string>
 </resources>

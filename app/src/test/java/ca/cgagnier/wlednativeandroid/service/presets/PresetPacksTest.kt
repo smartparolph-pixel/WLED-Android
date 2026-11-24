@@ -122,7 +122,8 @@ class PresetPacksTest {
     fun randomShufflesEveryEffectForever() {
         val random = PresetPacks.RANDOM
         assertTrue(random.locked)
-        assertEquals(48, random.presets.size)
+        assertEquals(47, random.presets.size)
+        assertTrue(random.presets.none { it.name == "Sunrise" }) // dark in a 20 s slot; stays in Rise & Shine
         assertTrue(random.presets.size <= 100) // WLED's playlist limit
         assertEquals(PlaylistSpec("🎲 Random", "🎲", 20, 1, loop = true, shuffle = true), random.playlist)
         assertTrue(PresetPacks.ALL.filter { it != random }.none { it.locked })
@@ -252,6 +253,8 @@ class PresetPacksTest {
         val aurora = plans.flatMap { it.second.presets }.filter { it.name == "Aurora" }
         assertEquals(1, aurora.filterIsInstance<PresetStep.Create>().size)
         assertEquals(2, aurora.filterIsInstance<PresetStep.Reuse>().size) // Northern Glow and Random
+        val random = plans.first { it.first == PresetPacks.RANDOM }.second.playlist as PlaylistStep.Save
+        assertEquals(47, random.presetIds.size)
     }
 
     @Test

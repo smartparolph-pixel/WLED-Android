@@ -390,4 +390,13 @@
     <string name="direct_status_wifi_settings">WiFi 设置</string>
     <string name="direct_chooser_connecting">正在连接…</string>
     <string name="direct_chooser_connected">已连接</string>
+    <string name="lantern_status_now_playing">正在播放：%1$s</string>
+    <string name="lantern_status_nothing">无已保存内容</string>
+    <string name="lantern_status_preset_number">预设 %1$d</string>
+    <string name="lantern_status_off">灯笼已关闭</string>
+    <string name="lantern_status_not_connected">未连接</string>
+    <string name="lantern_status_on_for">已开启 %1$s</string>
+    <string name="lantern_status_minutes">%1$d 分钟</string>
+    <string name="lantern_status_hours_minutes">%1$d 小时 %2$d 分钟</string>
+    <string name="lantern_status_days_hours">%1$d 天 %2$d 小时</string>
 </resources>

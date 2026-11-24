@@ -141,10 +141,10 @@ class PresetPackInstaller @Inject constructor(private val deviceApiFactory: Devi
                 runCatching { moshi.adapter(Map::class.java).fromJson(it) }.getOrNull()
             }
                 ?: return
-        val existing = presets.keys.mapNotNull { it.toString().toIntOrNull() }.toSet() + ready.playlistIds.values
+        val playlists = PowerOn.playlistIds(presets) + ready.playlistIds.values
         val target = PowerOn.presetToSet(
             PowerOn.bootPreset(cfg),
-            existing,
+            playlists,
             ready.playlistIds[PresetPacks.PLAYS_AFTER_SETUP],
         ) ?: return
         val response = api.postConfig(PowerOn.configJson(target, PowerOn.FULL_BRIGHTNESS).toRequestBody(JSON))

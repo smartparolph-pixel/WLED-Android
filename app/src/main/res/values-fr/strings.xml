@@ -392,4 +392,13 @@
     <string name="direct_status_wifi_settings">Paramètres WiFi</string>
     <string name="direct_chooser_connecting">Connexion…</string>
     <string name="direct_chooser_connected">Connecté</string>
+    <string name="lantern_status_now_playing">En cours : %1$s</string>
+    <string name="lantern_status_nothing">rien d\'enregistré</string>
+    <string name="lantern_status_preset_number">préréglage %1$d</string>
+    <string name="lantern_status_off">La lanterne est éteinte</string>
+    <string name="lantern_status_not_connected">Non connectée</string>
+    <string name="lantern_status_on_for">Allumée depuis %1$s</string>
+    <string name="lantern_status_minutes">%1$d min</string>
+    <string name="lantern_status_hours_minutes">%1$d h %2$d min</string>
+    <string name="lantern_status_days_hours">%1$d j %2$d h</string>
 </resources>
